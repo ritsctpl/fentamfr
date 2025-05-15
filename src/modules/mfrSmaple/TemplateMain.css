@@ -1,0 +1,15 @@
+.ant-tabs .ant-tabs-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+.TemplateScreen{
+    width: 100%;
+    height: 100%;
+}
+.TemplateHeadding{
+    font: bold 22px/1.5 "Microsoft YaHei";
+}
+.btmInfo{
+    border: none;
+}

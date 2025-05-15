@@ -1,0 +1,59 @@
+.builderTable :global(.ant-table-cell) {
+    padding: 8px !important;
+    vertical-align: top !important;
+}
+
+.cellContainer {
+    position: relative;
+    min-height: 32px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.cellInput {
+    border: none !important;
+    background: transparent !important;
+    width: 100%;
+    resize: none;
+    padding: 4px !important;
+}
+
+.cellInput:focus {
+    outline: none;
+    background: #f0f7ff !important;
+}
+
+.addRowButton {
+    position: absolute;
+    right: -22px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #1890ff;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 1;
+}
+
+.cellContainer:hover .addRowButton {
+    opacity: 1;
+}
+
+.addRowButton:hover {
+    color: #40a9ff;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.tableCell {
+    padding: 0 !important;
+    position: relative;
+}
+
+.builderTable :global(.ant-table-cell:hover) {
+    background-color: #fafafa;
+} 

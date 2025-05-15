@@ -1,0 +1,196 @@
+/* Tile.module.css - Compact version */
+.container {
+  margin: 8px 20px;
+  background-color: #f8fafc;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  padding: 1rem;
+  width: 300px;
+  /* max-width: 22rem; */
+}
+
+.header {
+  display: flex;
+  /* padding: 5px 0px; */
+  justify-content: space-between;
+  align-items: center;
+  /* border-bottom: 1px solid #000; */
+  margin-bottom: 0.20rem;
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.75rem;
+  color: #4b5563;
+  margin: 0;
+}
+
+.periodText {
+  font-size: 0.75rem;
+  color: #4b5563;
+  text-align: right;
+  margin: 0;
+}
+
+.chartContainer {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
+}
+
+.centerValue {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.oeeValue {
+  margin: 0;
+  font-size: 25px;
+  font-weight: 600;
+  color: #10b981;
+  margin-left: 8px;
+}
+
+.changeText {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #10b981;
+}
+
+.positiveChange {
+  color: #10b981;
+  margin-right: 7px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.negativeChange {
+  color: #ef4444;
+}
+
+.neutralText {
+  color: #9ca3af;
+  margin: 0 0.125rem;
+}
+
+.metricsSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* margin-top: 0.75rem; */
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.metricItem {
+  text-align: center;
+  padding: 0 0.25rem;
+}
+
+.metricLabel {
+  font-size: 0.65rem;
+  margin: 0;
+}
+
+.targetLabel {
+  color: #6b7280;
+}
+
+.targetValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0.125rem 0 0 0;
+}
+
+.availabilityLabel {
+  color: #4caf50;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.availabilityValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4caf50;
+  margin: 0.125rem 0 0 0;
+}
+
+.performanceLabel {
+  color: #ffa725;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.performanceValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ffa725;
+  margin: 0.125rem 0 0 0;
+}
+
+.qualityLabel {
+  color: #8967b3;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.qualityValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #8967b3;
+  margin: 0.125rem 0 0 0;
+}
+
+.productionSection {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.productionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.dataLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4b5563;
+  margin: 0;
+}
+
+.dataValue {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1f2937;
+  margin: 0.125rem 0 0 0;
+}
+
+.goodQuantity {
+  color: #10b981;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badQuantity {
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 600;
+}

@@ -1,0 +1,70 @@
+.datePicker {
+    position: relative; 
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.sheet {
+    width: 100%; /* Ensure full width */
+    height: 40px;
+    border: 1px solid rgb(219, 219, 219);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 10px;
+    overflow: hidden; /* To handle overflow during transition */
+    position: relative; /* Ensure it is the reference for absolute positioning of .paper */
+}
+
+.paper {
+    position: absolute; /* Position absolutely to overlay content */
+    top: 100%; /* Position right below the .sheet element */
+    left: 0;
+    width: 300px; /* Ensure it matches the width of .sheet */
+    padding: 5px;
+    border-radius: 10px;
+    margin-top: 2px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    z-index: 1000; /* Ensure it appears on top of other elements */
+}
+
+.sheet a {
+    color: rgb(206, 204, 204);
+    font-size: 15px;
+    margin-left: 8px;
+}
+
+.paper_open {
+    max-height: 500px; /* Adjust as needed */
+    padding: 10px; /* Adjust as needed */
+    box-shadow: rgba(0, 0, 0, 0.20) 0px 5px 15px;
+    background-color: white;
+
+}
+
+.expand {
+    margin-right: 8px;
+    display: flex;
+    gap: 10px;
+}
+
+.expand:hover {
+    cursor: pointer;
+}
+
+.ant-checkbox-indeterminate {
+    color: #1890ff;
+}
+
+.heading {
+    font-weight: bold;
+    font-size: small;
+    color: gray;
+}

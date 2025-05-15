@@ -1,0 +1,39 @@
+.tabContainer{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+.submitButton{display: flex;justify-content: end;}
+.insertButtonContainer{
+    display: flex;justify-content: end;
+}
+
+.tableValuecontent{
+    padding-bottom: 10px;
+}
+
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .tableHead {
+    background-color: black;
+  }
+  
+  .tableHeadCell {
+    font-size: larger;
+    font-weight: bold;
+    text-align: left;
+  }
+  
+  .tableCell {
+    font-size: large;
+    border-bottom: 1px solid black;
+  }
+
+  .tableBody{
+    background-color: black;
+  }
+  

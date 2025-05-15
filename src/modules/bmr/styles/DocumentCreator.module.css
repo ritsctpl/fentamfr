@@ -1,0 +1,1118 @@
+.dataField {
+    width: 100%;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    height: fit-content;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+    .datafieldNav {
+      display: flex;
+      padding: 20px 0px;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .dataFieldNav.shrink {
+      width: calc(100% - 500px);
+      margin-left: 500px;
+    }
+    
+    .modals{
+      height: 500px;
+      overflow: auto;
+    }
+    
+    
+    .searchInput {
+      width: 60px;
+      border-radius: 5px;
+      height: 20px;
+    }
+    
+    .searchPaper {
+      padding: 2px 4px;
+      margin-left: 20px;
+      display: flex;
+      align-items: center;
+      width: 250px;
+      border-radius: 5px;
+      height: 32px;
+      box-shadow:
+        0px 1px 2px rgba(28, 28, 29, 0.3),
+        -1px 1px 2px rgba(25, 25, 26, 0.3),
+        0px -1px 2px rgba(17, 17, 19, 0.3);
+    }
+    
+    
+    .floatingButtonContainer {
+      position: static; /* Ensure the container stays fixed */
+      bottom: 20px;    /* Space from the bottom of the viewport */
+      right: 20px;     /* Space from the right of the viewport */
+      display: flex;   /* Align buttons horizontally */
+      gap: 10px;       /* Space between buttons */
+    }
+    
+    .floatingButton {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    
+    .saveButton {
+      background-color: #1976d2; /* Blue */
+      padding: 0.4rem 0.8rem;  /* Adjust padding for smaller size */
+      font-size: 0.875rem;     /* Smaller font size */
+      border-radius: 4px;      /* Adjust border radius if needed */
+      color: #fff;             /* Button text color */
+      border: none;            /* Remove border if not needed */
+      cursor: pointer;         /* Add cursor pointer on hover */
+      transition: background-color 0.3s ease;
+    }
+    
+    .saveButton:hover{
+      background-color: #155fa0; /* Darken on hover */
+    }
+    
+    .cancelButton {
+      background-color: #fff;     /* White */
+        color: #1976d2;             /* Blue text */
+        border: 1px solid #1976d2;  /* Blue border */
+        padding: 0.4rem 0.8rem;     /* Adjust padding for smaller size */
+        font-size: 0.875rem;        /* Smaller font size */
+        border-radius: 4px;         /* Adjust border radius if needed */
+        cursor: pointer;            /* Add cursor pointer on hover */
+        transition: background-color 0.3s ease;
+    }
+    
+    .cancelButton:hover{
+      background-color: #f0f0f0;
+    }
+    
+    
+    .searchIcon {
+      color: #007bff;
+    }
+    
+    .homeButton {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+    
+    .homeButton:hover {
+      background-color: #0056b3;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .buttons{
+      margin-right: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .blueButton {
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      /* padding: 8px 10px; */
+      text-transform: uppercase;
+      cursor: pointer;
+      
+    }
+    
+    .goButton{
+      margin-right: 20px;
+      display: flex;
+      gap: 10px;
+      
+    }
+    
+    .outlinedButton {
+      border: 1px solid #124561;
+      color: #124561;
+      padding: 8px 16px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    
+    .searchFilter{
+      width: 100%;
+    }
+    
+    
+    
+    .dataFieldBody{
+      width: 100%;
+    }
+    
+    .dataFieldBodyContents{
+      margin: 10px 20px;
+      /* display: flex;
+      justify-content: center; */
+    }
+    
+    .heading{
+      background: #FFFFFF;
+      font-size: medium;
+      padding: 5px 20px;
+    }
+    
+    .headings{
+      display: none;
+    }
+    
+    .headingtext{
+      font-size: larger;
+    }
+    
+    .split{
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .dataFieldBodyContentsTop{
+      height: auto;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0px;
+    }
+    
+    .dataLength{
+      margin-left: 20px;
+    }
+    
+    .circleButton {
+      color: #124561;  
+      cursor: pointer;  
+      font-size: 20px;
+      margin-right: 20px;
+    }
+    
+    .dataFieldBodyContentsBottom {
+      display: flex;
+      transition-duration: 0.3s;
+      position: relative; 
+      /* height: 88vh; */
+    }
+    
+    .commonTableContainer {
+      position: absolute;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      transition: all 0.3s ease;
+      background: #fff;
+    }
+    
+    .commonTableContainer.shrink {
+      width: calc(100% - 500px);
+      right: 0;
+    }
+    
+    .formContainer {
+      width: 0%;
+      transform: translateX(100%); 
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      opacity: 0;
+      position: relative; 
+      border-left: solid 1px #eee4e4;
+    }
+    
+    .formContainer.show {
+      width: 80%;
+      transform: translateX(0);
+      opacity: 1; 
+      height: 92vh;
+      overflow: auto;
+    }
+    
+    .formContainer.showFullScreen {
+      width: 12000%;
+      transform: translateX(0);
+      opacity: 1; 
+      height: 92vh;
+      overflow: auto;
+    }
+    
+    /* ===================================== */
+    
+    .container {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+      background: #fff;
+      position: relative;
+    }
+    
+    .mainContent {
+      flex: 1;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+      margin-left: 0;
+      background: #fff;
+      width: 100%;
+      /* padding: 20px; */
+      overflow-y: auto;
+    }
+    
+    .mainContent.shrink {
+      margin-left: 500px;
+      width: calc(100% - 500px);
+    }
+    
+    .componentContainer {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 24px;
+      margin-top: 20px;
+    }
+    
+    .pageContainer{
+      position:relative;
+    }
+    
+    .splitScreen {
+      display: flex;
+      flex-direction: row;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      background-color: #f0f0f0;
+    }
+    
+    .addIcon {
+      cursor: pointer;
+      font-size: 24px;
+    }
+    
+    .tabContent {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+    }
+    
+    .footer {
+      padding: 10px;
+      background-color: #fff;
+      float:right;
+    }
+    
+    .splitScreen .tabContent {
+      width: 50%;
+    }
+    
+    .splitScreen .footer {
+      display: none; /* Hide footer in split screen mode if needed */
+    }
+    
+    /* YourStyles.module.css */
+    /* YourStyles.module.css */
+    
+    .headingtext {
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+    
+    .dateText {
+      color: #555;
+      margin: 0; /* Remove default margin */
+      line-height: 1.2; /* Adjust line height to control spacing */
+    }
+    
+    .fadedText {
+      color: rgba(0, 0, 0, 0.6); /* Faded black color */
+    }
+    
+    .drawerContent {
+      padding: 16px;
+    }
+    
+    .drawerContent p {
+      margin-bottom: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    
+    .drawerContent strong {
+      color: #124561;
+      margin-right: 8px;
+    }
+    
+    .slidingPanel {
+      position: fixed;
+      top: 0;
+      left: -500px;
+      width: 500px;
+      height: 100vh;
+      background: #ffffff;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+    
+    .slidingPanel.visible {
+      left: 0;
+    }
+    
+    .slidingPanelHeader {
+      padding: 16px 24px;
+      background: #f5f5f5;
+      border-bottom: 1px solid #e8e8e8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .slidingPanelTitle {
+      margin: 0;
+      color: #124561;
+      font-size: 18px;
+      font-weight: 500;
+    }
+    
+    .closeButton {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #999;
+      font-size: 20px;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .closeButton:hover {
+      color: #666;
+    }
+    
+    .slidingPanelContent {
+      padding: 16px;
+    }
+    
+    .slidingPanelContent :global(.ant-tabs) {
+      width: 100%;
+    }
+    
+    .slidingPanelContent :global(.ant-tabs-nav) {
+      margin-bottom: 16px !important;
+    }
+    
+    .slidingPanelContent :global(.ant-tabs-tab) {
+      padding: 8px 16px !important;
+    }
+    
+    .slidingPanelContent :global(.ant-tabs-tab-active) {
+      background-color: #e6f4ff !important;
+    }
+    
+    .slidingPanelContent :global(.ant-tabs-ink-bar) {
+      background-color: #124561 !important;
+    }
+    
+    /* Add section titles using t() function for translations */
+    .componentsContainer > div:first-child::before {
+      content: attr(data-section-title);
+      display: block;
+      font-size: 18px;
+      font-weight: 500;
+      color: #124561;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #124561;
+    }
+    
+    .componentsContainer > div:nth-child(2)::before {
+      content: attr(data-section-title);
+      display: block;
+      font-size: 18px;
+      font-weight: 500;
+      color: #124561;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #124561;
+    }
+    
+    .componentsContainer > div:last-child::before {
+      content: attr(data-section-title);
+      display: block;
+      font-size: 18px;
+      font-weight: 500;
+      color: #124561;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #124561;
+    }
+    
+    .documentInfo {
+      margin-bottom: 24px;
+      border-bottom: 1px solid #e8e8e8;
+      padding-bottom: 16px;
+    }
+    
+    .documentInfo p {
+      margin-bottom: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+      display: flex;
+      align-items: center;
+    }
+    
+    .documentInfo strong {
+      color: #124561;
+      font-weight: 500;
+      margin-right: 16px;
+      min-width: 120px;
+      display: inline-block;
+    }
+    
+    .componentSection {
+      margin-bottom: 20px;
+    }
+    
+    .sectionTitle {
+      color: #124561;
+      font-size: 16px;
+      font-weight: 500;
+      margin-right: 5px;
+      /* margin-bottom: 16px;
+      padding-bottom: 8px; */
+      border-bottom: 1px solid #124561;
+    }
+    
+    .typeItem {
+      background: #f5f5f5;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      transition: all 0.3s ease;
+      border-left: 3px solid transparent;
+    }
+    
+    .typeItem:hover {
+      background: #e6e6e6;
+      cursor: pointer;
+    }
+    
+    .typeItem.active {
+      background: #e6f4ff;
+      border-left-color: #124561;
+    }
+    
+    .typeItem.active .typeIcon {
+      color: #124561;
+    }
+    
+    .typeItem.active .typeText {
+      color: #124561;
+      font-weight: 500;
+    }
+    
+    .typeIcon {
+      width: 24px;
+      height: 24px;
+      margin-right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #124561;
+    }
+    
+    .typeText {
+      color: #333;
+      font-size: 14px;
+      flex: 1;
+    }
+    
+    .commonTableContainer {
+      flex: 1;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+      margin-left: 0;
+      background: #fff;
+      width: 100%;
+    }
+    
+    .commonTableContainer.shrink {
+      margin-left: 500px;
+      width: calc(100% - 500px);
+    }
+    
+    .dataFieldBodyContentsTop {
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+    }
+    
+    .dataLength {
+      margin: 0;
+    }
+    
+    .circleButton {
+      color: #124561 !important;
+    }
+    
+    .slidingPanelHeader {
+      padding: 10px 14px;
+      background: #f5f5f5;
+      border-bottom: 1px solid #e8e8e8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .slidingPanelTitle {
+      margin: 0;
+      color: #124561;
+      font-size: 16px;
+      font-weight: 500;
+    }
+    
+    .closeButton {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #999;
+      font-size: 20px;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .closeButton:hover {
+      color: #666;
+    }
+    
+    /* .slidingPanelContent {
+      padding: 24px;
+    } */
+    
+    .documentInfo {
+      margin-bottom: 24px;
+    }
+    
+    .documentInfo p {
+      margin-bottom: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+    }
+    
+    .documentInfo strong {
+      color: #124561;
+      font-weight: 500;
+      margin-right: 8px;
+      min-width: 100px;
+      display: inline-block;
+    }
+    
+    .componentContent {
+      margin-top: 24px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .formSection {
+      background: #fff;
+      padding: 24px;
+      border-radius: 8px;
+    }
+    
+    .formSection .ant-form {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .formSection .ant-form-item {
+      margin-bottom: 24px;
+    }
+    
+    .tableSection {
+      background: #fff;
+      padding: 24px;
+      border-radius: 8px;
+    }
+    
+    .tableSection .ant-table-wrapper {
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .tableSection .ant-table-small {
+      border: none;
+    }
+    
+    .tableSection .ant-table-thead > tr > th {
+      background: #f5f5f5;
+      color: #124561;
+      font-weight: 500;
+      padding: 12px 16px;
+    }
+    
+    .tableSection .ant-table-tbody > tr > td {
+      padding: 12px 16px;
+    }
+    
+    /* .sectionTitle {
+      color: #124561;
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #124561;
+    } */
+    
+    .documentContainer {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #fff;
+    }
+    
+    .documentHeader {
+      margin-bottom: 40px;
+      text-align: center;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #124561;
+    }
+    
+    .documentHeader h2 {
+      color: #124561;
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+    
+    .documentType {
+      color: #666;
+      font-size: 16px;
+    }
+    
+    .componentsContainer {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+    
+    .componentWrapper {
+      scroll-margin-top: 20px;
+    }
+    
+    .formSection, .tableSection {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+    
+    /* .formSection.activeSection, .tableSection.activeSection {
+      border-color: #124561;
+      box-shadow: 0 4px 12px rgba(18, 69, 97, 0.2);
+    } */
+    
+    .formSection .ant-form {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .formSection .ant-form-item {
+      margin-bottom: 24px;
+    }
+    
+    .tableSection .ant-table-wrapper {
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    /* .sectionTitle {
+      color: #124561;
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #124561;
+    } */
+    
+    .listSection,
+    .sectionComponent,
+    .flowChartSection,
+    .treeTableSection {
+      background: #fff;
+      padding: 24px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+    
+    /* .listSection.activeSection,
+    .sectionComponent.activeSection,
+    .flowChartSection.activeSection,
+    .treeTableSection.activeSection {
+      border-color: #124561;
+      box-shadow: 0 4px 12px rgba(18, 69, 97, 0.2);
+    } */
+    
+    .listSection {
+      padding: 16px 24px;
+    }
+    
+    .flowChartSection {
+      min-height: 400px;
+      overflow: auto;
+    }
+    
+    .treeTableSection {
+      overflow-x: auto;
+    }
+    
+    .sectionComponent {
+      padding: 20px;
+    }
+    
+    .headerButtons {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .deleteButton {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #ff4d4f;
+      font-size: 20px;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    
+    .deleteButton:hover {
+      color: #ff7875;
+      transform: scale(1.1);
+    }
+    
+    .builderTable :global(.ant-table-cell) {
+      padding: 8px !important;
+      vertical-align: top !important;
+    }
+    
+    .cellContainer {
+      position: relative;
+      min-height: 32px;
+      display: flex;
+      align-items: flex-start;
+      width: 100%;
+      padding: 0;
+    }
+    
+    .cellInput {
+      border: none !important;
+      background: transparent !important;
+      width: 100% !important;
+      resize: none !important;
+      padding: 4px !important;
+    }
+    
+    .cellInput:focus {
+      outline: none;
+      background: #f0f7ff !important;
+    }
+    
+    .tableCell {
+      padding: 0 !important;
+      position: relative;
+      width: 100%;
+    }
+    
+    .builderTable :global(.ant-table-cell) {
+      padding: 0 !important;
+      vertical-align: top !important;
+      width: 100%;
+    }
+    
+    .builderTable :global(.ant-table) {
+      table-layout: fixed !important;
+    }
+    
+    .builderTable :global(.ant-table-thead > tr > th) {
+      white-space: normal;
+      word-break: break-word;
+    }
+    
+    .rowActions {
+      position: absolute;
+      right: -30px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      z-index: 1;
+    }
+    
+    .cellContainer:hover .rowActions {
+      opacity: 1;
+    }
+    
+    .addRowButton,
+    .deleteRowButton {
+      color: #1890ff;
+      padding: 0;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .deleteRowButton {
+      color: #ff4d4f;
+    }
+    
+    .addRowButton:hover {
+      color: #40a9ff;
+      transform: scale(1.1);
+    }
+    
+    .deleteRowButton:hover {
+      color: #ff7875;
+      transform: scale(1.1);
+    }
+    
+    .tableHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .tableActions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .tableActions button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+    }
+    
+    .builderTable {
+      margin-top: 8px;
+    }
+    
+    .builderTable :global(.ant-table-selection-column) {
+      width: 40px;
+      min-width: 40px;
+    }
+    
+    .builderTable :global(.ant-table-row-selected) > td {
+      background-color: #e6f4ff !important;
+    }
+    
+    .builderTable :global(.ant-table-cell) {
+      padding: 8px !important;
+      vertical-align: top !important;
+    }
+    
+    .listHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    
+    .listActions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .listActions button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+    }
+    
+    .listSection {
+      margin-bottom: 24px;
+    }
+    
+    .listSection ul {
+      margin-top: 12px;
+    }
+    
+    .listSection li {
+      transition: background-color 0.3s ease;
+      border-radius: 4px;
+    }
+    
+    .listSection li:hover {
+      background-color: #fafafa;
+    }
+    
+    .sectionHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 8px;
+      background-color: #fafafa;
+      border-radius: 4px;
+    }
+    
+    .sectionTitle:focus {
+      background: #fff;
+    }
+    
+    .listItem {
+      margin-bottom: 8px;
+    }
+    
+    .itemContent {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .itemInput {
+      flex: 1;
+    }
+    
+    .deleteItemButton {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    
+    .itemContent:hover .deleteItemButton {
+      opacity: 1;
+    }
+    
+    .addItemButton {
+      list-style-type: none;
+      margin-left: -20px;
+      margin-top: 8px;
+    }
+    
+    .addItemButton button {
+      color: #1890ff;
+      padding-left: 0;
+    }
+    
+    .addItemButton button:hover {
+      color: #40a9ff;
+    }
+    
+    .componentFooter {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    .actionFooter {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+      padding: 16px;
+    }
+    
+    /* Add section separators */
+    .componentsContainer > div:not(:last-child) {
+      border-bottom: 2px solid #e8e8e8;
+      padding-bottom: 40px;
+    }
+    
+    /* Style the tabs */
+    .tabsContainer {
+      width: 100%;
+    }
+    
+    .tabsContainer :global(.ant-tabs) {
+      width: 100%;
+    }
+    
+    .tabsContainer :global(.ant-tabs-nav) {
+      margin-bottom: 16px !important;
+    }
+    
+    .tabsContainer :global(.ant-tabs-tab) {
+      padding: 8px 16px !important;
+    }
+    
+    .tabsContainer :global(.ant-tabs-tab-active) {
+      background-color: #e6f4ff !important;
+    }
+    
+    .tabsContainer :global(.ant-tabs-ink-bar) {
+      background-color: #124561 !important;
+    }
+    
+    /* Add section titles */
+    .sectionContainer {
+      margin-bottom: 40px;
+    }
+    
+    .sectionContainer::before {
+      content: attr(data-section-title);
+      display: block;
+      font-size: 18px;
+      font-weight: 500;
+      color: #124561;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #124561;
+    }
+    

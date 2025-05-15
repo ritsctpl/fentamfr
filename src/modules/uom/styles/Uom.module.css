@@ -1,0 +1,44 @@
+/* ===================================== */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Full viewport height */
+  overflow: hidden; /* Prevent scrolling on the container */
+  
+  transition: all 0.3s ease;
+  overflow-y: auto; 
+
+}
+
+.fixedHeader {
+  position: sticky;
+  top: 0;
+  z-index: 1000; /* Ensure the header stays on top */
+  background-color: #fff; /* Or any color that matches your design */
+}
+
+.scrollableContent {
+  /* flex-grow: 1;
+  overflow-y: auto;
+  padding: 20px;
+  position: sticky; */
+  padding-bottom: 0px;
+}
+
+.commonTableContainer {
+  width: 100%; 
+  transition: width 0.3s ease;
+}
+
+div.MuiBox-root.css-19midj6 {
+  padding: 0px;
+}
+
+.navBar {
+  /* Remove any height or padding that might affect the layout */
+  width: 100%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* If CommonAppBar has its own styles, you might need to adjust them as well */

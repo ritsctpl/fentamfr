@@ -1,0 +1,54 @@
+/* Plant Section */
+.heading {
+  font-weight: 500;
+  font-size: 16px;
+  color: #4a5568;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+}
+
+.plantName {
+  font-weight: 600;
+  font-size: 25px;
+  color: #2d3748;
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+}
+
+.fadeIn {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* .clickableSection {
+  transition: transform 0.2s ease-in-out;
+}
+
+.clickableSection:hover {
+  transform: scale(1.05);
+} */
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollContainer {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.searchButton {
+    color: rgb(251, 248, 248) !important;
+}

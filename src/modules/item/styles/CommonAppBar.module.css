@@ -1,0 +1,67 @@
+/* CommonAppBar.module.css */
+
+.appBar {
+  background-color: #124561; /* Dark blue background */
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 64px; /* Adjust height */
+  padding: 0 16px;
+}
+
+.logo {
+  height: 40px;
+  cursor: pointer;
+}
+
+.title {
+  font-family: 'Roboto', 'Arial', sans-serif;
+  font-weight: bold;
+  color: white;
+  margin-left: 16px;
+}
+
+.searchBox {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.searchField {
+  width: 400px;
+  background-color: white;
+  border-radius: 20px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  padding: 4px 8px; /* Adjust padding for reduced height */
+  box-sizing: border-box;
+}
+.userInfo {
+  display: flex;
+  align-items: center;
+}
+
+.userText {
+  margin-right: 8px;
+  color: white;
+}
+
+.iconButton {
+  color: white;
+}
+
+.logoutButton {
+  color: white;
+  margin-left: 16px;
+}
+
+.searchFieldRoot {
+  min-height: 30px; /* Set a specific min-height */
+  height: 30px; /* Control the overall height */
+}
+.noBorder {
+  border: none; /* Remove the border */
+}

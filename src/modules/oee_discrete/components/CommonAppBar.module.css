@@ -1,0 +1,68 @@
+/* CommonAppBar.module.css */
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 20px; /* Adjust height */
+  padding: 0 16px;
+  background-color: transparent;
+}
+
+.logo {
+  height: 40px;
+  width: 160px;
+  cursor: pointer;
+}
+
+.title {
+  font-family: "robot";
+  font-weight: bold;
+  color: #0c4da2;
+  margin-left: 16px;
+}
+
+.searchBox {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.searchField {
+  width: 21.833vw;
+  background-color: white;
+  border-radius: 20px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  padding: 1px 8px; /* Adjust padding for reduced height */
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+.userInfo {
+  display: flex;
+  align-items: center;
+}
+
+.userText {
+  margin-right: 8px;
+  color: #0c4da2;
+}
+
+.iconButton {
+  color: #0c4da2;
+}
+
+.logoutButton {
+  color: #0c4da2;
+  margin-left: 16px;
+}
+
+.searchFieldRoot {
+  min-height: 30px; /* Set a specific min-height */
+  height: 30px; /* Control the overall height */
+}
+.noBorder {
+  border: none; /* Remove the border */
+}

@@ -1,0 +1,51 @@
+.container{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+    padding: 16px;
+    background: #f5f8fe;
+    /* height: calc(100vh - [header-height]px);
+    max-height: 80vh; */
+    height: 80vh;
+    width: 100%;
+}
+.dashboardToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.leftSection {
+  flex: 0 0 auto;
+}
+
+.rightSection {
+  display: flex;
+  gap: 8px;
+}
+
+/* Make buttons more attractive on hover */
+.rightSection button {
+  transition: all 0.2s;
+}
+
+.rightSection button:hover {
+  background-color: #f0f0f0;
+  color: #1890ff;
+}
+
+.customTable {
+  background: white;
+  border-radius: 8px;
+}
+
+.customTable :global(.ant-table-thead > tr > th) {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+}
+
+.customTable :global(.ant-table-tbody > tr:hover > td) {
+  background: #f1f5f9;
+}

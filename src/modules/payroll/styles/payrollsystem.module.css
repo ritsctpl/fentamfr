@@ -1,0 +1,180 @@
+.dataFieldBodyContentsTop {
+    height: auto;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0 0 0;
+  }
+  .dataLength {
+    margin-left: 20px;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: 1.5;
+    letter-spacing: 0.00938em;
+  }
+  .circleButton {
+    color: #124561;
+    cursor: pointer;
+    font-size: 20px;
+    margin-right: 20px;
+  }
+  
+  .container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: all 0.3s ease;
+  }
+  
+  .mainContent {
+    width: 100%;
+    transition: all 0.3s ease;
+  }
+  
+  .mainContentShrink {
+    width: 50%;
+  }
+  
+  .sideWindow {
+    position: fixed;
+    right: -50%;
+    top: 64px;
+    width: 50%;
+    height: calc(100% - 64px);
+    background: white;
+    transition: all 0.3s ease;
+    z-index: 1000;
+  }
+  
+  .sideWindowOpen {
+    right: 0;
+  }
+  
+  /* ////////////////// */
+  .split {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 20px;
+  }
+  .sideWindowContent {
+    padding: 0 20px;
+  }
+  .headingtext {
+    font-weight: 500;
+    font-size: 1.3em;
+    font-family: "Roboto", "Arial", sans-serif;
+    margin: 0;
+  }
+  .details {
+    margin-top: 10px;
+  }
+  .dateText {
+    color: #555;
+    margin: 0;
+    line-height: 1.4;
+    font-size: 1.2em;
+    font-family: "Roboto", "Arial", sans-serif;
+  }
+  .fadedText {
+    color: rgba(0, 0, 0, 0.6);
+    font-family: "Roboto", "Arial", sans-serif;
+  }
+  .actionButtons {
+    display: flex;
+    gap: 25px;
+    margin-right: 20px;
+  }
+  .actionButton {
+    padding: 4px 8px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .coloredIcon svg {
+    color: rgb(24, 116, 206);
+  }
+  
+  .sideWindowFullScreen {
+    width: 100% !important;
+    z-index: 1000;
+  }
+  
+  .mainContentHidden {
+    display: none;
+  }
+  .footer {
+    padding: 10px;
+    background-color: #fff;
+    float: right;
+  }
+  
+  .floatingButtonContainer {
+    position: static;
+    bottom: 20px; 
+    right: 20px;
+    display: flex;
+    gap: 10px;
+  }
+  .floatingButton {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  .saveButton {
+    background-color: #1976d2;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem; 
+    border-radius: 4px;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .saveButton:hover {
+    background-color: #155fa0; 
+  }
+  
+  .cancelButton {
+    background-color: #fff; 
+    color: #1976d2;
+    border: 1px solid #1976d2;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .cancelButton:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .formContainer {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  
+  .centerForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2rem;
+    width: 100%;
+  }
+  .centerForm :global(.ant-form-item) {
+    width: 100%;
+    max-width: 800px;
+  }
+  

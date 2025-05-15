@@ -1,0 +1,155 @@
+/* Comment Markers */
+.comment-marker {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.comment-marker:hover {
+  transform: scale(1.1);
+}
+
+/* Comment Popover */
+.comment-popover-overlay .ant-popover-inner {
+  max-width: 300px;
+}
+
+.comment-popover {
+  max-width: 300px;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.comment-body {
+  padding: 8px 0;
+  white-space: pre-wrap;
+}
+
+/* Comment Panel */
+.ant-tabs-content {
+  height: 100%;
+  overflow: hidden;
+}
+
+.comment-panel .ant-list-item {
+  border-radius: 4px;
+  padding: 12px;
+  border: 1px solid #f0f0f0;
+  margin-bottom: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.comment-panel .ant-list-item:hover {
+  background-color: #f9f9f9;
+}
+
+/* Comment Form */
+.comment-form .ant-form-item {
+  margin-bottom: 12px;
+}
+
+/* Comment highlight animation */
+@keyframes highlight-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(250, 173, 20, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(250, 173, 20, 0);
+  }
+}
+
+.highlight-comment {
+  animation: highlight-pulse 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* Toolbar Comment Toggle Button */
+.comment-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #fafafa;
+  margin-right: 8px;
+}
+
+.comment-toggle-btn.active {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
+/* Comment Counter Badge */
+.comment-count-badge {
+  font-size: 12px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background-color: #faad14;
+  color: #fff;
+  margin-left: 4px;
+}
+
+/* Empty Comments State */
+.empty-comments-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 20px;
+  text-align: center;
+}
+
+.empty-comments-state .ant-empty-image {
+  margin-bottom: 16px;
+}
+
+/* Comment Tab Content */
+.ant-tabs-tabpane {
+  height: 100%;
+  overflow: auto;
+}
+
+/* PDF Page with Comments */
+.pdf-page-with-comments {
+  position: relative;
+}
+
+/* Comment Icon Button Styles */
+.comment-icon-btn {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* For Dark Mode Support */
+html[data-theme="dark"] .comment-marker button {
+  background-color: #d48806 !important;
+  border-color: #faad14 !important;
+}
+
+html[data-theme="dark"] .comment-panel .ant-list-item:hover {
+  background-color: #111 !important;
+}
+
+html[data-theme="dark"] .comment-toggle-btn {
+  background-color: #1f1f1f;
+}
+
+html[data-theme="dark"] .comment-toggle-btn.active {
+  background-color: #111d2c;
+}

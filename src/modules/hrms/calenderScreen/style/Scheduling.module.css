@@ -1,0 +1,315 @@
+.calendarContainer {
+  padding: 24px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin: 20px;
+  min-width: 80vw;
+}
+
+.calendarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.calendarTitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.calendarActions {
+  display: flex;
+  gap: 12px;
+}
+
+.calendarWrapper {
+  height: 60vh;
+  width: 100%;
+}
+
+.calendar {
+  height: 100% !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial;
+}
+
+/* Calendar Header Styling */
+.calendar :global(.rbc-toolbar) {
+  margin-bottom: 20px !important;
+  padding: 12px 0 !important;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.calendar :global(.rbc-toolbar button) {
+  color: #1890ff;
+  border: 1px solid #1890ff;
+  background: white;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.calendar :global(.rbc-toolbar button:hover) {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.calendar :global(.rbc-toolbar button.rbc-active) {
+  background-color: #1890ff;
+  color: white;
+  border-color: #1890ff;
+}
+
+.calendar :global(.rbc-toolbar button.rbc-active:hover) {
+  background-color: #40a9ff;
+  border-color: #40a9ff;
+}
+
+/* Calendar Grid Styling */
+.calendar :global(.rbc-header) {
+  padding: 12px 4px !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0 !important;
+}
+
+.calendar :global(.rbc-event) {
+  /* background-color: transparent !important; */
+  border-radius: 6px !important;
+  color: black !important;
+  padding: 2px 4px !important;
+  border: none !important;
+  font-size: 13px !important;
+  min-height: 24px !important;
+  margin-bottom: 2px !important;
+}
+
+.calendar :global(.rbc-event-content) {
+  height: auto !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  line-height: 1.2 !important;
+}
+
+.calendar :global(.rbc-event-label) {
+  display: none !important;
+}
+
+.calendar :global(.rbc-event:hover) {
+  /* background-color: #096dd9 !important; */
+  transform: translateY(-1px);
+  /* box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); */
+  transition: all 0.2s ease;
+}
+
+.calendar :global(.rbc-today) {
+  background-color: #e6f7ff;
+}
+
+.calendar :global(.rbc-off-range-bg) {
+  background: #fafafa !important;
+}
+
+.calendar :global(.rbc-date-cell) {
+  padding: 4px 8px !important;
+  font-weight: 500 !important;
+}
+
+.calendar :global(.rbc-show-more) {
+  color: #1890ff !important;
+  font-weight: 500 !important;
+}
+
+/* Modal Styling */
+
+
+.eventModal :global(.ant-modal-content) {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.eventModal :global(.ant-modal-header) {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.eventModal :global(.ant-modal-body) {
+  padding: 24px;
+}
+
+.eventModal :global(.ant-form-item-label) {
+  font-weight: 500;
+}
+
+.eventBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.eventBadge.pending {
+  background: #fff7e6;
+  color: #fa8c16;
+}
+
+.eventBadge.approved {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.eventBadge.rejected {
+  background: #fff1f0;
+  color: #f5222d;
+}
+
+.agendaEvent {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  gap: 8px;
+}
+
+.agendaContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+}
+
+.agendaTitle {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agendaActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.infoIcon {
+  color: #1890ff;
+}
+
+.deleteButton {
+  padding: 0;
+  height: auto;
+}
+
+/* Remove hover effects */
+.agendaEvent:hover {
+  background: none;
+}
+
+.deleteButton:hover {
+  background: none;
+}
+
+/* Optional: Style the agenda header */
+.calendar:global(.rbc-agenda-view table.rbc-agenda-table) {
+  border: none;
+  border-spacing: 0;
+  border-collapse: separate;
+}
+
+.calendar:global(.rbc-agenda-view table.rbc-agenda-table thead) {
+  background-color: #fafafa;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.calendar:global(.rbc-agenda-view table.rbc-agenda-table thead > tr > th) {
+  padding: 12px 16px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.calendar:global(.rbc-agenda-view table.rbc-agenda-table tbody > tr > td) {
+  padding: 0;
+  border: none;
+}
+
+/* Calendar navigation and view buttons styling */
+.calendar :global(.rbc-toolbar button) {
+  color: #1890ff;
+  border: 1px solid #1890ff;
+  background: white;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.calendar :global(.rbc-toolbar button:hover) {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+  color: #1890ff;
+}
+
+.calendar :global(.rbc-toolbar button.rbc-active) {
+  background-color: #1890ff;
+  color: white;
+  border-color: #1890ff;
+}
+
+.calendar :global(.rbc-toolbar button.rbc-active:hover) {
+  background-color: #40a9ff;
+  border-color: #40a9ff;
+}
+
+/* Improve toolbar spacing */
+.calendar :global(.rbc-toolbar) {
+  margin-bottom: 20px;
+  padding: 8px;
+  background: #fafafa;
+  border-radius: 6px;
+}
+
+.calendar :global(.rbc-btn-group) {
+  margin-right: 12px;
+}
+
+.calendar :global(.rbc-btn-group button) {
+  margin-right: 4px;
+}
+
+/* Make today's date more prominent */
+.calendar :global(.rbc-today) {
+  background-color: #e6f7ff;
+}
+
+.eventDisplay {
+  padding: 2px 4px;
+  width: 100%;
+  border-radius: 4px;
+  display: flex !important;
+  align-items: center !important;
+  flex-wrap: nowrap !important;
+  min-height: 20px !important;
+}
+
+.eventTag {
+  font-size: 0.8em;
+  margin-right: 4px;
+  padding: 0 4px;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+.eventTitle {
+  font-size: 0.9em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}

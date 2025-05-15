@@ -1,0 +1,453 @@
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import styles from '../styles/UomConversion.module.css';
+import CloseIcon from '@mui/icons-material/Close';
+import { parseCookies } from 'nookies';
+import { Form, Input, message, Button, Modal, Tooltip } from 'antd';
+import CopyIcon from '@mui/icons-material/FileCopy';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import { Box, Tabs, Tab } from '@mui/material';
+import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
+import { UomContext } from '../hooks/UomContext';
+import { createItemGroup, deleteItemGroup, updateItemGroup } from '@services/itemGroupServices';
+import ConversionForm from './ConversionForm';
+import { createBaseUnitConvertion, deleteBaseUnitConvertion, updateBaseUnitConvertion } from '@services/uomService';
+
+
+
+interface ConversionMaintenanceBodyProps {
+    isAdding: boolean;
+    selectedRowData: any | null; // Allow null
+    onClose: () => void;
+    setCall: (number) => void;
+    setFullScreen: (boolean) => void;
+    itemRowData: any[];
+    call: number;
+    username: string;
+    setAddClick: (boolean) => void;
+    fullScreen: boolean;
+    rowSelectedData: any;
+}
+
+
+const ConversionMaintenanceBody: React.FC<ConversionMaintenanceBodyProps> = ({ call, setCall,
+    isAdding, selectedRowData, onClose, itemRowData, setFullScreen, username, setAddClick, fullScreen, rowSelectedData }) => {
+    const { payloadData, setPayloadData, setShowAlert, activeTab, setActiveTab, uomConversionPayload, showAlertForConversion, setShowAlertForConversion } = useContext<any>(UomContext);
+    const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+    const [isCopyModalVisible, setIsCopyModalVisible] = useState<boolean>(false);
+    const [form] = Form.useForm();
+    const [formValues, setFormValues] = useState<any[]>([]);
+
+
+
+    useEffect(() => {
+
+        setFormValues(itemRowData);
+    }, [itemRowData]);
+
+    const handleOpenChange = () => {
+        if (fullScreen == false)
+            setFullScreen(true);
+        else
+            setFullScreen(false);
+    }
+
+    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+        // debugger
+        setActiveTab(newValue);
+        setAddClick(false);
+    };
+
+
+    const handleClose = () => {
+        onClose();
+    };
+
+
+    const handleSave = (oEvent) => {
+        const cookies = parseCookies();
+        const site = cookies.site;
+        let flagToSave = true;
+        // console.log("Form values: ", formValues);
+        const updatedRowData = {
+            ...uomConversionPayload,
+            user: username,
+            site: site,
+        };
+        delete updatedRowData.conversionFactor;
+        // Perform the save operation with updatedRowData
+        console.log("Request:", updatedRowData);
+        if (uomConversionPayload.baseAmt == undefined || uomConversionPayload.baseAmt == null || uomConversionPayload.baseAmt == "") {
+            message.error("Formula cannot be empty");
+            flagToSave = false;
+            return;
+        }
+
+        const oCreate = async () => { // Rename the inner function to avoid recursion
+            try {
+                if (oEvent.currentTarget.innerText == "Create" || oEvent.currentTarget.innerText == "बनाएं"
+                    || oEvent.currentTarget.innerText == "ರಚಿಸಿ" || oEvent.currentTarget.innerText == "உருவாக்க") {
+                    const createResponse = await createBaseUnitConvertion(updatedRowData);
+                    console.log("Created response: ", createResponse);
+                    if (createResponse) {
+                        if (createResponse.errorCode) {
+                            message.error(createResponse.message);
+                        }
+                        else {
+                            message.success(createResponse.message_details.msg);
+                            setCall(call + 1);
+                            setShowAlertForConversion(false);
+                            onClose();
+                        }
+                    }
+                }
+
+                else if (oEvent.currentTarget.innerText == "Save" || oEvent.currentTarget.innerText == "सहेजें"
+                    || oEvent.currentTarget.innerText == "ಉಳಿಸಿ" || oEvent.currentTarget.innerText == "சேமிக்க") {
+                    const updateResponse = await updateBaseUnitConvertion(updatedRowData);
+                    console.log("Updated reason Code response: ", updateResponse);
+                    // debugger
+                    if (updateResponse) {
+                        if (updateResponse.errorCode) {
+                            message.error(updateResponse.message);
+                        }
+                        else {
+                            message.success(updateResponse.message_details.msg);
+                            setCall(call + 1);
+                            setShowAlertForConversion(false);
+                        }
+                    }
+
+                }
+
+
+            } catch (error) {
+                console.error('Error creating conversion:', error);
+            }
+        };
+
+        if (flagToSave == true)
+            oCreate();
+
+
+    };
+
+
+
+
+    const handleCancel = () => {
+        // console.log("Cancel clicked");
+        Modal.confirm({
+            title: t('confirm'),
+            content: t('closePageMsg'),
+            okText: t('ok'),
+            cancelText: t('cancel'),
+            onOk: async () => {
+                // Proceed with the API call if confirmed
+                onClose();
+            },
+            onCancel() {
+                //   console.log('Action canceled');
+            },
+        });
+
+
+    };
+
+
+
+
+
+    const handleOpenModal = () => {
+        setIsModalVisible(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalVisible(false);
+    };
+
+    const handleConfirmDelete = () => {
+        const oDelete = async () => {
+            const cookies = parseCookies();
+            const site = cookies.site;
+
+            try {
+                const request = {
+                    // ...uomConversionPayload,
+                    baseUnit: uomConversionPayload.baseUnit,
+                    conversionUnit: uomConversionPayload.conversionUnit,
+                    user: username,
+                    site: site
+                };
+                // debugger
+                const response = await deleteBaseUnitConvertion(request);
+                if (!response.errorCode) {
+                    message.success(response.message_details.msg);
+                    setCall(call + 1);
+                    onClose();
+                }
+                else {
+                    console.log("Deleted conversion: ", response);
+                }
+            } catch (error) {
+                console.error('Error deleting conversion:', error);
+            }
+        };
+
+        oDelete();
+        setIsModalVisible(false);
+    };
+
+    const handleOpenCopyModal = () => {
+        // // debugger
+        setIsCopyModalVisible(true);
+        // Optionally reset form fields
+        form.resetFields();
+        form.setFieldsValue({
+            itemGroup: selectedRowData.itemGroup + "_COPY" || '',
+            description: ''
+        });
+    };
+
+    const handleCloseCopyModal = () => {
+        setIsCopyModalVisible(false);
+    };
+
+    const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: string) => {
+        const { value } = e.target;
+        let formattedValue = value;
+
+        if (fieldName != 'groupDescription') {
+            formattedValue = value.toUpperCase().replace(/[^A-Z0-9_]/g, '');
+        }
+
+        // console.log(`Field Change: ${fieldName}`, formattedValue); // Debugging line
+        // Set field value
+        form.setFieldsValue({ [fieldName]: formattedValue });
+    };
+
+
+
+    const handleConfirmCopy = () => {
+        form
+            .validateFields()
+            .then((values) => {
+                const cookies = parseCookies();
+                const site = cookies.site;
+                const updatedRowData: any = {
+                    ...uomConversionPayload,
+                    site: site,
+                    userId: username
+                };
+                updatedRowData.itemGroup = values.itemGroup;
+                updatedRowData.groupDescription = values.groupDescription;
+                // Perform the save operation with updatedRowData
+                delete updatedRowData.createdDateTime;
+                delete updatedRowData.modifiedDateTime;
+                console.log("Copy request:", updatedRowData);
+
+                if (updatedRowData.baseAmt == null || updatedRowData.baseAmt == "" || updatedRowData.baseAmt == undefined) {
+                    message.error("Formula cannot be empty");
+                    return;
+                }
+
+                const oCopy = async () => { // Rename the inner function to avoid recursion
+
+                    try {
+
+                        const copyResponse = await createItemGroup(updatedRowData);
+                        console.log("Copy response: ", copyResponse);
+                        if (copyResponse.errorCode) {
+                            message.error(copyResponse.message);
+                        }
+                        else {
+                            setCall(call + 1);
+                            message.success(copyResponse.message_details.msg);
+                            setShowAlertForConversion(false);
+                            onClose();
+                        }
+
+
+
+                    } catch (error) {
+                        console.error('Error copying conversion:', error);
+                    }
+                };
+
+                oCopy();
+                setIsCopyModalVisible(false);
+            })
+            .catch((errorInfo) => {
+                // console.log('Validation Failed:', errorInfo);
+            });
+    };
+
+    const { t } = useTranslation();
+
+    const renderTabContent = () => {
+        switch (activeTab) {
+            case 0:
+                return <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 100px)' }}>
+                    <ConversionForm rowSelectedData={rowSelectedData} onChange={function (values: Record<string, any>): void {
+                        throw new Error('Function not implemented.');
+                    }} />
+                </div>
+
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <div className={styles.pageContainer}>
+            <div className={styles.contentWrapper}>
+                <div className={styles.dataFieldBodyContents}>
+                    <div className={isAdding ? styles.heading : styles.headings}>
+                        <div className={styles.split}>
+                            <div>
+                                <p className={styles.headingtext}>
+                                    {selectedRowData ? selectedRowData?.baseUnit + " to " + selectedRowData?.conversionUnit : t('convertUom')}
+                                </p>
+                                {selectedRowData && (
+                                    <>
+
+                                        <p className={styles.dateText}>
+                                            {t('createdDate')}
+                                            <span className={styles.fadedText}>
+                                                {selectedRowData.createdDateTime
+                                                    ? dayjs(selectedRowData.createdDateTime).format('DD-MM-YYYY HH:mm:ss')
+                                                    : 'N/A'}
+                                            </span>
+                                        </p>
+                                        <p className={styles.dateText}>
+                                            {t('modifiedTime')}
+                                            <span className={styles.fadedText}>
+                                                {selectedRowData.modifiedDateTime
+                                                    ? dayjs(selectedRowData.modifiedDateTime).format('DD-MM-YYYY HH:mm:ss')
+                                                    : 'N/A'}
+                                            </span>
+                                        </p>
+
+                                    </>
+                                )}
+                            </div>
+
+                            <div className={styles.actionButtons}>
+                                <Tooltip title={fullScreen ? "Exit Full Screen" : "Enter Full Screen"}>
+                                    <Button
+                                        onClick={handleOpenChange}
+                                        className={styles.actionButton}
+                                    >
+                                        {fullScreen ? <CloseFullscreenIcon sx={{ color: '#1874CE' }} /> : <OpenInFullIcon sx={{ color: '#1874CE' }} />}
+                                    </Button>
+                                </Tooltip>
+
+                                {selectedRowData && (
+                                    <>
+                                        {/* <Tooltip title="Copy">
+                                            <Button onClick={handleOpenCopyModal} className={styles.actionButton}>
+                                                <CopyIcon sx={{ color: '#1874CE' }} />
+                                            </Button>
+                                        </Tooltip> */}
+                                        <Tooltip title="Delete">
+                                            <Button onClick={handleOpenModal} className={styles.actionButton}>
+                                                <DeleteIcon sx={{ color: '#1874CE' }} />
+                                            </Button>
+                                        </Tooltip>
+                                    </>
+                                )}
+
+                                <Tooltip title="Close">
+                                    <Button onClick={handleClose} className={styles.actionButton}>
+                                        <CloseIcon sx={{ color: '#1874CE' }} />
+                                    </Button>
+                                </Tooltip>
+                            </div>
+
+
+                        </div>
+                    </div>
+                    <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                        <Tabs value={activeTab} onChange={handleTabChange} >
+                            <Tab label={t("main")} />
+                        </Tabs>
+                    </Box>
+                    <Box sx={{ padding: 2 }}>
+                        {renderTabContent()}
+                    </Box>
+                </div>
+            </div>
+            <footer className={styles.footer}>
+                <div className={styles.floatingButtonContainer}
+                    style={{ position: 'fixed', bottom: '60px', right: '20px', display: 'flex', flexDirection: 'row', gap: '10px' }}
+                >
+                    <Button type='primary'
+                        // className={`${styles.floatingButton}`}
+                        onClick={handleSave}
+                        style={{ width: 'auto', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >
+                        {selectedRowData ? t("save") : t("create")}
+                    </Button>
+                    <Button
+                        className={` ${styles.cancelButton}`}
+                        onClick={handleCancel}
+                        style={{ width: 'auto', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                    >
+                        {t("cancel")}
+                    </Button>
+                </div>
+            </footer>
+            <Modal
+                title={t("confirmDelete")}
+                open={isModalVisible}
+                onOk={handleConfirmDelete}
+                onCancel={handleCloseModal}
+                okText={t("delete")}
+                cancelText={t("cancel")}
+                centered
+            >
+                <p>{t("conversionDeleteMessage")}</p>
+            </Modal>
+            <Modal
+                title={t("confirmCopy")}
+                open={isCopyModalVisible}
+                onOk={handleConfirmCopy}
+                onCancel={handleCloseCopyModal}
+                okText={t("copy")}
+                cancelText={t("cancel")}
+                centered
+            >
+                <Form
+                    form={form}
+                    layout="vertical"
+                    initialValues={{
+                        itemGroup: selectedRowData?.itemGroup || '',
+                        description: ''
+                    }}
+                >
+                    <Form.Item
+                        label={t("itemGroup")}
+                        name="itemGroup"
+                        rules={[{ required: true, message: 'Please enter the item group' }]}
+                    >
+                        <Input placeholder="" onChange={(e) => handleFieldChange(e, 'itemGroup')} />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="groupDescription"
+                        label={t("groupDescription")}
+                    >
+                        <Input placeholder="" onChange={(e) => handleFieldChange(e, 'groupDescription')} />
+                    </Form.Item>
+                </Form>
+            </Modal>
+        </div>
+
+
+
+    );
+};
+
+export default ConversionMaintenanceBody;

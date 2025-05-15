@@ -1,0 +1,36 @@
+<!-- node_modules
+.next
+out
+.DS_Store
+*.log
+.env.local
+.env -->
+
+# Folders to exclude
+node_modules
+.next
+out
+.git
+coverage
+test
+docs
+
+# OS/System files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Env/config files not needed at build
+.env*
+!env.production
+
+# CI/CD
+.github
+.vscode
+.idea
+
+# Docker files (optional if not needed at runtime)
+Dockerfile
+docker-compose.yml

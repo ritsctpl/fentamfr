@@ -1,0 +1,36 @@
+/* .tableContainer {
+    padding: 16px;
+  } */
+   
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: robot!important;
+  }
+  
+  .tableHead {
+    background-color: black;
+    font-family: robot!important;
+  }
+  
+  .tableHeadCell {
+    /* padding: 16px; */
+    font-size: larger;
+    font-weight: bold;
+    text-align: left;
+    font-family: robot!important;
+  }
+  
+  .tableCell {
+    /* padding: 16px; */
+    font-size: large;
+    border-bottom: 1px solid black;
+    font-family: robot!important;
+  }
+
+  .tableBody{
+    background-color: black;
+    font-family: robot!important; 
+  }
+  

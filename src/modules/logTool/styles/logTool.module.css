@@ -1,0 +1,157 @@
+.subTitle {
+    font-size: 14px;
+    color: #666;
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
+    align-items: center;
+}
+
+.subTitle1 {
+    font-size: 14px;
+    color: #666;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: center;
+    padding-bottom: 10px;
+}
+
+.subTitleText {
+    font-weight: bold;
+}
+
+.subTitleInput {
+    width: 100%;
+}
+
+.subTitleTextScan {
+    margin: 0;
+    width: 100%;
+}
+
+.cardFooter {
+    margin-top: 20px;
+    margin-right: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+}
+
+/* Add these new styles */
+.assemblyTable :global(.ant-table-tbody > tr > td),
+.dataFieldTable :global(.ant-table-tbody > tr > td) {
+    padding: 12px 16px;
+    height: 48px; /* Consistent height for both tables */
+    line-height: 24px;
+}
+
+.assemblyTable :global(.ant-table-thead > tr > th),
+.dataFieldTable :global(.ant-table-thead > tr > th) {
+    padding: 12px 16px;
+    height: 48px; /* Consistent header height */
+    background: #fafafa;
+}
+
+.assemblyForm {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.cardFooter {
+    text-align: right;
+    margin-top: 16px;
+    /* padding: 16px; */
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+/* Make both tables have consistent borders */
+.assemblyTable :global(.ant-table),
+.dataFieldTable :global(.ant-table) {
+    border: 1px solid #f0f0f0;
+}
+
+/* Consistent hover states */
+.assemblyTable :global(.ant-table-tbody > tr:hover > td),
+.dataFieldTable :global(.ant-table-tbody > tr:hover > td) {
+    background: #f5f5f5;
+}
+
+.formItems :global(.ant-form-item),
+.assemblyTable :global(.ant-form-item),
+.dataFieldTable :global(.ant-form-item) {
+    margin-bottom: 1px !important; /* Use !important to override default styles */
+}
+
+.formClosed {
+    width: 100%;
+}
+
+.formWrapper {
+    width: 100%;
+}
+
+.formOpen {
+    width: 100%;
+    display: block;
+    height: 570px;
+    overflow: auto;
+}
+
+.formContent {
+    width: 0;
+    display: none;
+    height: 570px;
+    overflow: auto;
+}       
+
+.container {
+    height: auto;
+    /* display: flex;
+    flex-direction: row;
+    gap: 20px; */
+}
+
+.firstChild {
+    width: 100%;
+    transition: width 0.3s ease-in-out, transform 0.3s ease-in-out;
+    transform: translateY(0);
+}
+
+.firstChild.shifted {
+    width: 100%;
+    transform: translateY(-20px);
+}
+
+.secondChild {
+    width: 100%;
+    /* height: 570px; */
+    /* overflow: auto; */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(100%);
+    transition: all 0.3s ease-in-out;
+    position: relative;
+}
+
+.secondChild.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.formContent {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease-in-out;
+}
+
+.visible .formContent {
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0.2s;
+}

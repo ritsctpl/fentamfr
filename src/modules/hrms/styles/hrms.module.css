@@ -1,0 +1,116 @@
+.header {
+  padding: 10px;
+  /* background: #f5f8fe; */
+}
+.searchInput {
+  width: 60px;
+  border-radius: 5px;
+  height: 20px;
+}
+
+.searchPaper {
+  padding: 2px 4px;
+  margin-left: 20px;
+  display: flex;
+  align-items: center;
+  width: 250px;
+  border-radius: 5px;
+  height: 32px;
+  box-shadow: 0px 1px 2px rgba(28, 28, 29, 0.3),
+    -1px 1px 2px rgba(25, 25, 26, 0.3), 0px -1px 2px rgba(17, 17, 19, 0.3);
+}
+
+.searchIcon {
+  color: #007bff;
+}
+
+/* Right container to align search input, notification, and theme toggle in a row */
+.rightContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Align everything to the right side */
+  gap: 20px; /* Adds spacing between each element */
+  padding-right: 20px; /* Adds some padding to the right side */
+}
+
+/* Search input style */
+
+.searchPaper:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.searchInput::placeholder {
+  color: #888;
+}
+
+.searchIcon {
+  font-size: 18px;
+  color: #007bff;
+  cursor: pointer;
+}
+
+/* Notification icon with badge */
+.iconButton {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+}
+
+.ant-badge {
+  background-color: #ff4d4f;
+  color: #fff;
+  font-size: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Theme toggle icon */
+.themeToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f2f5;
+  border-radius: 50%;
+  padding: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.themeToggle:hover {
+  background-color: #e6f7ff;
+}
+
+.themeToggle svg {
+  font-size: 20px;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+.themeToggle:hover svg {
+  color: #007bff;
+}
+.profileDetails {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.empId {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.profileIcon {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}

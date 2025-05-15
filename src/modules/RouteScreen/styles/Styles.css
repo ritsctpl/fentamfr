@@ -1,0 +1,10 @@
+.full-height-tabs {
+    height: 100%;
+}
+
+.full-height-tabs .ant-tabs-content,
+.full-height-tabs .ant-tabs-content-top,
+.full-height-tabs .ant-tabs-tabpane,
+.full-height-tabs .ant-tabs-tabpane-active {
+    height: 100%;
+}

@@ -1,0 +1,35 @@
+.workcenter {
+    padding: 10px;
+    width: 100%;
+    height: calc(100vh - 100px);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+.workcenter_top{
+    width: 100%;
+    height: 23%;
+    display: flex;
+    gap: 20px;
+}
+.workcenter_top_left{
+    width: 40%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+.machine_timeline{
+    width: 60%;
+}
+
+.machine_taile{
+    width: 100%;
+    overflow: auto;
+    display: flex;
+    gap:10px;
+}
+.machine_bottom{
+    display: flex;
+    gap:10px
+}

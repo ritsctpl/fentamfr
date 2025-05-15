@@ -1,0 +1,233 @@
+.tileWrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: start;
+}
+.mainCard {
+  width: 335px;
+  height: 100%;
+  cursor: pointer;
+  font-family: "roboto";
+}
+.mainCard:hover {
+  transform: scale(1.01);
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 10px, rgba(0, 0, 0, 0.15) 0px 3px 6px;
+}
+.detailsDisplay {
+  display: grid;
+  /* justify-content: space-between; */
+  gap: 10px;
+}
+
+.boxFull {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 10px;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  width: 100%;
+  height: 72px;
+  font-weight: bolder;
+  padding: 15px;
+  margin-top: 6px;
+}
+.reject {
+  color: red;
+  font-size: 16px;
+  font-weight: bolder;
+  display: flex;
+  align-items: center;
+  margin-top: 22px;
+}
+.cardLength {
+  display: flex;
+  gap: 20px;
+}
+.qualityItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.qualityLabel {
+  margin-bottom: 4px;
+}
+.qualityValue {
+  display: flex;
+  align-items: center;
+}
+.oeebox {
+  display: flex;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  margin-top: 6px;
+  padding: 5px;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  font-size: 12px;
+  justify-content: space-between;
+  font-weight: bolder;
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-family: "roboto";
+}
+
+.resourceName {
+  display: flex;
+  align-items: center;
+}
+
+.resourceIcon {
+  margin-right: 5px;
+}
+
+.resourceText {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.itemName {
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.statusText {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.productionCard {
+  width: 100%;
+  height: 100%;
+  margin-right: 5px;
+}
+
+.productionCardBody {
+  padding: 10px;
+  border-radius: 0 0 8px 8px;
+}
+
+.productionDetails {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 2px;
+}
+
+.productionItem {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 4px 0;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.productionLabel {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  min-width: 85px;
+  font-size: 14px;
+}
+
+.productionIcon {
+  margin-right: 5px;
+  font-size: 14px;
+}
+.productionItemvalue {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+}
+
+.timeValue {
+  font-family: "Roboto Mono", monospace;
+  font-size: 14px;
+  font-weight: bold;
+  /* min-width: 120px; */
+  display: inline-block;
+  margin-left: 4px;
+}
+
+.actualCard {
+  width: 100%;
+  height: 140px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 5px;
+  background: white;
+  border-radius: 8px;
+}
+
+.actplancontainer {
+  width: 100%;
+  height: 100%;
+}
+
+.actualPlanContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 5px 0;
+}
+
+.actualLabel {
+  font-size: 12px;
+  color: #3b82f6;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.planLabel {
+  font-size: 12px;
+  color: #3b82f6;
+  font-weight: bold;
+  margin-top: 2px;
+}
+
+.actualPlanValue {
+  font-size: 17px;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.divider {
+  width: 100%;
+  height: 1px;
+  background: #a4a4a4;
+  margin: 8px 0;
+}
+.blue {
+  color: #3b82f6;
+}
+.green {
+  color: #22c55e;
+}
+.red {
+  color: #ef4444;
+}
+
+.blink {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { 
+    box-shadow: 0 6px 24px rgb(255 0 0 / 100%);
+  }
+  50% { 
+    box-shadow: 0 6px 24px rgb(255 0 0 / 30%);
+  }
+}

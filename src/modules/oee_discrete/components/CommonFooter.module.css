@@ -1,0 +1,15 @@
+.footer {
+    backdrop-filter: blur(13px) saturate(96%);
+    -webkit-backdrop-filter: blur(13px) saturate(96%);
+    background-color: rgba(187, 187, 187, 0.22);
+    width: 100%;
+    bottom: 0;
+    height: 6vh;
+    z-index: 10000; 
+    position: fixed; 
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    align-items: center;
+  }
+  

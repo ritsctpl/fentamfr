@@ -1,0 +1,444 @@
+import { ColumnGroupType, ColumnType } from "antd/es/table";
+import { parseCookies } from "nookies";
+import { list } from "postcss";
+
+// Define the data structure for the shift intervals and breaks
+export interface Certificate {
+  certification: string;  // Ensure this property exists
+  certificationDescription: string;  // Ensure this property exists
+  // Add any additional properties that are required
+}
+
+export type DynamicColumn<T> = {
+  title?: string;
+  dataIndex?: keyof T;
+  key: string;
+  editable?: boolean;
+  inputType?: 'text' | 'textarea';
+};
+
+
+interface SubStep {
+  subStep: any;
+  subStepDescription: any;
+  // Define the properties of SubStep here
+  // For example:
+  id: string;
+  description: string;
+}
+
+interface ActivityHook {
+  hookPoint: any;
+  activity: any;
+  enable: any;
+  userArgument: any;
+  // Define the properties of ActivityHook here
+  // For example:
+  id: string;
+  action: string;
+}
+
+
+
+
+ 
+  export type ColumnsType<RecordType = any> = (ColumnGroupType<RecordType> | ColumnType<RecordType>)[];
+
+  export interface MainFormData {
+  shiftName: string;
+    description: string;
+    shiftType: string;
+    workCenter: string;
+    resource: string;
+  }
+
+  export interface DecodedToken {
+    preferred_username: string;
+  }
+ 
+
+export interface DynamicTableProps {
+  columns: any[];
+  data: any[];
+  currentPage: number;
+  pageSize: number;
+  handleRowClick: (record: any) => void;
+  handleTableChange: (pagination: any, filters: any, sorter: any) => void;
+  setCurrentPage: (page: number) => void;
+  selectedRowKey: string | null;
+}
+
+
+
+export interface Break {
+  uniqueId: number;
+  breakId: number;
+  breakType: string;
+  breakTimeStart: string;
+  breakTimeEnd: string;
+  meanTime: number;
+  reason: string;
+}
+export interface CalendarRule {
+  day:string;
+  prodDay:string;
+  dayClass:string;
+}
+export interface CustomData {
+  customData: string;
+    value: string;
+}
+export interface ShiftInterval {
+  key: string;
+  validFrom: string;
+  validEnd: string;
+  startTime: string;
+  endTime: string;
+  clockInStart: string;
+  clockInEnd: string;
+  clockOutStart: string;
+  clockOutEnd: string;
+  labourAssign: string;
+  breakList: Break[];
+}
+
+export interface Data {
+  shiftName: string;
+  description: string;
+  shiftType: string;
+  workCenter: string;
+  resource: string;
+  erpShift?: boolean;
+  startTime?: Date | null;
+  endTime?: Date | null;
+  calendarList :[];
+  customData :[];
+  shiftIntervals: [];
+  createdDateTime?: Date;
+  modifiedDateTime?: Date;
+}
+
+
+
+// For User Type
+
+interface UserGroup {
+  userGroup: string; // Adjust based on actual fields
+}
+
+interface WorkCenter {
+  // Define properties based on your requirements
+}
+
+interface LabourTracking {
+  current: number;
+  validFrom: string;
+  validTo: string;
+  userType: string;
+  primaryShift: string;
+  secondaryShift: string;
+  costCenter: string;
+  defaultLCC: string;
+  department: string;
+  details: string;
+}
+
+interface Supervisor {
+  current: number;
+  validFrom: string;
+  validTo: string;
+  supervisedCcs: string;
+}
+
+interface LabourRules {
+  labourRule: string;
+  currentValue: number;
+}
+
+
+
+export interface User {
+  site:string;
+  defaultSite: string;
+  user: string;
+  lastName: string;
+  firstName: string;
+  emailAddress: string | null;
+  status: string;
+  employeeNumber: string | null;
+  hireDate: string | null;
+  erpUser: string | null;
+  erpPersonnelNumber: string | null;
+  details: string | null;
+  userGroups: UserGroup[];
+  workCenters: WorkCenter[] | null;
+  labourTracking: LabourTracking[] | null;
+  supervisor: Supervisor[] | null;
+  labourRules: LabourRules[] | null;
+  customDataList: CustomData[] | null;
+  userId: string | null;
+  active: number;
+  createdDateTime: string; // Can be ISO date string
+  modifiedDateTime: string; // Can be ISO date string
+}
+const cookies = parseCookies();
+      const currentSite = cookies.site;
+
+export const DefaultUserData: User = {
+  site:'',
+  defaultSite: currentSite,
+  user: '',
+  lastName: '',
+  firstName: '',
+  emailAddress: null,
+  status: 'Active',
+  employeeNumber: null,
+  hireDate: null,
+  erpUser: null,
+  erpPersonnelNumber: null,
+  details:"",
+  userGroups: [], // Empty array for nested objects
+  workCenters: [], // Empty array, adjust based on actual WorkCenter definition
+  labourTracking: [], // Empty array, adjust based on actual LabourTracking definition
+  supervisor: [], // Empty array, adjust based on actual Supervisor definition
+  labourRules: [], // Empty array, adjust based on actual LabourRules definition
+  customDataList: [], // Empty array, adjust based on actual CustomData definition
+  userId: null,
+  active: 0, // Default to inactive or neutral state
+  createdDateTime: '', // Empty string or a placeholder like 'N/A'
+  modifiedDateTime: '', // Empty string or a placeholder like 'N/A'
+};
+
+
+
+// Define types for TimeZone and ActivityHookList
+interface TimeZone {
+  // Define properties based on Java class or requirements
+}
+
+interface ActivityHookList {
+  id: number;
+  hookPoint: string;
+  activity: string;
+  enabled: boolean;
+  userArgument: string;
+}
+// Define the SiteRequest interface
+export interface SiteRequest {
+  site?: string;
+  handle?: string;
+  description?: string;
+  type?: string;
+  timeZone?: TimeZone[];
+  activityHookLists?: ActivityHookList[];
+  local?: boolean;
+  createdDateTime?: string;
+  updatedDateTime?: string;
+  userId?: string;
+}
+
+export const DefaultSiteData: SiteRequest = { 
+    site: '',
+    handle: '',
+    description: '',
+    type: 'Production',
+    timeZone: [], 
+    activityHookLists: [], 
+    local: false,
+    createdDateTime: new Date().toISOString(), 
+    updatedDateTime: new Date().toISOString(),
+    userId: ''
+  };
+
+
+
+  // For Pop App 
+
+
+  // Define the interface for the ButtonActivity
+interface ButtonActivity {
+  activitySequence: string;
+  activity: string;
+  type: string;
+  url: string;
+  pluginLocation: string;
+  clearsPcu: boolean;
+  fixed: boolean;
+}
+
+// Define the interface for the Button
+interface Button {
+  sequence: string;
+  buttonType: string;
+  buttonId: string;
+  buttonLabel: string;
+  buttonSize?: string; // Optional
+  imageIcon?: string; // Optional
+  hotKey?: string; // Optional
+  buttonLocation?: string; // Optional
+  startNewButtonRow: boolean;
+  activityList: ButtonActivity[];
+}
+
+// Define the interface for the ListOptions
+interface ListOptions {
+  browseWorkList: string;
+  podWorkList: string;
+  assembleList: string;
+  dcCollectList: string;
+  toolList: string;
+  workInstructionList: string;
+  dcEntryList: string;
+  subStepList: string;
+}
+
+// Define the interface for PodSelection
+interface PodSelection {
+  mainInput: string;
+  mainInputHotKey: string;
+  defaultOperation: string;
+  defaultResource: string;
+  sfcQueueButtonID?: string; // Optional
+  sfcInWorkButtonID?: string; // Optional
+  infoLine1: string;
+  infoLine2: string;
+  showOperationFirst: boolean;
+  showQuantity: boolean;
+  operationCanBeChanged: boolean;
+  resourceCanBeChanged: boolean;
+}
+
+// Define the interface for the Printers
+interface Printers {
+  documentPrinter: string;
+  labelPrinter: string;
+  travelerPrinter: string;
+}
+
+// Define the main interface
+export interface PodConfig {
+  id: string;
+  site: string;
+  handle: string;
+  type: string;
+  podName: string;
+  panelLayout: string;
+  description: string;
+  status: string;
+  displayDevice?: string; // Optional
+  displaySize?: string; // Optional
+  ncClient?: string; // Optional
+  realTimeMessageDisplay?: string; // Optional
+  specialInstructionDisplay?: string; // Optional
+  kafkaIntegration: boolean;
+  kafkaId: string;
+  sessionTimeout: number;
+  refreshRate: number;
+  defaultOperation: string;
+  defaultResource: string;
+  soundWithErrorMessage: boolean;
+  showHomeIcon: boolean;
+  showHelpIcon: boolean;
+  showLogoutIcon: boolean;
+  autoExpandMessageArea: boolean;
+  operationCanBeChanged: boolean;
+  resourceCanBeChanged: boolean;
+  showQuantity: boolean;
+  pcuQueueButtonId?: string; // Optional
+  pcuInWorkButtonId?: string; // Optional
+  documentName?: string; // Optional
+  buttonList: Button[];
+  listOptions: ListOptions[];
+  podSelection: PodSelection[];
+  printers: Printers[];
+  customDataList: any[]; // Adjust type if more specific structure is known
+  createdBy?: string; // Optional
+  modifiedBy: string;
+  active: number;
+  createdDateTime?: string; // Optional
+  modifiedDateTime: string;
+  selectedRowData?:[];
+}
+
+// Default values (if needed)
+export const defaultPodConfig: PodConfig = {
+  id: '',
+  site: '',
+  handle: '',
+  type: '',
+  podName: '',
+  panelLayout: '1',
+  description: '',
+  status: 'Enabled',
+  kafkaIntegration: false,
+  kafkaId: '',
+  sessionTimeout: 20,
+  refreshRate: 6000,
+  defaultOperation: '',
+  defaultResource: '',
+  soundWithErrorMessage: false,
+  showHomeIcon: false,
+  showHelpIcon: false,
+  showLogoutIcon: false,
+  autoExpandMessageArea: false,
+  operationCanBeChanged: true,
+  resourceCanBeChanged: true,
+  showQuantity: true,
+  buttonList: [],
+  listOptions: [{
+    browseWorkList: '',
+    podWorkList: '',
+    assembleList: '',
+    dcCollectList: '',
+    toolList: '',
+    workInstructionList: 'WORKINSTRUCTION',
+    dcEntryList: '',
+    subStepList: ''
+  }],
+  podSelection: [{
+    mainInput: '',
+    mainInputHotKey: 'Ctrl+G',
+    defaultOperation: '',
+    defaultResource: 'DEMO_SRC2',
+    infoLine1: '',
+    infoLine2: '',
+    showOperationFirst: true,
+    showQuantity: true,
+    operationCanBeChanged: true,
+    resourceCanBeChanged: true
+  }],
+  printers: [{
+    documentPrinter: '',
+    labelPrinter: '',
+    travelerPrinter: ''
+  }],
+  customDataList: [],
+  createdBy: null,
+  modifiedBy: '',
+  active: 1,
+  createdDateTime: null,
+  modifiedDateTime: ''
+};
+
+export interface DataItem {
+  key?:string;
+  dataField: string;
+  dataAttribute: string;
+}
+export const defaultData: DataItem[] = [
+  { "dataField": "pcuBO", "dataAttribute": null },
+  { "dataField": "itemBO", "dataAttribute": null },
+  { "dataField": "routerBO", "dataAttribute": null },
+  { "dataField": "qty", "dataAttribute": null },
+  { "dataField": "shopOrderBO", "dataAttribute": null },
+  { "dataField": "Status", "dataAttribute": null }
+];
+
+
+export interface DataRow {
+  key: string; // Or use a more specific type if applicable
+  [key: string]: any; // Index signature to allow any other properties
+}
+
+
+

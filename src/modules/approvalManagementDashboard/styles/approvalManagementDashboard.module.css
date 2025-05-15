@@ -1,0 +1,30 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: all 0.3s ease;
+    overflow:hidden;
+  }
+.datafieldNav {
+    display: flex;
+    padding: 20px 0px;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  .dataFieldBody{
+    width: 100%;
+  }
+
+  .dataFieldBodyContentsTop{
+    height: auto;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0px;
+  }
+  .dataLength{
+    margin-left: 20px;
+    font-weight: 500;
+  }

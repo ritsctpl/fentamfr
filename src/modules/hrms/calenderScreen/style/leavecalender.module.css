@@ -1,0 +1,956 @@
+/* ////////// Leave Calendar Layout /////////////////*/
+.leaveCalendarContainer {
+  display: flex;
+  width: 100%;
+  height: calc(100vh - 150px);
+  gap: 16px;
+  overflow: hidden;
+}
+
+.calendarSection,
+.detailsSection {
+  flex: 1;
+  max-width: 50%;
+  height: 100%;
+  display: flex;
+}
+
+/* Calendar Card and Leave Card base styles */
+.calendarCard,
+.leaveCard {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+  background: white;
+}
+
+/* Leave Details Card */
+.leaveCard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Override Ant Design Card styles */
+.leaveCard :global(.ant-card-head) {
+  padding: 0;
+  min-height: auto;
+  border-bottom: none;
+}
+
+.leaveCard :global(.ant-card-head-title) {
+  padding: 0;
+}
+
+.leaveCard :global(.ant-card-body) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.dateHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.calendarIcon {
+  color: #1890ff;
+}
+
+.dateHeader span {
+  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.leaveStatus {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #fafafa;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 20px 0;
+}
+
+.leaveStatus :global(.ant-empty) {
+  margin-bottom: 24px;
+}
+
+.requestLeaveButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  height: auto;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.045);
+}
+
+.requestLeaveButton:hover {
+  transform: translateY(-1px);
+}
+
+/* Style Empty component */
+.leaveStatus :global(.ant-empty) {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateY(20px);
+}
+
+.leaveStatus :global(.ant-empty-image) {
+  height: 80px;
+  margin-bottom: 12px;
+}
+
+.leaveStatus :global(.ant-empty-description) {
+  color: #999;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.applyButton {
+  padding: 8px 24px;
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.applyButton:hover {
+  background-color: #40a9ff;
+}
+
+/* Calendar Styling */
+.calendar {
+  width: 100% !important;
+  height: 100% !important;
+  border: none !important;
+  background: white;
+  border-radius: 12px;
+}
+
+/* Style calendar navigation */
+.calendar :global(.react-calendar__navigation) {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 6px;
+}
+
+.calendar :global(.react-calendar__navigation button) {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  padding: 6px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  color: #333 !important;
+}
+
+.calendar :global(.react-calendar__navigation button:hover) {
+  background-color: #f0f7ff !important;
+  color: #1890ff !important;
+}
+
+.calendar :global(.react-calendar__navigation button:disabled) {
+  opacity: 0.5;
+}
+
+/* Style weekday names */
+.calendar :global(.react-calendar__month-view__weekdays) {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.calendar :global(.react-calendar__month-view__weekdays__weekday) {
+  padding: 8px !important;
+  text-align: center;
+}
+
+.calendar :global(.react-calendar__month-view__weekdays abbr) {
+  text-decoration: none !important;
+  cursor: default;
+}
+
+/* Style calendar days */
+.calendar :global(.react-calendar__month-view__days) {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.calendar button {
+  aspect-ratio: 1 !important;
+  height: auto !important;
+  padding: 0 !important;
+  border-radius: 12px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border: 2px solid #f0f0f0 !important;
+  position: relative;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.calendar button:hover {
+  background-color: #f0f7ff !important;
+  border-color: #1890ff !important;
+  transform: scale(1.05);
+  z-index: 1;
+}
+
+.calendar :global(.react-calendar__tile--active) {
+  background-color: #e6f7ff !important;
+  border-color: #1890ff !important;
+  color: #1890ff !important;
+  font-weight: 600 !important;
+}
+
+.calendar :global(.react-calendar__tile--now) {
+  background-color: #fff3e6 !important;
+  border-color: #ffa940 !important;
+  color: #fa8c16 !important;
+}
+
+/* Weekend styling */
+.calendar :global(.react-calendar__month-view__days__day--weekend) {
+  color: #ff4d4f !important;
+}
+
+/* Neighboring month days */
+.calendar :global(.react-calendar__month-view__days__day--neighboringMonth) {
+  opacity: 0.5;
+}
+
+/* Month View Styling */
+.calendar :global(.react-calendar__year-view__months),
+.calendar :global(.react-calendar__decade-view__years),
+.calendar :global(.react-calendar__century-view__decades) {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 12px !important;
+  padding: 16px !important;
+  height: auto !important;
+}
+
+/* Month and Year Cell Styling */
+.calendar :global(.react-calendar__year-view__months__month),
+.calendar :global(.react-calendar__decade-view__years__year),
+.calendar :global(.react-calendar__century-view__decades__decade) {
+  aspect-ratio: 1 !important;
+  height: auto !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border-radius: 12px !important;
+  border: 2px solid #f0f0f0 !important;
+  background-color: white !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  position: relative !important;
+  overflow: hidden !important;
+  color: #333 !important;
+}
+
+/* Hover state for month/year cells */
+.calendar :global(.react-calendar__year-view__months__month:hover),
+.calendar :global(.react-calendar__decade-view__years__year:hover),
+.calendar :global(.react-calendar__century-view__decades__decade:hover) {
+  background-color: #f0f7ff !important;
+  border-color: #1890ff !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1) !important;
+  z-index: 1;
+}
+
+/* Active state for month/year cells */
+.calendar :global(.react-calendar__year-view__months__month--active),
+.calendar :global(.react-calendar__decade-view__years__year--active),
+.calendar :global(.react-calendar__century-view__decades__decade--active) {
+  background-color: #e6f7ff !important;
+  border-color: #1890ff !important;
+  color: #1890ff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+}
+
+/* Navigation buttons for year/decade view */
+.calendar :global(.react-calendar__navigation) {
+  margin-bottom: 16px !important;
+  padding: 0 16px !important;
+}
+
+.calendar :global(.react-calendar__navigation button) {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  padding: 8px !important;
+  border-radius: 8px !important;
+  color: #333 !important;
+}
+
+/* Adjust calendar container for month/year views */
+.calendar :global(.react-calendar__viewContainer) {
+  height: calc(100% - 60px) !important;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Make sure the view takes full height */
+.calendar :global(.react-calendar__year-view),
+.calendar :global(.react-calendar__decade-view),
+.calendar :global(.react-calendar__century-view) {
+  height: auto !important;
+  padding: 0 12px;
+}
+
+/* Current month/year highlight */
+.calendar :global(.react-calendar__tile--now) {
+  background-color: #fff7e6 !important;
+  border-color: #ffd591 !important;
+  color: #fa8c16 !important;
+}
+
+/* Disabled state */
+.calendar :global(.react-calendar__tile:disabled) {
+  opacity: 0.5 !important;
+  background-color: #f5f5f5 !important;
+  cursor: not-allowed !important;
+}
+
+.calendarTile {
+  position: relative;
+  height: 100%;
+  border-radius: 4px;
+  width: 100%;
+}
+
+/* Pending status */
+.pending {
+  background-color: #fff7e6 !important;
+  border: 2px solid #faad14 !important;
+}
+
+/* Approved status */
+.approved {
+  background-color: #f6ffed !important;
+  border: 2px solid #52c41a !important;
+}
+
+/* Cancelled status */
+.cancelled {
+  background-color: #fff1f0 !important;
+  border: 2px solid #ff4d4f !important;
+}
+
+/* Update existing calendar button styles to work with new status styles */
+.calendar button {
+  position: relative;
+  /* border: none !important; */
+  /* background: transparent !important; */
+}
+
+.calendar button:hover {
+  background-color: #f0f7ff !important;
+}
+
+/* Ensure status colors show through on hover */
+.calendar button:hover .pending {
+  background-color: #fff7e6 !important;
+}
+
+.calendar button:hover .approved {
+  background-color: #f6ffed !important;
+}
+
+.calendar button:hover .cancelled {
+  background-color: #fff1f0 !important;
+}
+
+.dateRange {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.dateBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dateLabel {
+  color: #8c8c8c;
+  margin: 0;
+  font-size: 12px;
+}
+
+.date {
+  margin: 0;
+  font-weight: 500;
+}
+
+.arrowIcon {
+  color: #8c8c8c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.durationTag {
+  margin-left: auto;
+}
+
+.leaveReason {
+  background: #f5f5f5;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.leaveReason p {
+  margin: 0.5rem 0;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.editButton,
+.cancelButton {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s;
+}
+
+.editButton:disabled,
+.cancelButton:disabled {
+  background-color: #f5f5f5 !important;
+  color: rgba(0, 0, 0, 0.25) !important;
+  cursor: not-allowed !important;
+  border: 1px solid #d9d9d9 !important;
+}
+
+.editButton:disabled:hover,
+.cancelButton:disabled:hover {
+  background-color: #f5f5f5 !important;
+  transform: none !important;
+}
+
+.editButton {
+  background: #1890ff;
+  color: white;
+}
+
+.cancelButton {
+  background: #fff;
+  color: #1976d2;
+  border: 1px solid #1976d2;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.875rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.editButton:hover {
+  background: #40a9ff;
+}
+
+.cancelButton:hover {
+  background: #f0f0f0;
+}
+
+.pending {
+  color: #faad14;
+}
+
+.approved {
+  color: #52c41a;
+  background-color: #e3f9ce84 !important;
+}
+
+.cancelled {
+  color: #ff4d4f;
+}
+
+/* Weekend style - only changing text color */
+.weekend {
+  color: #bfbfbf !important; /* Grey text color */
+  cursor: not-allowed !important;
+}
+
+/* Remove hover effects for weekend */
+.weekend:hover {
+  transform: none !important;
+  background-color: transparent !important;
+}
+
+/* Make sure disabled dates don't show pointer cursor */
+.weekend abbr {
+  cursor: not-allowed !important;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.dateHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.actionIcons {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.editIcon,
+.cancelIcon {
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.editIcon[disabled],
+.cancelIcon[disabled] {
+  color: rgba(0, 0, 0, 0.25) !important;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.editIcon {
+  color: #1890ff;
+}
+
+.editIcon:hover:not(.disabled) {
+  color: #40a9ff;
+  background-color: rgba(24, 144, 255, 0.1);
+}
+
+.cancelIcon {
+  color: #ff4d4f;
+}
+
+.cancelIcon:hover:not(.disabled) {
+  color: #ff7875;
+  background-color: rgba(255, 77, 79, 0.1);
+}
+
+.disabled {
+  color: rgba(0, 0, 0, 0.25) !important;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.disabled:hover {
+  background-color: transparent !important;
+  color: rgba(0, 0, 0, 0.25) !important;
+}
+
+.calendarIcon {
+  color: #1890ff;
+}
+
+/* Update existing styles */
+.leaveDetails {
+  padding: 12px 0;
+}
+
+.dateRange {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.leaveReason {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.arrowIcon {
+  color: #1890ff;
+}
+
+.leaveDetails {
+  padding: 20px 0;
+}
+
+.statusSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.appliedDate {
+  color: #8c8c8c;
+  font-size: 12px;
+}
+
+.dateRangeSection {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.dateRange {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.dateBlock {
+  text-align: center;
+  flex: 1;
+}
+
+.dateLabel {
+  color: #8c8c8c;
+  margin-bottom: 4px;
+  font-size: 11px;
+}
+
+.date {
+  font-size: 18px;
+  font-weight: 500;
+  color: #262626;
+  margin: 0;
+}
+
+.durationTag {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: #1890ff;
+  color: white;
+  border: none;
+  font-size: 12px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.infoLabel {
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.infoContent {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  font-size: 13px;
+}
+
+.documentTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.descriptionBox {
+  background: #fafafa;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.descriptionTitle {
+  color: #8c8c8c;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.descriptionText {
+  margin: 0;
+  color: #262626;
+  line-height: 1.5;
+}
+
+.documentsSection {
+  margin: 20px 0;
+}
+
+.documentTitle {
+  color: #8c8c8c;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.documentTag {
+  padding: 2px 8px;
+  margin: 2px;
+  cursor: pointer;
+}
+
+.commentsSection {
+  background: #f0f5ff;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.commentTitle {
+  color: #1890ff;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.commentText {
+  margin: 0;
+  color: #262626;
+  font-style: italic;
+}
+
+/* Hover effects */
+.documentTag:hover {
+  background: #e6f7ff;
+}
+
+/* Animations */
+.leaveDetails {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.leaveInfoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.infoLabel {
+  min-width: 100px;
+  color: #666;
+  font-weight: 500;
+}
+
+.infoContent {
+  flex: 1;
+}
+
+.dateRange {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.durationTag {
+  margin-left: auto;
+}
+
+/* Fix status tag icon alignment */
+.statusSection :global(.ant-tag) {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+}
+
+.statusSection :global(.ant-tag .anticon) {
+  margin-right: 0;
+  font-size: 14px;
+}
+
+/* Update info label styles */
+.infoLabel {
+  min-width: 100px;
+  color: #666;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.infoLabel .anticon {
+  font-size: 16px;
+  color: #1890ff;
+}
+
+.pastDateMessage {
+  color: #ff4d4f;
+  font-size: 14px;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.leaveStatus {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.drawerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.drawerTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.closeButton {
+  margin-right: -12px;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.cancelButton {
+  min-width: 100px;
+}
+
+.submitButton {
+  min-width: 120px;
+}
+/* Add hover effects */
+.leaveDrawer {
+  background-color: #f0f2f5;
+}
+
+.drawerHeader {
+  color: #1890ff;
+}
+
+.selectInput,
+.textInput,
+.textArea {
+  border-color: #d9d9d9;
+}
+
+.uploadButton {
+  background-color: #1890ff;
+  color: white;
+}
+
+.cancelButton {
+  background-color: transparent;
+  color: #ff4d4f;
+}
+
+.submitButton {
+  background-color: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submitButton:hover {
+  background-color: #155fa0;
+}
+
+.cancelButton {
+  background-color: #fff;
+  color: #1976d2;
+  border: 1px solid #1976d2;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.875rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.cancelButton:hover {
+  background-color: #f0f0f0;
+}
+
+.datePicker {
+  width: 100%;
+}
+
+.leaveCard :global(.ant-divider) {
+  margin: 12px 0;
+}

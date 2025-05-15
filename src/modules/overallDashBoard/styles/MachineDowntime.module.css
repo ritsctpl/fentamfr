@@ -1,0 +1,31 @@
+.container {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+}
+
+.title {
+  margin-bottom: 16px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.progressContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.progressItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.machineName {
+  min-width: 120px;
+  font-size: 14px;
+  color: #666;
+} 

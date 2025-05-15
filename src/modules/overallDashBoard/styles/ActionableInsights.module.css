@@ -1,0 +1,96 @@
+/* Container for insights content */
+.insightContainer {
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.insightContainer:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Scrolling content wrapper */
+.scrollingContent {
+  position: absolute;
+  width: 100%;
+  animation: scrollContent linear infinite;
+  will-change: transform;
+  display: flex;
+  flex-direction: column;
+  min-height: 200%; /* Ensure there's enough height for scrolling */
+}
+
+/* List styling */
+.insightList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  min-height: 30px; /* Minimum height to ensure visibility */
+}
+
+/* Individual insight item */
+.insightItem {
+  color: #0e2328;
+  font-size: 13px;
+  margin-bottom: 15px;
+  padding-bottom: 5px;
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  animation: fadeIn 0.5s ease-in-out;
+  min-height: 20px; /* Ensure each item has a minimum height */
+}
+
+/* For static display (1-2 items), increase spacing */
+.insightContainer > .insightList > .insightItem {
+  margin-bottom: 20px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Bullet point */
+.bulletPoint {
+  display: inline-block;
+  min-width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  margin-right: 10px;
+  margin-top: 6px;
+  transition: background-color 0.3s ease;
+}
+
+/* Text wrapper */
+.textWrapper {
+  flex: 1;
+  line-height: 1.5;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+/* Animation for content scrolling - true continuous loop */
+@keyframes scrollContent {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(
+      -50%
+    ); /* Move exactly half the content height for perfect loop */
+  }
+}
+
+/* Animation for fade in */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

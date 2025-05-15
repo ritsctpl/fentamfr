@@ -1,0 +1,356 @@
+.calendarContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* height: 45vh; */
+  /* margin-top: 40px; */
+}
+
+.calendarCard {
+  width: 80vw;
+  max-width: none;
+  box-shadow: none;
+  border-radius: 0;
+  /* padding: 10px; */
+  border: none;
+}
+
+.calendar {
+  width: 100%;
+  height: 100%;
+  border: none;
+
+  .calendar :global(.ant-table-small) {
+    font-size: 11px;
+  }
+
+  .calendar :global(.ant-table-small .ant-table-cell) {
+    padding: 8px 6px !important;
+  }
+
+  .calendar :global(.ant-select-dropdown) {
+    font-size: 11px;
+  }
+}
+
+/* Override default calendar styles */
+.calendar :global(.react-calendar) {
+  width: 100%;
+  height: 100%;
+  border: none;
+  font-family: inherit;
+  font-size: 1.1em;
+}
+
+.calendar :global(.react-calendar__month-view__days) {
+  height: 45vh;
+}
+
+.calendar :global(.react-calendar__tile) {
+  height: 75px !important;
+  width: 30px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  padding: 6px !important;
+  position: relative !important;
+}
+
+.calendar :global(.react-calendar__tile--active) {
+  background: #1890ff;
+  border-radius: 6px;
+}
+.calendar :global(.react-calendar__tile:disabled) {
+  background: #ffffff;
+  border-radius: 6px;
+  cursor: not-allowed;
+}
+
+.calendar :global(.react-calendar__tile:hover) {
+  background: #e6f7ff;
+  border-radius: 6px;
+}
+
+.calendar :global(.react-calendar__navigation button:hover) {
+  background: #e6f7ff;
+  border-radius: 6px;
+}
+
+/* Style calendar navigation */
+.calendar :global(.react-calendar__navigation) {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 6px;
+}
+
+.calendar :global(.react-calendar__navigation button) {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  /* padding: 6px !important; */
+  border-radius: 8px !important;
+  background: transparent !important;
+  border: none !important;
+  color: #333 !important;
+  width: auto !important;
+  min-width: 45px !important;
+}
+
+.calendar :global(.react-calendar__navigation button:hover) {
+  background-color: #f0f7ff !important;
+  color: #1890ff !important;
+}
+
+/* Style weekday names */
+.calendar :global(.react-calendar__month-view__weekdays) {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+/* Style calendar days */
+.calendar button {
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  border: 2px solid #f0f0f0 !important;
+  position: relative;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.calendar button:hover {
+  background-color: #f0f7ff !important;
+  border-color: #1890ff !important;
+  transform: scale(1.05);
+  z-index: 1;
+  opacity: 0.9;
+}
+
+.calendar :global(.react-calendar__tile--active) {
+  background-color: #e6f7ff !important;
+  border-color: #1890ff !important;
+  color: #1890ff !important;
+  font-weight: 600 !important;
+}
+
+.calendar :global(.react-calendar__tile--now) {
+  background-color: #fff3e6 !important;
+  border-color: #ffa940 !important;
+  color: #fa8c16 !important;
+}
+
+/* Weekend styling */
+.calendar :global(.react-calendar__month-view__days__day--weekend) {
+  color: #ff4d4f !important;
+}
+
+/* Neighboring month days */
+.calendar :global(.react-calendar__month-view__days__day--neighboringMonth) {
+  opacity: 0.5;
+}
+
+.tileContent {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: auto;
+}
+
+.hours {
+  font-size: 14px !important;
+  color: #666;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.status {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-right: 4px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Style the date number */
+.calendar :global(.react-calendar__tile abbr) {
+  font-size: 16px !important;
+  font-weight: 300 !important;
+  margin-bottom: auto;
+}
+
+.monthSummary {
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.monthSummary h3 {
+  margin: 0;
+  color: #1890ff;
+}
+
+.selectedRow {
+  background-color: #e6f7ff;
+}
+
+/* If you want the highlight color to persist on hover */
+.selectedRow:hover > td {
+  background-color: #e6f7ff !important;
+}
+
+.timeEntryHeader {
+  text-align: center;
+  padding: 24px;
+  margin-bottom: 24px;
+  background: #fafafa;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.timeStats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.timeBlock {
+  text-align: center;
+  padding: 12px 18px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  flex: 1;
+  max-width: 150px;
+}
+
+.timeBlockCenter {
+  margin: 0 15px;
+  background: #e6f7ff;
+  border-color: #91d5ff;
+  padding: 18px;
+}
+
+.timeLabel {
+  font-size: 14px;
+  color: #8c8c8c;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.timeValue {
+  font-size: 20px;
+  color: #262626;
+  font-weight: 600;
+  margin: 0;
+}
+
+.timeValueCenter {
+  font-size: 26px;
+  color: #1890ff;
+}
+
+.timeIcon {
+  color: #1890ff;
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.timeSubtitle {
+  margin: 8px 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Status-based tile styling */
+.approved {
+  background-color: #f6ffed !important;
+  border-color: #b7eb8f !important;
+}
+
+.pending {
+  background-color: #fff7e6 !important;
+  border-color: #ffd591 !important;
+}
+
+.rejected {
+  background-color: #fff1f0 !important;
+  border-color: #ffa39e !important;
+}
+
+.missing {
+  background-color: #f5f5f5 !important;
+  border-color: #d9d9d9 !important;
+}
+
+.no-entry {
+  background-color: #ffffff !important;
+  border-color: #f0f0f0 !important;
+}
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Drawer styling */
+.calendar :global(.ant-drawer-content-wrapper) {
+  width: 35% !important; /* Reduced from 40% */
+}
+
+.calendar :global(.ant-drawer-content) {
+  font-size: 10px !important; /* Reduced from 12px */
+}
+
+.calendar :global(.ant-drawer-header-title) {
+  font-size: 12px !important; /* Reduced from 14px */
+}
+
+.calendar :global(.ant-drawer-title) {
+  font-size: 12px !important; /* Reduced from 14px */
+}
+
+@media (max-width: 768px) {
+  .calendar :global(.ant-drawer-content-wrapper) {
+    width: 75% !important; /* Slightly wider on mobile devices */
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar :global(.ant-drawer-content-wrapper) {
+    width: 100% !important; /* Full width on very small devices */
+  }
+}
+
+.drawerTable {
+  font-size: 9px; /* Reduced from 10px */
+}
+
+.drawerTableCell {
+  padding: 2px 2px !important; /* Reduced from 4px */
+}
+
+.drawerDropdown {
+  font-size: 9px; /* Reduced from 10px */
+}
+
+/* More compact table rows */
+.calendar :global(.ant-table-small .ant-table-row) {
+  height: 24px; /* Reduced from 32px */
+}
+
+.calendar :global(.ant-table-small .ant-table-thead > tr > th) {
+  padding: 2px 2px !important; /* Reduced from 4px */
+  height: 24px; /* Reduced from 32px */
+}
+
+/* Add this to remove extra spacing in the drawer */
+.calendar :global(.ant-drawer-body) {
+  padding: 12px !important; /* Reduced padding around drawer content */
+}

@@ -1,0 +1,52 @@
+.logo {
+    width: 75px;
+    height: auto;
+    margin-right: 20px;
+  }
+  
+  .logOutSection{
+    margin-right: 20px;
+  }
+  
+  .logOutSection span{
+    font-weight: 400;
+    font-size: 16px;
+    color: #BEA060;
+  }
+  .pickListHeading {
+    position: fixed; /* Make it fixed */
+    top: 0; /* Stick it to the top */
+    left: 0;
+    right: 0;
+    z-index: 1000; /* Ensure it sits above other elements */
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    height: 60px; /* Set a height that fits your content */
+    align-items: center;
+    background-color: #FFFFFF;
+    box-shadow: 0 2px 4px rgba(190, 160, 96, 0.5); 
+    padding: 10px 20px; /* Add padding for spacing */
+  }
+  
+  .pickListHeading h2 {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-weight: 600;
+    font-size: 24px;
+    color: #BEA060;
+  }
+  .footer {
+    backdrop-filter: blur(13px) saturate(96%);
+    -webkit-backdrop-filter: blur(13px) saturate(96%);
+    /* background-color: rgba(187, 187, 187, 0.22); */
+    background-color: #F0F0F0;
+    width: 100%;
+    bottom: 0;
+    height: 6vh;
+    z-index: 10000; 
+    position: fixed; 
+    display: flex;
+    justify-content: center;
+    /* padding: 10px; */
+    align-items: center;
+  }

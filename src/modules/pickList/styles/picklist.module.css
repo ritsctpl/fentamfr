@@ -1,0 +1,112 @@
+.pickListContainer {
+    width: 100%;
+}
+
+.pickListHeading {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    height: 100%;
+    align-items: center;
+    background-color: #FFFFFF;
+    /* padding: 3px 0; */
+    /* border-bottom: 2px solid #BEA060;  */
+    box-shadow: 0 2px 4px rgba(190, 160, 96, 0.5); 
+}
+
+.pickListHeading h2 {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-weight: 600;
+    font-size: 24px;
+    color: #BEA060;
+}
+
+.formContainer {
+    display: flex;
+    justify-content: space-around;
+    margin: 40px 0px 60px 0px;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+}
+
+.inputContainer,
+.selectContainer {
+    display: flex;
+    gap: 15px;
+    height: 100%;
+    align-items: center;
+}
+
+.label {
+    width: 195px;
+    display: flex;
+    justify-content: end;
+}
+
+.labels {
+    width: 120px;
+    display: flex;
+    justify-content: end;
+}
+
+.input,
+.select {
+    width: 300px;
+    height: 40px;
+}
+
+.button {
+    height: 40px;
+    width: fit-content;
+    background-color: #BEA060;
+    border-color: #BEA060;
+    color: #fff;
+    font-weight: 500;
+}
+
+.logOutSection{
+    margin-right: 20px;
+}
+
+.logOutSection span{
+    font-weight: 400;
+    font-size: 16px;
+    color: #BEA060;
+}
+
+.button:hover {
+    border-color: #BEA060 !important;
+    color: #BEA060 !important;
+}
+
+.logo {
+    width: 75px;
+    height: auto;
+    margin-right: 20px;
+}
+
+.buttonContainer {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 50px 0px;
+}
+
+.footer {
+    backdrop-filter: blur(13px) saturate(96%);
+    -webkit-backdrop-filter: blur(13px) saturate(96%);
+    background-color: rgba(187, 187, 187, 0.22);
+    width: 100%;
+    bottom: 0;
+    height: 6vh;
+    z-index: 10000; 
+    position: fixed; 
+    display: flex;
+    justify-content: center;
+    /* padding: 10px; */
+    align-items: center;
+  }
