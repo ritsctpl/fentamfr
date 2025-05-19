@@ -1108,4 +1108,14 @@ export const tamilLanguage = {
 
   "productGroup":"பொருள் குழு",
   "selectProductGroup":"பொருள் குழு தேர்ந்தெடுக்கவும்",
+
+  "componentBuilderMaintenance": "கம்போனென்ட் பில்டர் பராமரிப்பு",
+  "validation": "உறுதிப்பாடு",
+  "defaultValue": "இயலுநிலை மதிப்பு",
+  "componentLabel": "கம்போனென்ட் பெயர்",
+  "createComponent": "கம்போனென்ட் உருவாக்கு",
+  "dropdownOptions": "வீழ்படிவான விருப்பங்கள்",
+  "addOption": "விருப்பம் சேர்க்க",
+  "noOfColumns": "நிரல்களின் எண்ணிக்கை",
+  "noOfRows": "வரிகளின் எண்ணிக்கை",
 }

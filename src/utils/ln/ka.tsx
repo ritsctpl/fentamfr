@@ -1093,4 +1093,15 @@ export const kannadaLanguage = {
 
   "productGroup":"ಉತ್ಪಾದ ಸಮೂಹ",
   "selectProductGroup":"ಉತ್ಪಾದ ಸಮೂಹ ಆಯ್ಕೆಮಾಡಿ",
+
+
+  "componentBuilderMaintenance": "ಕಂಪೋನೆಂಟ್ ಬಿಲ್ಡರ್ ನಿರ್ವಹಣೆ",
+  "validation": "ಪರಿಶೀಲನೆ",
+  "defaultValue": "ಡಿಫಾಲ್ಟ್ ಮೌಲ್ಯ",
+  "componentLabel": "ಕಂಪೋನೆಂಟ್ ಲೇಬಲ್",
+  "createComponent": "ಕಂಪೋನೆಂಟ್ ರಚಿಸಿ",
+  "dropdownOptions": "ಡ್ರಾಪ್ಡೌನ್ ಆಯ್ಕೆಗಳು",
+  "addOption": "ಆಯ್ಕೆ ಸೇರಿಸಿ",
+  "noOfColumns": "ಸ್ತಂಭಗಳ ಸಂಖ್ಯೆ",
+  "noOfRows": "ಸಾಲುಗಳ ಸಂಖ್ಯೆ",
 }

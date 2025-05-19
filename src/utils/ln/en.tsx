@@ -1163,4 +1163,14 @@ export const englishLanguage = {
 
   "productGroup":"Product Group",
   "selectProductGroup":"Select Product Group",
+
+  "componentBuilderMaintenance": "Component Builder Maintenance",
+  "validation": "Validation",
+  "defaultValue": "Default Value",
+  "componentLabel": "Component Label",
+  "createComponent": "Create Component",
+  "dropdownOptions": "Dropdown Options",
+  "addOption": "Add Option",
+  "noOfColumns": "No. of Columns",
+  "noOfRows": "No. of Rows",
 }
