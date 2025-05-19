@@ -310,7 +310,7 @@ const DyanamicMachineCard: React.FC<{ data?: any; eventSource?: string, date: an
           </Title>
 
           {/* Right Side - Cards Row */}
-          <Row gutter={[24, 16]} style={{ marginTop: 0 }}>
+          <Row gutter={[8, 8]} style={{ marginTop: 0 }}>
             <Col
               span={8}
               style={{ display: "flex", justifyContent: "flex-end" }}
@@ -318,7 +318,7 @@ const DyanamicMachineCard: React.FC<{ data?: any; eventSource?: string, date: an
               <Card
                 size="small"
                 style={{
-                  width: "180px",
+                  width: "auto",
                   height: "100px", // ensure space between top and bottom
                   boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                   border: "1px solid #3aa080",
@@ -334,8 +334,9 @@ const DyanamicMachineCard: React.FC<{ data?: any; eventSource?: string, date: an
                   </Text>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <Text style={{ fontSize: "25px", fontWeight: "normal" }}>
-                    {machineWiseData?.shift_name?.split(",")?.[2]}
+                  <Text style={{ fontSize: "25px", fontWeight: "normal", whiteSpace: "nowrap" }}>
+                    {/* {machineWiseData?.shift_name?.split(",")?.[2]} */}
+                    {"General shift" }
                   </Text>
                 </div>
               </Card>
@@ -347,7 +348,7 @@ const DyanamicMachineCard: React.FC<{ data?: any; eventSource?: string, date: an
               <Card
                 size="small"
                 style={{
-                  width: "180px",
+                  width: "auto",
                   height: "100px", // ensure enough height for spacing
                   boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                   border: "1px solid #3aa080",
@@ -364,7 +365,7 @@ const DyanamicMachineCard: React.FC<{ data?: any; eventSource?: string, date: an
                   </Text>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <Text style={{ fontSize: "25px", fontWeight: "normal" }}>
+                  <Text style={{ fontSize: "25px", fontWeight: "normal", whiteSpace: 'nowrap' }}>
                     {formatNumber(machineWiseData?.avg_oee)} %
                   </Text>
                 </div>
@@ -377,7 +378,7 @@ const DyanamicMachineCard: React.FC<{ data?: any; eventSource?: string, date: an
               <Card
                 size="small"
                 style={{
-                  width: "180px",
+                  width: "auto",
                   height: "100px",
                   boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                   border: "1px solid #3aa080",
@@ -403,6 +404,7 @@ const DyanamicMachineCard: React.FC<{ data?: any; eventSource?: string, date: an
                       // fontSize: `${(machineWiseData?.perf_actual_qty)?.toString().length > 9 ? 25 : 21 }px`,
                       fontSize: "25px",
                       fontWeight: "normal",
+                      whiteSpace: "nowrap"
                     }}
                   >
                     {formatNumber(machineWiseData?.perf_actual_qty)}
