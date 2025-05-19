@@ -91,53 +91,80 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect, columns: p
   });
 
   // Generate default columns if none provided
-  const defaultColumns: ColumnsType<DataRow> = data?.length > 0
-    ? Object.keys(data[0]).map((column) => ({
-        title: t(column),
-        dataIndex: column,
-        ellipsis: true,
-        key: column,
-        ...getColumnSearchProps(column),
-        render: (text: string | number | boolean) => {
-          if (text === null || text === '') {
-            return '--'; // Show '--' for null or empty values
-          }
-          if (typeof text === 'boolean') {
-            return text.toString(); // Directly convert boolean values to 'true' or 'false'
-          }
-          return text;
-        },
-        sorter: (a, b) => {
-          const aValue = a[column];
-          const bValue = b[column];
+  // const defaultColumns: ColumnsType<DataRow> = data?.length > 0
+  //   ? Object.keys(data[0]).map((column) => ({
+  //       title: t(column),
+  //       dataIndex: column,
+  //       ellipsis: true,
+  //       key: column,
+  //       ...getColumnSearchProps(column),
+  //       render: (text: string | number | boolean, record: DataRow) => {
+  //         if (text === null || text === '') {
+  //           return '--'; // Show '--' for null or empty values
+  //         }
+  //         if (column === 'currentVersion' && typeof text === 'boolean') {
+  //           return text ? 'true' : 'false'; // Always string for currentVersion
+  //         }
+  //         if (typeof text === 'boolean') {
+  //           return text.toString(); // Directly convert boolean values to 'true' or 'false'
+  //         }
+  //         return text;
+  //       },
+  //       sorter: (a, b) => {
+  //         const aValue = a[column];
+  //         const bValue = b[column];
 
-          if (typeof aValue === 'boolean' && typeof bValue === 'boolean') {
-            return aValue === bValue ? 0 : (aValue ? 1 : -1);
-          }
+  //         if (typeof aValue === 'boolean' && typeof bValue === 'boolean') {
+  //           return aValue === bValue ? 0 : (aValue ? 1 : -1);
+  //         }
 
-          if (typeof aValue === 'number' && typeof bValue === 'number') {
-            return aValue - bValue;
-          }
+  //         if (typeof aValue === 'number' && typeof bValue === 'number') {
+  //           return aValue - bValue;
+  //         }
 
-          if (typeof aValue === 'string' && typeof bValue === 'string') {
-            return aValue.localeCompare(bValue);
-          }
+  //         if (typeof aValue === 'string' && typeof bValue === 'string') {
+  //           return aValue.localeCompare(bValue);
+  //         }
 
-          return 0;
-        },
-        sortDirections: ['ascend', 'descend'],
-      }))
-    : [];
+  //         return 0;
+  //       },
+  //       sortDirections: ['ascend', 'descend'],
+  //     }))
+  //   : [];
 
-  // Use provided columns or default columns
-  const columns = propColumns || defaultColumns;
+  // // Use provided columns or default columns
+  // const columns = propColumns || defaultColumns;
+
+  const column = [
+    {
+      title: 'Template Name',
+      dataIndex: 'templateLabel',
+      key: 'templateLabel',
+    },
+    {
+      title: 'Template Version',
+      dataIndex: 'templateVersion',
+      key: 'templateVersion',
+    },
+    {
+      title: 'Template Type',
+      dataIndex: 'templateType',
+      key: 'templateType',
+    },
+    {
+      title: 'Currect Version',
+      dataIndex: 'currentVersion',
+      key: 'currentVersion',
+      render: (text: boolean) => text ? 'true' : 'false'
+    }
+  ]
 
   return (
     <Table
       className={styles.table}
       size='small'
       dataSource={data}
-      columns={columns}
+      columns={column}
       rowKey={(record: any) => record.id || JSON.stringify(record)} 
       onRow={(record) => ({
         onClick: () => handleRowClick(record),

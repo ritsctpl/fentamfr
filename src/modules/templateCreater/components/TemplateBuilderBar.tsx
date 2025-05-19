@@ -6,15 +6,17 @@ import { IconButton, InputBase, Paper } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
+import { parseCookies } from 'nookies';
+import { getTop50Templates } from '@services/templateService';
 
 
 interface TemplateBuilderBarProps {
-  handleTop50: (searchTerm: string) => void;
+  setFilteredData: (data: any) => void;
   handleSearchClicks: (searchTerm: string) => void;
   button: any;
 }
 
-const TemplateBuilderBar: React.FC<TemplateBuilderBarProps> = ({ handleTop50, handleSearchClicks, button }) => {
+const TemplateBuilderBar: React.FC<TemplateBuilderBarProps> = ({ setFilteredData, handleSearchClicks, button }) => {
   const {t} = useTranslation()
   const [filter, setFilter] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -27,9 +29,16 @@ const TemplateBuilderBar: React.FC<TemplateBuilderBarProps> = ({ handleTop50, ha
     handleSearchClicks(searchTerm)
   };
 
-  const handleGoClick = () => {
-    handleTop50(searchTerm)
-    setSearchTerm('')
+  const handleGoClick = async () => {
+      setSearchTerm('')
+      const cookies = parseCookies();
+      const site = cookies.site;
+      try {
+        const response = await getTop50Templates(site);
+        setFilteredData(response);
+      } catch (error) {
+        console.error('Error fetching data fields:', error);
+      }
   };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {

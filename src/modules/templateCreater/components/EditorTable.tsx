@@ -128,13 +128,14 @@ const EditorTable: React.FC<EditorTableProps> = ({ data, rows, onMoveRow, onDele
     { 
       title: 'Sl.No', 
       dataIndex: 'slNo', 
-      width: 80 
+      width: 80,
+      align: 'center'
     },
     { 
-      title: 'Section', 
+      title: 'Contents', 
       dataIndex: 'section',
       render: (text, record) => (
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
           <div>{text}</div>
           <Tag color={
             record.type === 'Section' ? 'blue' : 
@@ -144,7 +145,8 @@ const EditorTable: React.FC<EditorTableProps> = ({ data, rows, onMoveRow, onDele
             {record.type}
           </Tag>
         </div>
-      )
+      ),
+      align: 'center'
     },
     {
       title: 'Action',
@@ -161,6 +163,7 @@ const EditorTable: React.FC<EditorTableProps> = ({ data, rows, onMoveRow, onDele
           }}
         />
       ),
+      align: 'center'
     },
   ];
 
