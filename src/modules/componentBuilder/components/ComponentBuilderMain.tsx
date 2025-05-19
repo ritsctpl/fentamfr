@@ -337,7 +337,7 @@ const ComponentBuilderMaintenance: React.FC = () => {
                   ]
               }
           }
-            setPayloadData(dummyData);
+            setPayloadData(response);
             setSelectedRowData(response);
             setNavigateToNewScreen(true);
             fieldType.current = response?.dataType;
