@@ -18,7 +18,8 @@ interface LeftPanelProps {
 
 const sectionTypes = [
   { id: 'section', name: 'Section', description: 'Basic content section' },
-  { id: 'sectionGroup', name: 'SectionGroup', description: 'Container for multiple sections' },
+  { id: 'group', name: 'Group', description: 'Container for multiple sections' },
+  { id: 'component', name: 'Component', description: 'Reusable component' },
 ];
 
 // Dummy section options based on type
@@ -115,6 +116,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) 
     setShowConfig(false);
     setIsEditMode(false);
     setSectionValue('');
+    setType('section');
     form.resetFields();
   };
 
@@ -132,13 +134,6 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) 
               layout="vertical"
               initialValues={{ type: 'section' }}
             >
-              {/* <Form.Item label="Template Name" name="templateName">
-                <Input placeholder="Enter template name" />
-              </Form.Item>
-
-              <Form.Item label="Version" name="version">
-                <Input placeholder="Enter version number" />
-              </Form.Item> */}
 
               <Form.Item label="Type" name="type">
                 <Select 

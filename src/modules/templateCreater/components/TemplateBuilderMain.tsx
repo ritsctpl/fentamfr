@@ -10,61 +10,217 @@ import { decryptToken } from '@/utils/encryption';
 import jwtDecode from 'jwt-decode';
 import CommonAppBar from '@components/CommonAppBar';
 import { useTranslation } from 'react-i18next';
-import CommonTable from '@components/CommonTable';
 import { Modal, Form, Input, Button } from 'antd';
 import InstructionModal from '@components/InstructionModal';
 import { TemplateBuilderContext } from '../hooks/TemplateBuilderContext';
 import TemplateBuilderBar from './TemplateBuilderBar';
 import TemplateEditorScreen from './TemplateEditorScreen';
+import CommonTable from './CommonTable';
 
 // Updated dummy data to match the new table structure
 const dummyTableData: any[] = [
   { 
     templateId: 'TEMP-001', 
-    templateName: 'Introduction Template', 
+    templateName: 'Standard Template', 
     version: '1.0', 
-    date: '2023-01-15',
-    description: 'A standard introduction template'
+    date: '2024-03-15',
+    description: 'A standard template with sections and components',
+    templateSections: [
+      {
+        id: 1,
+        section: 'Header',
+        type: 'Section',
+        heading: 'Document Header',
+        component: {
+          title: { type: 'text', content: 'Document Title' },
+          subtitle: { type: 'text', content: 'Document Subtitle' },
+          date: { type: 'input', label: 'Document Date' },
+          author: { type: 'input', label: 'Author Name' }
+        }
+      },
+      {
+        id: 2,
+        section: 'Main Content',
+        type: 'Group',
+        heading: 'Main Content Group',
+        sections: [
+          {
+            id: 3,
+            section: 'Introduction',
+            type: 'Component',
+            heading: 'Introduction Component',
+            component: {
+              text: { type: 'text', content: 'Welcome to this document' },
+              description: { type: 'text', content: 'This is a detailed introduction section' },
+              input: { type: 'input', label: 'Additional Notes' },
+              button: { type: 'button', label: 'Save Notes' }
+            }
+          },
+          {
+            id: 4,
+            section: 'Details',
+            type: 'Component',
+            heading: 'Details Component',
+            component: {
+              table: {
+                type: 'table',
+                columns: ['Item', 'Description', 'Status'],
+                data: [
+                  ['Item 1', 'Description 1', 'Active'],
+                  ['Item 2', 'Description 2', 'Pending']
+                ]
+              },
+              notes: { type: 'text', content: 'Additional details can be added here' }
+            }
+          }
+        ]
+      }
+    ]
   },
   { 
     templateId: 'TEMP-002', 
     templateName: 'Report Template', 
     version: '2.1', 
-    date: '2023-03-22',
-    description: 'Comprehensive report template'
+    date: '2024-03-20',
+    description: 'Comprehensive report template with nested groups',
+    templateSections: [
+      {
+        id: 1,
+        section: 'Executive Summary',
+        type: 'Section',
+        heading: 'Executive Summary Section',
+        component: {
+          summary: { type: 'text', content: 'Executive Summary of the Report' },
+          keyPoints: { type: 'text', content: 'Key points to be highlighted' },
+          date: { type: 'input', label: 'Report Date' },
+          status: { type: 'input', label: 'Report Status' }
+        }
+      },
+      {
+        id: 2,
+        section: 'Report Body',
+        type: 'Group',
+        heading: 'Report Body Group',
+        sections: [
+          {
+            id: 3,
+            section: 'Findings',
+            type: 'Component',
+            heading: 'Findings Component',
+            component: {
+              table: {
+                type: 'table',
+                columns: ['Finding', 'Impact', 'Priority'],
+                data: [
+                  ['Finding 1', 'High', 'Critical'],
+                  ['Finding 2', 'Medium', 'Important']
+                ]
+              },
+              notes: { type: 'text', content: 'Additional findings notes' }
+            }
+          },
+          {
+            id: 4,
+            section: 'Analysis',
+            type: 'Component',
+            heading: 'Analysis Component',
+            component: {
+              text: { type: 'text', content: 'Detailed analysis of findings' },
+              input: { type: 'input', label: 'Analysis Notes' },
+              button: { type: 'button', label: 'Update Analysis' }
+            }
+          }
+        ]
+      }
+    ]
   },
   { 
     templateId: 'TEMP-003', 
-    templateName: 'Summary Template', 
+    templateName: 'Project Template', 
     version: '1.2', 
-    date: '2023-05-10',
-    description: 'Brief summary template'
+    date: '2024-03-25',
+    description: 'Project documentation template',
+    templateSections: [
+      {
+        id: 1,
+        section: 'Project Overview',
+        type: 'Section',
+        heading: 'Project Overview Section',
+        component: {
+          title: { type: 'text', content: 'Project Title' },
+          description: { type: 'text', content: 'Project Description' },
+          startDate: { type: 'input', label: 'Start Date' },
+          endDate: { type: 'input', label: 'End Date' }
+        }
+      },
+      {
+        id: 2,
+        section: 'Project Details',
+        type: 'Group',
+        heading: 'Project Details Group',
+        sections: [
+          {
+            id: 3,
+            section: 'Objectives',
+            type: 'Component',
+            heading: 'Objectives Component',
+            component: {
+              table: {
+                type: 'table',
+                columns: ['Objective', 'Status', 'Due Date'],
+                data: [
+                  ['Objective 1', 'In Progress', '2024-04-01'],
+                  ['Objective 2', 'Not Started', '2024-04-15']
+                ]
+              },
+              notes: { type: 'text', content: 'Additional objective details' }
+            }
+          },
+          {
+            id: 4,
+            section: 'Timeline',
+            type: 'Component',
+            heading: 'Timeline Component',
+            component: {
+              text: { type: 'text', content: 'Project Timeline Overview' },
+              input: { type: 'input', label: 'Timeline Notes' },
+              button: { type: 'button', label: 'Update Timeline' }
+            }
+          }
+        ]
+      }
+    ]
   },
 ];
 
 // Define table columns configuration for CommonTable
-// const tableColumns = (any): any[] => [
-//   {
-//     title: 'Template ID',
-//     dataIndex: 'templateId',
-//     key: 'templateId',
-//   },
-//   {
-//     title: 'Template Name',
-//     dataIndex: 'templateName',
-//     key: 'templateName',
-//   },
-//   {
-//     title: 'Version',
-//     dataIndex: 'version',
-//     key: 'version',
-//   },
-//   {
-//     title: 'Date',
-//     dataIndex: 'date',
-//     key: 'date',
-//   },
-// ];
+const tableColumns = [
+  {
+    title: 'Template ID',
+    dataIndex: 'templateId',
+    key: 'templateId',
+  },
+  {
+    title: 'Template Name',
+    dataIndex: 'templateName',
+    key: 'templateName',
+  },
+  {
+    title: 'Version',
+    dataIndex: 'version',
+    key: 'version',
+  },
+  {
+    title: 'Date',
+    dataIndex: 'date',
+    key: 'date',
+  },
+  {
+    title: 'Description',
+    dataIndex: 'description',
+    key: 'description',
+  }
+];
 
 const TemplateBuilderMain: React.FC = () => {
   const cookies = parseCookies();
@@ -112,8 +268,8 @@ const TemplateBuilderMain: React.FC = () => {
 
   const handleRowSelect = (row: any) => {
     console.log("Row selected:", row);
-    setEditorData(row); // pass selected row data
-    setIsFromTableClick(true); // Mark that this is from a table click
+    setEditorData(row.templateSections); // Pass only templateSections data
+    setIsFromTableClick(true);
     setShowEditor(true);
   };
 
@@ -138,7 +294,8 @@ const TemplateBuilderMain: React.FC = () => {
         templateName: values.name,
         version: values.version || '1.0',
         date: currentDate,
-        description: values.description || ''
+        description: values.description || '',
+        templateSections: values.templateSections || []
       };
       
       setFilteredData(prev => [...prev, newTemplateData]);
@@ -155,7 +312,7 @@ const TemplateBuilderMain: React.FC = () => {
   };
 
   const buttonLayout = {
-    wrapperCol: { offset: 6, span: 18 },
+    wrapperCol: { offset: 9, span: 24 },
   };
 
   // Direct conditional rendering
@@ -214,7 +371,7 @@ const TemplateBuilderMain: React.FC = () => {
               <CommonTable 
                 data={filteredData} 
                 onRowSelect={handleRowSelect} 
-                // columns={tableColumns}
+                columns={tableColumns}
               />
               <Modal
                 title={t('confirmation')}
@@ -261,8 +418,15 @@ const TemplateBuilderMain: React.FC = () => {
                     name="description"
                     label={t('Description')}
                   >
-                    <Input.TextArea rows={4} />
+                    <Input.TextArea rows={1} />
                   </Form.Item>
+                  
+                  {/* <Form.Item
+                    name="templateSections"
+                    label={t('Template Sections')}
+                  >
+                    <Input.TextArea rows={4} />
+                  </Form.Item> */}
                   
                   <Form.Item {...buttonLayout}>
                     <Button 

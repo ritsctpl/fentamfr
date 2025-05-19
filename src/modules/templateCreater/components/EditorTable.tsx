@@ -13,6 +13,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { Button, Table, Empty, Tag } from 'antd';
 import type { TableColumnsType } from 'antd';
+import { calc } from 'antd/es/theme/internal';
 
 interface TableRow {
   id: number;
@@ -85,9 +86,9 @@ const Row: React.FC<RowProps> = (props) => {
 };
 
 const EditorTable: React.FC<EditorTableProps> = ({ data, rows, onMoveRow, onDeleteRow, onRowSelect }) => {
-  console.log(data,'hhhh');
-  
   const [selectedRowKey, setSelectedRowKey] = useState<number | null>(null);
+  console.log(rows,'rows');
+  
   
   // Determine which rows to display based on props priority
   const tableRows = rows && rows.length > 0 
@@ -95,6 +96,8 @@ const EditorTable: React.FC<EditorTableProps> = ({ data, rows, onMoveRow, onDele
     : data && Object.keys(data).length > 0 
       ? [data] 
       : [];
+
+      console.log('tableRows', tableRows);
 
   // Convert for Ant Design Table
   const dataSource = tableRows.map((row, index) => ({
@@ -106,6 +109,9 @@ const EditorTable: React.FC<EditorTableProps> = ({ data, rows, onMoveRow, onDele
     heading: row.heading,
   }));
 
+  console.log('dataSource', dataSource);
+  
+
   const handleDelete = (id: number) => {
     if (onDeleteRow) {
       onDeleteRow(id);
@@ -114,8 +120,9 @@ const EditorTable: React.FC<EditorTableProps> = ({ data, rows, onMoveRow, onDele
 
   const columns: TableColumnsType<any> = [
     { 
+      title: 'Drag', 
       key: 'sort', 
-      width: 50, 
+      width: 80, 
       render: () => <DragHandle /> 
     },
     { 
@@ -129,7 +136,11 @@ const EditorTable: React.FC<EditorTableProps> = ({ data, rows, onMoveRow, onDele
       render: (text, record) => (
         <div style={{ display: 'flex', gap: 10 }}>
           <div>{text}</div>
-          <Tag color={record.type === 'Section' ? 'blue' : 'green'}>
+          <Tag color={
+            record.type === 'Section' ? 'blue' : 
+            record.type === 'Group' ? 'green' : 
+            'default'
+          }>
             {record.type}
           </Tag>
         </div>
@@ -201,6 +212,7 @@ const EditorTable: React.FC<EditorTableProps> = ({ data, rows, onMoveRow, onDele
               columns={columns}
               dataSource={dataSource}
               pagination={false}
+              scroll={{ y: "calc(100vh - 200px)" }}
               rowClassName={(record) => record.key === String(selectedRowKey) ? 'ant-table-row-selected' : ''}
               onRow={onRow}
               style={{ 

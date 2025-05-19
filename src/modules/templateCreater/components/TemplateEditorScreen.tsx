@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import type { MenuProps } from 'antd';
 import styles from '@modules/templateCreater/styles/templateBuilder.module.css';
 import LeftPanel from './LeftPanel';
 import EditorTable from './EditorTable';
-import { Switch, message, Input, Button, Modal } from 'antd';
+import { Switch, message, Input, Button, Modal, Dropdown } from 'antd';
 import TemplateTreeView from './TemplateTreeView';
 import { FaArrowLeft } from 'react-icons/fa6';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DownloadOutlined, FilePdfOutlined } from '@ant-design/icons';
+import html2pdf from 'html2pdf.js';
+import { Document, Packer, Paragraph, Table, TableCell, TableRow as DocxTableRow, TextRun, HeadingLevel, BorderStyle } from 'docx';
+import { saveAs } from 'file-saver';
 
 interface TemplateEditorScreenProps {
   data?: any;
@@ -53,30 +57,40 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
 
     // First, create all sections
     rows.forEach((row, index) => {
-      if (row.type === "SectionGroup") {
-        template.template[`sectionGroup${index}`] = {
+      if (row.type === "Group") {
+        template.template[`group${index}`] = {
           id: row.id,
           section: row.section,
           heading: row.heading,
-          type: "SectionGroup",
+          type: "Group",
           sections: [
-            // Add some sample nested sections
             {
               id: `nested-${row.id}-1`,
-              section: "Nested Section 1",
-              heading: "Nested Section 1",
-              type: "Section",
+              section: "Component 1",
+              heading: "Component 1",
+              type: "Component",
               component: {
-                text1: { type: "text", content: "Some text content" },
-                input1: { type: "input", label: "Input field" }
+                text: { type: 'text', content: 'Component content' },
+                input: { type: 'input', label: 'Input field' },
+                button: { type: 'button', label: 'Submit' }
               }
             },
             {
               id: `nested-${row.id}-2`,
-              section: "Nested Section 2",
-              heading: "Nested Section 2",
-              type: "Text Section",
-              content: "This is a text section inside a section group"
+              section: "Component 2",
+              heading: "Component 2",
+              type: "Component",
+              component: {
+                table: {
+                  type: 'table',
+                  columns: ['Column 1', 'Column 2'],
+                  data: [
+                    ['Data 1', 'Data 2'],
+                    ['Data 3', 'Data 4']
+                  ]
+                },
+                notes: { type: 'text', content: 'Additional notes' }
+              }
             }
           ]
         };
@@ -87,18 +101,31 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
           heading: row.heading,
           type: "Section",
           component: {
-            text1: { type: "text", content: "Sample text component" },
-            input1: { type: "input", label: "Sample input field" },
-            button1: { type: "button", label: "button" }
+            title: { type: 'text', content: 'Section Title' },
+            subtitle: { type: 'text', content: 'Section Subtitle' },
+            date: { type: 'input', label: 'Section Date' },
+            status: { type: 'input', label: 'Section Status' }
           }
         };
-      } else if (row.type === "Text Section") {
-        template.template[`textSection${index}`] = {
+      } else if (row.type === "Component") {
+        template.template[`component${index}`] = {
           id: row.id,
           section: row.section,
           heading: row.heading,
-          type: "Text Section",
-          content: "This is a sample text content for the section"
+          type: "Component",
+          component: {
+            text: { type: 'text', content: 'Component content' },
+            input: { type: 'input', label: 'Component input' },
+            button: { type: 'button', label: 'Component button' },
+            table: {
+              type: 'table',
+              columns: ['Item', 'Value'],
+              data: [
+                ['Item 1', 'Value 1'],
+                ['Item 2', 'Value 2']
+              ]
+            }
+          }
         };
       }
     });
@@ -127,12 +154,44 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
       message.success("Row updated successfully");
       setSelectedRow(undefined);
     } else {
-      // Create a new row
+      // Create a new row with default component data based on type
       const newRow = {
-        id: Date.now(), // Generate unique ID
+        id: Date.now(),
         section: heading || type,
         type: type,
-        heading: heading
+        heading: heading,
+        component: type === 'Section' ? {
+          title: { type: 'text', content: 'New Section Title' },
+          subtitle: { type: 'text', content: 'New Section Subtitle' },
+          date: { type: 'input', label: 'Section Date' },
+          status: { type: 'input', label: 'Section Status' }
+        } : type === 'Group' ? {
+          sections: [
+            {
+              id: `nested-${Date.now()}-1`,
+              section: "New Component 1",
+              heading: "New Component 1",
+              type: "Component",
+              component: {
+                text: { type: 'text', content: 'New component content' },
+                input: { type: 'input', label: 'New input field' },
+                button: { type: 'button', label: 'New button' }
+              }
+            }
+          ]
+        } : {
+          text: { type: 'text', content: 'New component content' },
+          input: { type: 'input', label: 'New input field' },
+          button: { type: 'button', label: 'New button' },
+          table: {
+            type: 'table',
+            columns: ['New Column 1', 'New Column 2'],
+            data: [
+              ['New Data 1', 'New Data 2'],
+              ['New Data 3', 'New Data 4']
+            ]
+          }
+        }
       };
 
       const updatedRows = [...editorTableRows, newRow];
@@ -199,37 +258,141 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
 
   // Render component based on type
   const renderComponent = (row: TableRow) => {
+    if (!row || !row.type) {
+      return <div>Invalid row data</div>;
+    }
+
+    const componentData = jsonView.template[`${row.type.toLowerCase()}${editorTableRows.indexOf(row)}`];
+    console.log('Component Data:', componentData); // Debug log
+    
     switch(row.type) {
       case 'Section':
         return (
           <div key={row.id} className={styles.previewSection}>
-            <h3>{row.heading}</h3>
-            <p>Sample text component</p>
-            <Input placeholder="Sample input field" style={{ marginBottom: '10px' }} />
-            <Button type="primary">button</Button>
+            <h3>{row.heading || 'Untitled Section'}</h3>
+            {componentData?.component && Object.entries(componentData.component).map(([key, comp]: [string, any]) => {
+              switch(comp.type) {
+                case 'text':
+                  return <p key={key}>{comp.content || ''}</p>;
+                case 'input':
+                  return <Input key={key} placeholder={comp.label || 'Enter text'} style={{ marginBottom: '10px' }} />;
+                case 'button':
+                  return <Button key={key} type="primary">{comp.label || 'Button'}</Button>;
+                case 'table':
+                  return (
+                    <div key={key} className={styles.previewTable}>
+                      <table>
+                        <thead>
+                          <tr>
+                            {comp.columns?.map((col: string) => (
+                              <th key={col}>{col}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {comp.data?.map((row: any[], idx: number) => (
+                            <tr key={idx}>
+                              {row.map((cell, cellIdx) => (
+                                <td key={cellIdx}>{cell}</td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                default:
+                  return null;
+              }
+            })}
           </div>
         );
-      case 'Text Section':
+      case 'Component':
         return (
-          <div key={row.id} className={styles.previewTextSection}>
-            <h3>{row.heading}</h3>
-            <p>This is a sample text content for the section</p>
+          <div key={row.id} className={styles.previewComponent}>
+            <h3>{row.heading || 'Untitled Component'}</h3>
+            {componentData?.component && Object.entries(componentData.component).map(([key, comp]: [string, any]) => {
+              switch(comp.type) {
+                case 'text':
+                  return <p key={key}>{comp.content || ''}</p>;
+                case 'input':
+                  return <Input key={key} placeholder={comp.label || 'Enter text'} style={{ marginBottom: '10px' }} />;
+                case 'button':
+                  return <Button key={key} type="primary">{comp.label || 'Button'}</Button>;
+                case 'table':
+                  return (
+                    <div key={key} className={styles.previewTable}>
+                      <table>
+                        <thead>
+                          <tr>
+                            {comp.columns?.map((col: string) => (
+                              <th key={col}>{col}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {comp.data?.map((row: any[], idx: number) => (
+                            <tr key={idx}>
+                              {row.map((cell, cellIdx) => (
+                                <td key={cellIdx}>{cell}</td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                default:
+                  return null;
+              }
+            })}
           </div>
         );
-      case 'SectionGroup':
+      case 'Group':
         return (
-          <div key={row.id} className={styles.previewSectionGroup}>
-            <h2>{row.heading}</h2>
+          <div key={row.id} className={styles.previewGroup}>
+            <h2>{row.heading || 'Untitled Group'}</h2>
             <div className={styles.nestedSections}>
-              <div className={styles.previewSection}>
-                <h4>Nested Section 1</h4>
-                <p>Some text content</p>
-                <Input placeholder="Input field" style={{ marginBottom: '10px' }} />
-              </div>
-              <div className={styles.previewTextSection}>
-                <h4>Nested Section 2</h4>
-                <p>This is a text section inside a section group</p>
-              </div>
+              {componentData?.sections?.map((section: any, index: number) => (
+                <div key={section.id || index} className={styles.previewComponent}>
+                  <h4>{section.heading || `Component ${index + 1}`}</h4>
+                  {section.component && Object.entries(section.component).map(([key, comp]: [string, any]) => {
+                    switch(comp.type) {
+                      case 'text':
+                        return <p key={key}>{comp.content || ''}</p>;
+                      case 'input':
+                        return <Input key={key} placeholder={comp.label || 'Enter text'} style={{ marginBottom: '10px' }} />;
+                      case 'button':
+                        return <Button key={key} type="primary">{comp.label || 'Button'}</Button>;
+                      case 'table':
+                        return (
+                          <div key={key} className={styles.previewTable}>
+                            <table>
+                              <thead>
+                                <tr>
+                                  {comp.columns?.map((col: string) => (
+                                    <th key={col}>{col}</th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {comp.data?.map((row: any[], idx: number) => (
+                                  <tr key={idx}>
+                                    {row.map((cell, cellIdx) => (
+                                      <td key={cellIdx}>{cell}</td>
+                                    ))}
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        );
+                      default:
+                        return null;
+                    }
+                  })}
+                </div>
+              ))}
             </div>
           </div>
         );
@@ -238,6 +401,142 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
     }
   };
 
+  const convertHtmlToDocxContent = (element: Element): any[] => {
+    const children = Array.from(element.children);
+    const content: any[] = [];
+
+    children.forEach(child => {
+      switch (child.tagName.toLowerCase()) {
+        case 'h1':
+          content.push(new Paragraph({
+            text: child.textContent || '',
+            heading: HeadingLevel.HEADING_1,
+            spacing: { before: 300, after: 200 }
+          }));
+          break;
+        case 'h2':
+          content.push(new Paragraph({
+            text: child.textContent || '',
+            heading: HeadingLevel.HEADING_2,
+            spacing: { before: 200, after: 100 }
+          }));
+          break;
+        case 'p':
+          content.push(new Paragraph({
+            text: child.textContent || '',
+            spacing: { before: 100, after: 100 }
+          }));
+          break;
+        case 'table':
+          const rows = Array.from(child.querySelectorAll('tr'));
+          const tableRows = rows.map(row => {
+            const cells = Array.from(row.querySelectorAll('td, th'));
+            return new DocxTableRow({
+              children: cells.map(cell => new TableCell({
+                children: [new Paragraph({
+                  children: [new TextRun({
+                    text: cell.textContent || '',
+                    bold: cell.tagName.toLowerCase() === 'th'
+                  })]
+                })],
+                borders: {
+                  top: { style: BorderStyle.SINGLE, size: 1 },
+                  bottom: { style: BorderStyle.SINGLE, size: 1 },
+                  left: { style: BorderStyle.SINGLE, size: 1 },
+                  right: { style: BorderStyle.SINGLE, size: 1 }
+                }
+              }))
+            });
+          });
+          content.push(new Table({ rows: tableRows }));
+          break;
+        case 'ol':
+        case 'ul':
+          const items = Array.from(child.querySelectorAll('li'));
+          items.forEach((item, index) => {
+            content.push(new Paragraph({
+              text: `${child.tagName === 'OL' ? `${index + 1}.` : '•'} ${item.textContent}`,
+              spacing: { before: 100, after: 100 },
+              indent: { left: 720 } // 0.5 inch indent
+            }));
+          });
+          break;
+        default:
+          if (child.children.length > 0) {
+            content.push(...convertHtmlToDocxContent(child));
+          } else if (child.textContent?.trim()) {
+            content.push(new Paragraph({ text: child.textContent }));
+          }
+      }
+    });
+
+    return content;
+  };
+
+  const handleDownloadDOCX = async () => {
+    try {
+      const content = document.querySelector('.preview-content');
+      if (!content) {
+        message.error('Content not found');
+        return;
+      }
+
+      // Create document
+      const doc = new Document({
+        sections: [{
+          properties: {},
+          children: convertHtmlToDocxContent(content)
+        }]
+      });
+
+      // Generate and save document
+      const buffer = await Packer.toBlob(doc);
+      saveAs(buffer, `template-${Date.now()}.docx`);
+      message.success('DOCX downloaded successfully');
+
+    } catch (error) {
+      console.error('Error generating DOCX:', error);
+      message.error('Failed to generate DOCX');
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    const content = document.querySelector('.preview-content');
+    if (!content) {
+      message.error('Content not found');
+      return;
+    }
+    // Dynamically import html2pdf.js only on client
+    const html2pdf = (await import('html2pdf.js')).default;
+    const opt = {
+      margin: 0.5,
+      filename: `template-${Date.now()}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+    html2pdf().set(opt).from(content).save()
+      .then(() => message.success('PDF downloaded successfully'))
+      .catch((error: any) => {
+        console.error('Error generating PDF:', error);
+        message.error('Failed to generate PDF');
+      });
+  };
+
+  const items: MenuProps['items'] = [
+    {
+      key: 'pdf',
+      label: 'Download as PDF',
+      onClick: handleDownloadPDF,
+    },
+    // {
+    //   key: 'docx',
+    //   label: 'Download as DOCX',
+    //   onClick: handleDownloadDOCX,
+    // },
+  ];
+
   // Preview component that renders actual components based on the table data
   const PreviewContent = () => {
     if (editorTableRows.length === 0) {
@@ -245,8 +544,21 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
     }
 
     return (
-      <div className={styles.previewContainer}>
-        {editorTableRows.map(row => renderComponent(row))}
+      <div className={styles.previewWrapper}>
+        <div className={styles.previewHeader}>
+          <h2 className={styles.previewTitle}>{selectedRow?.heading || 'Template Preview'}</h2>
+          <Dropdown menu={{ items }} placement="bottomRight">
+            <Button
+              type="text"
+              icon={<DownloadOutlined />}
+              aria-label="Download"
+              style={{ fontSize: 18 }}
+            />
+          </Dropdown>
+        </div>
+        <div className={`preview-content ${styles.previewContainer}`}>
+          {editorTableRows.map(row => renderComponent(row))}
+        </div>
       </div>
     );
   };
