@@ -1,5 +1,6 @@
 import React, { useContext, useMemo } from 'react';
-import { HolderOutlined } from '@ant-design/icons';
+import { DeleteOutlined, HolderOutlined } from '@ant-design/icons';
+import { MdDeleteOutline } from "react-icons/md";
 import type { DragEndEvent } from '@dnd-kit/core';
 import { DndContext } from '@dnd-kit/core';
 import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
@@ -16,13 +17,15 @@ import type { TableColumnsType } from 'antd';
 
 interface SectionType {
     id: number;
-    sectionName: string;
+    instanceId: string;
+    sectionLabel: string;
     description?: string;
 }
 
 interface DndTableProps {
     data: SectionType[];
     onOrderChange?: (newOrder: SectionType[]) => void;
+    onDelete?: (instanceId: string) => void;
 }
 
 interface RowContextProps {
@@ -80,7 +83,7 @@ const Row: React.FC<RowProps> = (props) => {
     );
 };
 
-const DndTable: React.FC<DndTableProps> = ({ data, onOrderChange }) => {
+const DndTable: React.FC<DndTableProps> = ({ data, onOrderChange, onDelete }) => {
     const [dataSource, setDataSource] = React.useState<SectionType[]>(data);
 
     // Update dataSource when data prop changes
@@ -97,24 +100,30 @@ const DndTable: React.FC<DndTableProps> = ({ data, onOrderChange }) => {
             render: () => <DragHandle />,
         },
         {
-            title: 'Section Name',
-            dataIndex: 'sectionName',
+            title: 'Section Label',
+            dataIndex: 'sectionLabel',
             className: 'drag-visible',
         },
         {
-            title: 'Description',
-            dataIndex: 'description',
-            render: (text) => text || '-'
-        },
+            title: 'Actions',
+            dataIndex: 'actions',
+            width: 100,
+            render: (_, record) => (
+                <Button 
+                    type="text" 
+                    icon={<MdDeleteOutline color='red' size={20} />} 
+                    onClick={() => onDelete?.(record.instanceId)}
+                />
+            )
+        }
     ];
 
     const onDragEnd = ({ active, over }: DragEndEvent) => {
         if (active.id !== over?.id) {
             setDataSource((prevState) => {
-                const activeIndex = prevState.findIndex((record) => record.id === active.id);
-                const overIndex = prevState.findIndex((record) => record.id === over?.id);
+                const activeIndex = prevState.findIndex((record) => record.instanceId === active.id);
+                const overIndex = prevState.findIndex((record) => record.instanceId === over?.id);
                 const newOrder = arrayMove(prevState, activeIndex, overIndex);
-                // Notify parent component of the new order
                 onOrderChange?.(newOrder);
                 return newOrder;
             });
@@ -123,13 +132,12 @@ const DndTable: React.FC<DndTableProps> = ({ data, onOrderChange }) => {
 
     return (
         <DndContext modifiers={[restrictToVerticalAxis]} onDragEnd={onDragEnd}>
-            <SortableContext items={dataSource.map((i) => i.id.toString())} strategy={verticalListSortingStrategy}>
+            <SortableContext items={dataSource.map((i) => i.instanceId)} strategy={verticalListSortingStrategy}>
                 <Table<SectionType>
-                    rowKey="id"
+                    rowKey="instanceId"
                     components={{ body: { row: Row } }}
                     columns={columns}
                     dataSource={dataSource}
-                    bordered
                     pagination={false}
                 />
             </SortableContext>
