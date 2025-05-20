@@ -91,6 +91,63 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
             return;
         }
 
+        if (payloadData?.dataType == "Table") {
+            if ((payloadData?.tableConfig?.columns == "" || payloadData?.tableConfig?.columns == null || payloadData?.tableConfig?.columns == undefined)) {
+                message.error("No. of columns cannot be empty");
+                return;
+            }
+        }
+
+        // New validation for table column names
+        if (payloadData?.dataType == 'Table') {
+            const columnNames = payloadData?.tableConfig?.columnNames || [];
+            const numberOfColumns = parseInt(payloadData?.tableConfig?.columns || '0', 10);
+
+            // Check if column names are provided for all columns
+            if (columnNames.length != numberOfColumns) {
+                message.error(`Please provide names for all ${numberOfColumns} columns`);
+                return;
+            }
+
+            // Check if any column name is empty
+            const hasEmptyColumnName = columnNames.some(name => !name || name.trim() == '');
+            if (hasEmptyColumnName) {
+                message.error("Column names cannot be empty");
+                return;
+            }
+        }
+
+        // Validation for Reference Table column names
+        if (payloadData?.dataType == 'Reference Table') {
+            const columnNames = payloadData?.referenceTableConfig?.columnNames || [];
+            const numberOfColumns = parseInt(payloadData?.referenceTableConfig?.columns || '0', 10);
+            const numberOfRows = parseInt(payloadData?.referenceTableConfig?.rows || '0', 10);
+
+            if(numberOfColumns == 0){
+                message.error("No. of columns cannot be empty");
+                return;
+            }
+
+            if (numberOfRows == 0) {
+                message.error("No. of rows cannot be empty");
+                return;
+            }
+
+
+            // Check if column names are provided for all columns
+            if (columnNames.length != numberOfColumns) {
+                message.error(`Please provide names for all ${numberOfColumns} columns`);
+                return;
+            }
+
+            // Check if any column name is empty
+            const hasEmptyColumnName = columnNames.some(name => !name || name.trim() == '');
+            if (hasEmptyColumnName) {
+                message.error("Column names cannot be empty");
+                return;
+            }
+        }
+
 
         const oCreateComponent = async () => { // Rename the inner function to avoid recursion
 
