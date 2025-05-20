@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Select, Typography, Divider, Card, Form, Input, Space } from 'antd';
 import { PlusOutlined, SaveOutlined, EditOutlined } from '@ant-design/icons';
+import { getComponents, getGroups, getSections } from '@services/templateService';
 
 const { Option } = Select;
 const { Title, Text } = Typography;
@@ -39,37 +40,74 @@ const sectionOptions = {
 };
 
 const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) => {
-  const [type, setType] = useState('section'); // Default to Section
+  const [type, setType] = useState('component'); // Default to Component
   const [sectionValue, setSectionValue] = useState('');
   const [showConfig, setShowConfig] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [componentData, setComponentData] = useState<any>([]);
+  const [groupData, setGroupData] = useState<any>([]);
+  const [sectionData, setSectionData] = useState<any>([]);
   
   // Form to collect all data
   const [form] = Form.useForm();
   
+  // On mount, if type is 'component', load components but do not auto-select
+  useEffect(() => {
+    if (type === 'component') {
+      (async () => {
+        const components = await getComponents();
+        const componentData = components.map((component: any) => ({
+          key: component.componentLabel,
+          value: component.componentLabel,
+        }));
+        setComponentData(componentData);
+        // Do not set sectionValue or form.setFieldsValue here
+      })();
+    }
+    if (type === 'section') {
+      (async () => {
+        const sections = await getSections();
+        const sectionData = sections.map((section: any) => ({
+          key: section.sectionLabel,
+          value: section.sectionLabel,
+        }));
+        setSectionData(sectionData);
+      })();
+    }
+    if (type === 'group') {
+      (async () => {
+        const groups = await getGroups();
+        const groupData = groups.map((group: any) => ({
+          key: group.groupLabel,
+          value: group.groupLabel,
+        }));
+        setGroupData(groupData);
+      })();
+    }
+  }, [type]);
+  
   // Update form when selected row changes
   useEffect(() => {
     if (selectedRow) {
-      // Find matching type from sectionTypes
       const matchingType = sectionTypes.find(t => t.name === selectedRow.type);
-      const typeId = matchingType ? matchingType.id : 'section';
+      const typeId = matchingType ? matchingType.id : 'component';
       setType(typeId);
-      
-      // Find matching section value
-      const options = typeId === 'section' ? sectionOptions.section : sectionOptions.sectionGroup;
-      const matchingSection = options.find(s => s.name === selectedRow.section);
-      const sectionId = matchingSection ? matchingSection.id : '';
-      setSectionValue(sectionId);
-      
-      // Show in edit mode
+      if (typeId === 'component') {
+        setSectionValue(selectedRow.section);
+        form.setFieldsValue({ component: selectedRow.section });
+      } else if (typeId === 'section') {
+        const options = sectionOptions.section;
+        const matchingSection = options.find(s => s.name === selectedRow.section);
+        const sectionId = matchingSection ? matchingSection.id : '';
+        setSectionValue(sectionId);
+        form.setFieldsValue({ section: sectionId });
+      } else if (typeId === 'group') {
+        setSectionValue(selectedRow.section);
+        form.setFieldsValue({ group: selectedRow.section });
+      }
       setShowConfig(true);
       setIsEditMode(true);
-      
-      // Update form values
-      form.setFieldsValue({
-        type: typeId,
-        sectionValue: sectionId
-      });
+      form.setFieldsValue({ type: typeId });
     }
   }, [selectedRow, form]);
   
@@ -77,46 +115,35 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) 
   useEffect(() => {
     if (!selectedRow) {
       setSectionValue('');
-      form.setFieldsValue({ sectionValue: '' });
+      form.setFieldsValue({ section: '', component: '', group: '' });
     }
   }, [type, form, selectedRow]);
   
-  const handleTypeChange = (value: string) => {
+  const handleTypeChange = async (value: string) => {
     setType(value);
     setSectionValue('');
-    form.setFieldsValue({ sectionValue: '' });
-  };
-  
-  const handleAddRow = () => {
-    // Reset form before showing
-    form.resetFields();
-    setType('section');
-    setSectionValue('');
-    
-    // Show configuration fields
-    setShowConfig(true);
-    setIsEditMode(false);
+    form.setFieldsValue({ section: '', component: '', group: '' });
+    // Loading of options is handled by useEffect above
   };
 
   const handleSave = () => {
     const selectedType = sectionTypes.find(option => option.id === type)?.name || '';
-    const selectedSection = type === 'section' 
-      ? sectionOptions.section.find(option => option.id === sectionValue)?.name || ''
-      : sectionOptions.sectionGroup.find(option => option.id === sectionValue)?.name || '';
-    
-    // Create the row with collected data
+    let selectedSection = '';
+    if (type === 'component') {
+      selectedSection = sectionValue;
+    } else if (type === 'section') {
+      selectedSection = sectionOptions.section.find(option => option.id === sectionValue)?.name || '';
+    } else {
+      selectedSection = sectionOptions.sectionGroup.find(option => option.id === sectionValue)?.name || '';
+    }
     onAddRow(selectedType, selectedSection);
-    
-    // Call parent save if needed
     if (onSave) {
       onSave();
     }
-    
-    // Reset the form and hide config
     setShowConfig(false);
     setIsEditMode(false);
     setSectionValue('');
-    setType('section');
+    setType('component');
     form.resetFields();
   };
 
@@ -132,7 +159,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) 
             <Form
               form={form}
               layout="vertical"
-              initialValues={{ type: 'section' }}
+              initialValues={{ type: 'component' }}
             >
 
               <Form.Item label="Type" name="type">
@@ -147,46 +174,69 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) 
                 </Select>
               </Form.Item>
 
-              <Form.Item 
-                label={type === 'section' ? 'Section' : 'Section Group'} 
-                name="sectionValue"
-              >
-                <Select 
-                  value={sectionValue} 
-                  onChange={value => setSectionValue(value)} 
-                  style={{ width: '100%' }}
-                  placeholder={`Select ${type === 'section' ? 'section' : 'section group'}`}
+              {type === 'component' && (
+                <Form.Item 
+                  label={'Component'}
+                  name="component"
                 >
-                  {(type === 'section' ? sectionOptions.section : sectionOptions.sectionGroup).map(option => (
-                    <Option key={option.id} value={option.id}>{option.name}</Option>
-                  ))}
-                </Select>
-              </Form.Item>
+                  <Select 
+                    value={sectionValue}
+                    onChange={value => setSectionValue(value)} 
+                    style={{ width: '100%' }}
+                    placeholder={'select component'}
+                    loading={componentData.length === 0}
+                  >
+                    {componentData.map(option => (
+                      <Option key={option.key} value={option.value}>{option.value}</Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              )}
+
+              {type === 'section' && (
+                <Form.Item 
+                  label={'Section'}
+                  name="section"
+                >
+                  <Select 
+                    onChange={value => setSectionValue(value)} 
+                    style={{ width: '100%' }}
+                    placeholder={'select section'}
+                  >
+                    {sectionData.map(option => (
+                      <Option key={option.key} value={option.value}>{option.value}</Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+              )}
+
+              {type === 'group' && (
+                <Form.Item 
+                  label={'Group'}
+                  name="group"
+                >
+                  <Select 
+                    onChange={value => setSectionValue(value)} 
+                    style={{ width: '100%' }}
+                    placeholder={'select group'}
+                  >
+                    {groupData.map(option => (
+                      <Option key={option.key} value={option.value}>{option.value}</Option>
+                    ))}
+                  </Select> 
+                </Form.Item>
+              )}
             </Form>
           </Card>
 
-          <div style={{ display: 'flex', gap: 10 }}>
-            <Button 
-              onClick={() => {
-                setShowConfig(false);
-                setIsEditMode(false);
-              }}
-              style={{
-                flex: 1,
-                height: 40,
-              }}
-            >
-              Cancel
-            </Button>
-            
+          <div style={{ display: 'flex' }}>
             <Button 
               type="primary"
               onClick={handleSave}
               style={{ 
                 flex: 1,
-                height: 40,
+                height: 30,
                 background: '#005A60',
-                // borderColor: '#43a047'
               }}
             >
               {isEditMode ? 'Update' : 'Save'}

@@ -1,20 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import type { MenuProps } from 'antd';
 import styles from '@modules/templateCreater/styles/templateBuilder.module.css';
 import LeftPanel from './LeftPanel';
 import EditorTable from './EditorTable';
-import { Switch, message, Input, Button, Modal, Dropdown } from 'antd';
+import { Switch, message, Input, Button, Modal, Dropdown, Form } from 'antd';
 import TemplateTreeView from './TemplateTreeView';
 import { FaArrowLeft } from 'react-icons/fa6';
-import { DeleteOutlined, DownloadOutlined, FilePdfOutlined } from '@ant-design/icons';
+import { CopyOutlined, DeleteOutlined, DownloadOutlined, FilePdfOutlined } from '@ant-design/icons';
 import html2pdf from 'html2pdf.js';
 import { Document, Packer, Paragraph, Table, TableCell, TableRow as DocxTableRow, TextRun, HeadingLevel, BorderStyle } from 'docx';
 import { saveAs } from 'file-saver';
+import { FormInstance } from 'antd/lib';
+import { createTemplate, deleteTemplate, getComponents } from '@services/templateService';
+import { parseCookies } from 'nookies';
+import { TemplateBuilderContext } from '../hooks/TemplateBuilderContext';
 
 interface TemplateEditorScreenProps {
   data?: any;
   onClose?: () => void;
   isNewTemplate?: boolean;
+  rowData?: any;
 }
 
 interface TableRow {
@@ -24,27 +29,26 @@ interface TableRow {
   heading: string;
 }
 
-const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClose, isNewTemplate = false }) => {
-  // const context = useContext(TemplateBuilderContext);
-  // if (!context) return null;
+const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClose, rowData, isNewTemplate = false }) => {
+  console.log(rowData, 'rowData');
 
+  const context = useContext(TemplateBuilderContext);
+  if (!context) return null;
+  const { call, setCall, setShowEditor, setIsFromTableClick } = context;
   const [editorTableRows, setEditorTableRows] = useState<TableRow[]>([]);
   const [jsonView, setJsonView] = useState<any>({ template: {} });
   const [previewMode, setPreviewMode] = useState(false);
   const [selectedRow, setSelectedRow] = useState<TableRow | undefined>(undefined);
+  const formRef = useRef<FormInstance>(null);
 
   // Initialize based on whether we're creating a new template or editing an existing one
   useEffect(() => {
-    // Default is empty table
     setEditorTableRows([]);
     setJsonView({ template: {} });
-
-    // Only load data if it's provided and not a new template
     if (!isNewTemplate && data) {
       if (Array.isArray(data)) {
         setEditorTableRows(data);
       } else if (typeof data === 'object' && data !== null) {
-        // If it's a single row, create an array with that row
         setEditorTableRows([data]);
       }
       updateJsonView(Array.isArray(data) ? data : data ? [data] : []);
@@ -213,7 +217,6 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
 
   // Delete a row
   const handleDeleteRow = (rowId: number) => {
-    // If the deleted row is currently selected, clear the selection
     if (selectedRow && selectedRow.id === rowId) {
       setSelectedRow(undefined);
     }
@@ -234,9 +237,12 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
 
   // Handle cancel button click
   const handleCancel = () => {
-    if (onClose) {
-      onClose();
-    }
+    // if (onClose) {
+    //   onClose();
+    // }
+    setShowEditor(false);
+    setIsFromTableClick(false);
+    setCall(call + 1);
   };
 
   // Handle save template (for the main Save button, not the Left Panel one)
@@ -264,14 +270,14 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
 
     const componentData = jsonView.template[`${row.type.toLowerCase()}${editorTableRows.indexOf(row)}`];
     console.log('Component Data:', componentData); // Debug log
-    
-    switch(row.type) {
+
+    switch (row.type) {
       case 'Section':
         return (
           <div key={row.id} className={styles.previewSection}>
             <h3>{row.heading || 'Untitled Section'}</h3>
             {componentData?.component && Object.entries(componentData.component).map(([key, comp]: [string, any]) => {
-              switch(comp.type) {
+              switch (comp.type) {
                 case 'text':
                   return <p key={key}>{comp.content || ''}</p>;
                 case 'input':
@@ -312,7 +318,7 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
           <div key={row.id} className={styles.previewComponent}>
             <h3>{row.heading || 'Untitled Component'}</h3>
             {componentData?.component && Object.entries(componentData.component).map(([key, comp]: [string, any]) => {
-              switch(comp.type) {
+              switch (comp.type) {
                 case 'text':
                   return <p key={key}>{comp.content || ''}</p>;
                 case 'input':
@@ -357,7 +363,7 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
                 <div key={section.id || index} className={styles.previewComponent}>
                   <h4>{section.heading || `Component ${index + 1}`}</h4>
                   {section.component && Object.entries(section.component).map(([key, comp]: [string, any]) => {
-                    switch(comp.type) {
+                    switch (comp.type) {
                       case 'text':
                         return <p key={key}>{comp.content || ''}</p>;
                       case 'input':
@@ -563,19 +569,102 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
     );
   };
 
-  const handleDeleteTemplate = () => {
+  const handleDeleteTemplate = async () => {
     Modal.confirm({
       title: 'Delete Template',
       content: 'Are you sure you want to delete this template?',
       okText: 'Delete',
       cancelText: 'Cancel',
+      onOk: async () => {
+        const cookies = parseCookies();
+        const site = cookies.site;
+        const userId = cookies.rl_user_id;
+
+        try {
+          const payload = { 
+            site, 
+            userId, 
+            templateLabel: rowData?.templateLabel, 
+            templateVersion: rowData?.templateVersion 
+          };
+          const response = await deleteTemplate(payload);
+          if (response.message_details) {
+            message.success(response.message_details.msg);
+            setShowEditor(false);
+            setIsFromTableClick(false);
+            setCall(call + 1);
+          } else {
+            console.error('Failed to delete template:', response.error);
+          }
+        } catch (error) {
+          console.error('Error deleting template:', error);
+        }
+      },
+    });
+  };
+
+  const handleCopyTemplate = () => {
+    const initialTemplateName = (rowData && rowData.templateLabel ? rowData.templateLabel : 'Template') + '_copy';
+    const initialTemplateVersion = (rowData && rowData.templateVersion ? rowData.templateVersion : 'A');
+    let modalInstance: any = null;
+    const handleFinish = async (values: any) => {
+      try {
+        const payload = {
+          ...rowData,
+          templateLabel: values.templateLabel,
+          templateVersion: values.templateVersion,
+        }
+        const response = await createTemplate(payload);
+        if (response.message_details) {
+          message.success(response.message_details.msg);
+          setShowEditor(false);
+          setIsFromTableClick(false);
+          setCall(call + 1);
+          if (modalInstance) modalInstance.destroy();
+        } else {
+          message.error('Failed to copy template');
+        }
+      } catch (error) {
+        console.error('Error copying template:', error);
+        message.error('Failed to copy template');
+      }
+    };
+    let formInstance: any = null;
+    modalInstance = Modal.confirm({
+      title: 'Copy Template',
+      icon: null,
+      content: (
+        <Form
+          layout="vertical"
+          ref={ref => { formInstance = ref; }}
+          initialValues={{ templateLabel: initialTemplateName, templateVersion: initialTemplateVersion }}
+          onFinish={handleFinish}
+        >
+          <Form.Item
+            name="templateLabel"
+            label="Template Label"
+            rules={[{ required: true, message: 'Please enter template Label' }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="templateVersion"
+            label="Template Version"
+          >
+            <Input />
+          </Form.Item>
+        </Form>
+      ),
+      okText: 'Copy Template',
+      cancelText: 'Cancel',
       onOk() {
-        setEditorTableRows([]);
-        setJsonView({ template: {} });
-        message.success('Template deleted');
-        // Navigate back to main screen
-        if (onClose) {
-          onClose();
+        if (formInstance) {
+          formInstance.submit();
+        }
+      },
+      onCancel() {
+        if (formInstance) {
+          formInstance.resetFields();
         }
       },
     });
@@ -585,7 +674,7 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
     <div className={styles.Editorcontainer}>
       <div className={styles.header}>
         <span style={{ display: 'flex', gap: 10 }}>
-          {onClose && (
+          {/* {onClose && ( */}
             <button
               style={{
                 background: '#fff',
@@ -603,19 +692,35 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
             >
               <FaArrowLeft />
             </button>
-          )}
-          <b>Template Editor</b>
+          {/* )} */}
+        <b>{rowData?.templateLabel || ''}</b> (<b>Template Editor</b>)
         </span>
-        <span style={{ display: 'flex', alignItems: 'center' }}>
+        <span style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }}>
           Preview
           <Switch
             checked={previewMode}
             onChange={(checked) => setPreviewMode(checked)}
             style={{ margin: '0 16px 0 8px' }}
+            size='small'
           />
           <button
             style={{
-              // background: '#005A60',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 4,
+              padding: '6px 16px',
+              fontWeight: 500,
+              fontSize: 14,
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(25, 118, 210, 0.08)',
+              marginRight: 10,
+            }}
+            onClick={handleCopyTemplate}
+          >
+            <CopyOutlined />
+          </button>
+          <button
+            style={{
               color: '#fff',
               border: 'none',
               borderRadius: 4,
