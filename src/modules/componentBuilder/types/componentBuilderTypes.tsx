@@ -9,6 +9,8 @@ export interface ComponentBuilderFormData {
   validation: string;
   dropdownOptions: any;
   apiUrl: string;
+  minValue: string;
+  maxValue: string;
 }
 
 export const defaultFormData: ComponentBuilderFormData = {
@@ -19,5 +21,7 @@ export const defaultFormData: ComponentBuilderFormData = {
   required: false,
   validation: '',
   dropdownOptions: [],
-  apiUrl: ''
+  apiUrl: '',
+  minValue: '0',
+  maxValue: '100'
 };

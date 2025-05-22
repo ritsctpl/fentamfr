@@ -16,7 +16,14 @@ interface MyContextType {
     fieldType: React.MutableRefObject<any>;
     seeFullScreen: any;
     setSeeFullScreen: (seeFullScreen: any) => void;
-
+    transformedRowData: Array<{[key: string]: string}>;
+    setTransformedRowData: (transformedRowData: Array<{[key: string]: string}>) => void;
+    triggerSave: any;
+    setTriggerSave: (triggerSave: any) => void;
+    columnNames: any;
+    setColumnNames: (columnNames: any) => void;
+    rowData: { [key: string]: string };
+    setRowData: (rowData: { [key: string]: string }) => void;
 }
 
 // Create the context
@@ -31,11 +38,20 @@ export const MyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [navigateToNewScreen, setNavigateToNewScreen] = useState<boolean>(false);
     const fieldType = useRef<any>("Input");
     const [seeFullScreen, setSeeFullScreen] = useState<any>(false);
+    const [transformedRowData, setTransformedRowData] = useState<Array<{[key: string]: string}>>([]);
+    const [triggerSave, setTriggerSave] = useState<any>(0);
+    const [columnNames, setColumnNames] = useState<any>([]);
+    const [rowData, setRowData] = useState<any>();
+
+    
+        
+    
 
     return (
         <MyContext.Provider value={{ payloadData, setPayloadData, showAlert, setShowAlert, isAdding, setIsAdding,
          isRequired, setIsRequired, navigateToNewScreen, setNavigateToNewScreen, fieldType, seeFullScreen, 
-         setSeeFullScreen }}>
+         setSeeFullScreen, transformedRowData, setTransformedRowData, triggerSave, setTriggerSave, columnNames,
+          setColumnNames, rowData, setRowData }}>
             {children}
         </MyContext.Provider>
     );
