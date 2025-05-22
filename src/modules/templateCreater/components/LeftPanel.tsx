@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Select, Typography, Divider, Card, Form, Input, Space } from 'antd';
+import { Button, Select, Typography, Divider, Card, Form, Input, Space, message } from 'antd';
 import { PlusOutlined, SaveOutlined, EditOutlined } from '@ant-design/icons';
 import { getComponents, getGroups, getSections } from '@services/templateService';
+import { parseCookies } from 'nookies';
 
 const { Option } = Select;
 const { Title, Text } = Typography;
 
 interface LeftPanelProps {
-  onAddRow: (type: string, heading: string) => void;
+  onAddRow: (type: string, heading: string, apiData?: any) => void;
   onSave?: () => void;
   selectedRow?: {
     id: number;
     section: string;
     type: string;
     heading: string;
+    handle?: string;
   };
+  setSelectedTypeData: (data: any) => void;
 }
 
 const sectionTypes = [
@@ -24,22 +27,22 @@ const sectionTypes = [
 ];
 
 // Dummy section options based on type
-const sectionOptions = {
-  section: [
-    { id: 'introduction', name: 'Introduction' },
-    { id: 'mainContent', name: 'Main Content' },
-    { id: 'details', name: 'Details' },
-    { id: 'conclusion', name: 'Conclusion' },
-  ],
-  sectionGroup: [
-    { id: 'userDetails', name: 'User Details' },
-    { id: 'contactInfo', name: 'Contact Information' },
-    { id: 'paymentDetails', name: 'Payment Details' },
-    { id: 'orderSummary', name: 'Order Summary' },
-  ]
-};
+// const sectionOptions = {
+//   section: [
+//     { id: 'introduction', name: 'Introduction' },
+//     { id: 'mainContent', name: 'Main Content' },
+//     { id: 'details', name: 'Details' },
+//     { id: 'conclusion', name: 'Conclusion' },
+//   ],
+//   sectionGroup: [
+//     { id: 'userDetails', name: 'User Details' },
+//     { id: 'contactInfo', name: 'Contact Information' },
+//     { id: 'paymentDetails', name: 'Payment Details' },
+//     { id: 'orderSummary', name: 'Order Summary' },
+//   ]
+// };
 
-const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) => {
+const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow, setSelectedTypeData }) => {
   const [type, setType] = useState('component'); // Default to Component
   const [sectionValue, setSectionValue] = useState('');
   const [showConfig, setShowConfig] = useState(false);
@@ -47,7 +50,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) 
   const [componentData, setComponentData] = useState<any>([]);
   const [groupData, setGroupData] = useState<any>([]);
   const [sectionData, setSectionData] = useState<any>([]);
-  
+  const [selectedData, setSelectedData] = useState<any>([]);
   // Form to collect all data
   const [form] = Form.useForm();
   
@@ -61,6 +64,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) 
           value: component.componentLabel,
         }));
         setComponentData(componentData);
+        setSelectedData(components);
         // Do not set sectionValue or form.setFieldsValue here
       })();
     }
@@ -72,6 +76,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) 
           value: section.sectionLabel,
         }));
         setSectionData(sectionData);
+        setSelectedData(sections);
       })();
     }
     if (type === 'group') {
@@ -82,6 +87,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) 
           value: group.groupLabel,
         }));
         setGroupData(groupData);
+        setSelectedData(groups);
       })();
     }
   }, [type]);
@@ -96,8 +102,8 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) 
         setSectionValue(selectedRow.section);
         form.setFieldsValue({ component: selectedRow.section });
       } else if (typeId === 'section') {
-        const options = sectionOptions.section;
-        const matchingSection = options.find(s => s.name === selectedRow.section);
+        // const options = sectionOptions.section;
+        const matchingSection = sectionData.find(s => s.name === selectedRow.section);
         const sectionId = matchingSection ? matchingSection.id : '';
         setSectionValue(sectionId);
         form.setFieldsValue({ section: sectionId });
@@ -125,25 +131,67 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) 
     form.setFieldsValue({ section: '', component: '', group: '' });
     // Loading of options is handled by useEffect above
   };
-
+  const [selectedApiData, setSelectedApiData] = useState<any>(null);
+  
+  const handleSectionValueChange = (value: string) => {
+    setSectionValue(value);
+    
+    // Get site from cookies
+    const cookies = parseCookies();
+    const site = cookies.site;
+    
+    // Find and store the complete API data for the selected item
+    let apiData = null;
+    if (type === 'component') {
+      apiData = selectedData.find((item: any) => item.componentLabel === value);
+      // Extract the handle from the API data if available
+      if (apiData) {
+        apiData.type = 'Component';
+        apiData.handle = apiData.handle || `ComponentBO:${site},${value}`;
+      }
+    } else if (type === 'section') {
+      apiData = selectedData.find((item: any) => item.sectionLabel === value);
+      if (apiData) {
+        apiData.type = 'Section';
+        apiData.handle = apiData.handle || `SectionBO:${site},${value}`;
+      }
+    } else if (type === 'group') {
+      apiData = selectedData.find((item: any) => item.groupLabel === value);
+      if (apiData) {
+        apiData.type = 'Group';
+        apiData.handle = apiData.handle || `GroupBO:${site},${value}`;
+      }
+    }
+    
+    setSelectedApiData(apiData);
+  };
+  
   const handleSave = () => {
     const selectedType = sectionTypes.find(option => option.id === type)?.name || '';
     let selectedSection = '';
+    
     if (type === 'component') {
       selectedSection = sectionValue;
     } else if (type === 'section') {
-      selectedSection = sectionOptions.section.find(option => option.id === sectionValue)?.name || '';
+      selectedSection = sectionValue;
     } else {
-      selectedSection = sectionOptions.sectionGroup.find(option => option.id === sectionValue)?.name || '';
+      selectedSection = sectionValue;
     }
-    onAddRow(selectedType, selectedSection);
+    
+    setSelectedTypeData(selectedApiData);
+    
+    // Pass the complete API data to the parent component
+    onAddRow(selectedType, selectedSection, selectedApiData);
+    
     if (onSave) {
       onSave();
-    }
+    } 
+    
     setShowConfig(false);
     setIsEditMode(false);
     setSectionValue('');
     setType('component');
+    setSelectedApiData(null);
     form.resetFields();
   };
 
@@ -181,7 +229,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) 
                 >
                   <Select 
                     value={sectionValue}
-                    onChange={value => setSectionValue(value)} 
+                    onChange={handleSectionValueChange} 
                     style={{ width: '100%' }}
                     placeholder={'select component'}
                     loading={componentData.length === 0}
@@ -199,7 +247,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) 
                   name="section"
                 >
                   <Select 
-                    onChange={value => setSectionValue(value)} 
+                    onChange={handleSectionValueChange} 
                     style={{ width: '100%' }}
                     placeholder={'select section'}
                   >
@@ -216,7 +264,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) 
                   name="group"
                 >
                   <Select 
-                    onChange={value => setSectionValue(value)} 
+                    onChange={handleSectionValueChange} 
                     style={{ width: '100%' }}
                     placeholder={'select group'}
                   >
@@ -247,4 +295,4 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onAddRow, onSave, selectedRow }) 
   );
 };
 
-export default LeftPanel; 
+export default LeftPanel;

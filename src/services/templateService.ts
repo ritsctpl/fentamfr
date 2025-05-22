@@ -48,3 +48,8 @@ export const getGroups = async () => {
     const response = await api.post(`/groupbuilder-service/getAllGroup`, {site:'1004', groupLabel: ''});
     return response.data;
 };
+
+export const getTemplatePreview = async (payload: any) => {
+    const response = await api.post(`/templatebuilder-service/preview`, payload);
+    return response.data;
+};
