@@ -1163,4 +1163,11 @@ export const englishLanguage = {
 
   "productGroup":"Product Group",
   "selectProductGroup":"Select Product Group",
+
+  "createComponent": "Create Component",
+  "defaultValue": "Default value",
+  "componentLabel": "Component Label",
+  "validation": "Validation",
+  "componentBuilderMaintenance": "Componenet Builder",
+  "noOfColumns": "No. of columns",
 }

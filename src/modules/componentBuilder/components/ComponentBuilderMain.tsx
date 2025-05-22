@@ -313,24 +313,10 @@ const ComponentBuilderMaintenance: React.FC = () => {
                 setAddClick={setAddClick}
                 // itemRowData={itemRowData}
                 fullScreen={fullScreen}
+                setSelectedRowData={setSelectedRowData}
               />
             </div>
-            <div
-              className={`${styles.formContainer} ${isAdding ? `${styles.show} ${fullScreen ? styles.showFullScreen : styles.show}`: ""}`}
-            >
-              <ComponentBuilderBody
-                call={call}
-                onClose={handleClose}
-                selectedRowData={selectedRowData}
-                setCall={setCall}
-                isAdding={isAdding}
-                setFullScreen={setFullScreen}
-                addClickCount={addClickCount}
-                setAddClick={setAddClick}
-                // itemRowData={itemRowData}
-                fullScreen={fullScreen}
-              />
-            </div>
+            
           </div>
         </div>
 

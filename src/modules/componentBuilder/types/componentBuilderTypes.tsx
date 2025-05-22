@@ -16,7 +16,7 @@ export interface ComponentBuilderFormData {
 export const defaultFormData: ComponentBuilderFormData = {
   componentLabel: '',
   dataType: 'Input',
-  unit: '',
+  unit: 'kg',
   defaultValue: 'NA',
   required: false,
   validation: '',

@@ -16,6 +16,8 @@ import { parseCookies } from 'nookies';
 import { createComponent, deleteComponent, retrieveAllComponents, retrieveComponent, retrieveTop50Components, updateComponent } from '@services/componentBuilderService';
 import camelCase from 'lodash/camelCase';
 import { PlusOneOutlined } from '@mui/icons-material';
+import AddIcon from "@mui/icons-material/Add";
+import { defaultFormData } from '../types/componentBuilderTypes';
 const { Option } = Select
 
 
@@ -33,6 +35,7 @@ interface ComponentBuilderBodyProps {
     fullScreen: boolean;
     call: number;
     setCall: (number) => void;
+    setSelectedRowData: (any) => void;
 }
 
 
@@ -40,7 +43,7 @@ interface ComponentBuilderBodyProps {
 
 
 const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
-    isAdding, selectedRowData, onClose, call, setCall, setFullScreen, setAddClick, fullScreen, }) => {
+    isAdding, selectedRowData, onClose, call, setCall, setFullScreen, setAddClick, fullScreen, setSelectedRowData }) => {
 
 
     const { payloadData, setPayloadData, showAlert, setShowAlert, isRequired, setIsRequired,
@@ -93,7 +96,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
         };
 
         fetchTop50Data();
-    }, []);
+    }, [call]);
 
 
 
@@ -118,36 +121,36 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
 
 
     const handleTransformRowData = () => {
-        const transformed = Array.from({ length: Number(payloadData?.tableConfig?.rows) || 0 }).map((_, rowIdx) => {
-            const rowObj: { [key: string]: string } = {};
+    const transformed = Array.from({ length: Number(payloadData?.tableConfig?.rows) || 0 }).map((_, rowIdx) => {
+        const rowObj: { [key: string]: string } = {};
 
-            columnNames.forEach((column, colIdx) => {
-                const key = `row${rowIdx + 1}-col${colIdx}`;
-                rowObj[column.dataIndex] = rowData[key] || '';
-            });
-
-            return rowObj;
+        columnNames.forEach((column, colIdx) => {
+            const key = `row${rowIdx + 1}-col${colIdx}`;
+            rowObj[column.dataIndex] = payloadData?.tableConfig?.rowData?.[key] || '';
         });
 
-        // Update the local state
-        setTransformedRowData(transformed);
+        return rowObj;
+    });
 
-        // Update the payload data
-        setPayloadData((prev) => ({
-            ...prev,
-            tableConfig: {
-                ...prev.tableConfig,
-                rowData: transformed
-            }
-        }));
-    };
+    // Update the local state
+    setTransformedRowData(transformed);
+
+    // Update the payload data
+    setPayloadData((prev) => ({
+        ...prev,
+        tableConfig: {
+            ...prev.tableConfig,
+            rowData: transformed
+        }
+    }));
+};
 
 
 
     const handleSave = async (oEvent) => {
         message.destroy();
         // handleTransformRowData();
-        setTriggerSave(triggerSave + 1);
+        // setTriggerSave(triggerSave + 1);
         let flagToSave = true;
         let buttonLabel = oEvent.currentTarget.innerText;
 
@@ -162,12 +165,12 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
             return;
         }
 
-        if (payloadData?.dataType == "Table") {
-            if ((payloadData?.tableConfig?.columns == "" || payloadData?.tableConfig?.columns == null || payloadData?.tableConfig?.columns == undefined)) {
-                message.error("No. of columns cannot be empty");
-                return;
-            }
-        }
+        // if (payloadData?.dataType == "Table") {
+        //     if ((payloadData?.tableConfig?.columns == "" || payloadData?.tableConfig?.columns == null || payloadData?.tableConfig?.columns == undefined)) {
+        //         message.error("No. of columns cannot be empty");
+        //         return;
+        //     }
+        // }
 
         // New validation for table column names
         if (payloadData?.dataType == 'Table') {
@@ -184,10 +187,10 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
             // const hasEmptyColumnName = columnNames.some(name => !name || name.trim() == '');
             const hasEmptyColumnName = columnNames.some(item => !item?.title || item?.title?.trim() == '');
 
-            if (hasEmptyColumnName) {
-                message.error("Column names cannot be empty");
-                return;
-            }
+            // if (hasEmptyColumnName) {
+            //     message.error("Column names cannot be empty");
+            //     return;
+            // }
         }
 
         // Validation for Reference Table column names
@@ -196,15 +199,15 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
             const numberOfColumns = parseInt(payloadData?.tableConfig?.columns || '0', 10);
             const numberOfRows = parseInt(payloadData?.tableConfig?.rows || '0', 10);
 
-            if (numberOfColumns == 0) {
-                message.error("No. of columns cannot be empty");
-                return;
-            }
+            // if (numberOfColumns == 0) {
+            //     message.error("No. of columns cannot be empty");
+            //     return;
+            // }
 
-            if (numberOfRows == 0) {
-                message.error("No. of rows cannot be empty");
-                return;
-            }
+            // if (numberOfRows == 0) {
+            //     message.error("No. of rows cannot be empty");
+            //     return;
+            // }
 
 
             // Check if column names are provided for all columns
@@ -215,10 +218,10 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
 
             // Check if any column name is empty
             const hasEmptyColumnName = columnNames.some(item => !item?.title || item?.title?.trim() == '');
-            if (hasEmptyColumnName) {
-                message.error("Column names cannot be empty");
-                return;
-            }
+            // if (hasEmptyColumnName) {
+            //     message.error("Column names cannot be empty");
+            //     return;
+            // }
         }
 
 
@@ -245,9 +248,9 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                     userId: user,
                 }
 
-                if (payloadData?.dataType != "Table" && payloadData?.dataType != "Reference Table") {
-                    delete updatedRequest?.rowData;
-                }
+                // if (payloadData?.dataType != "Table" && payloadData?.dataType != "Reference Table") {
+                //     delete updatedRequest?.rowData;
+                // }
 
                 if (payloadData?.dataType != "Integer" && payloadData?.dataType != "Decimal") {
                     delete updatedRequest?.maxValue;
@@ -329,36 +332,75 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                 try {
                     response = await retrieveComponent(request);
                     if (!response?.errorCode) {
-                        const dummyData =
-                        {
+                        const dummyData1 = {
                             "site": "1004",
-                            "handle": "ComponentBO:1004,Active Composition",
-                            "componentLabel": "Active Composition",
+                            "componentLabel": "asass",
                             "dataType": "Reference Table",
-                            "unit": "",
+                            "unit": "kg",
                             "defaultValue": null,
                             "required": false,
                             "validation": "",
-                            "active": 1,
-                            "userId": "rits_admin",
-                            "createdDateTime": "2025-05-19T13:16:37.155",
-                            "modifiedDateTime": null,
-                            "tableConfig": {},
-                            "referenceTableConfig": {
+                            "dropdownOptions": [],
+                            "apiUrl": "",
+                            "tableConfig": {
                                 "rows": "2",
                                 "rowData": {
-                                    "row1-col0": "1",
-                                    "row2-col0": "2"
+                                    "row1-col0": "55"
                                 },
                                 "columns": "2",
                                 "columnNames": [
-                                    "hi",
-                                    "hello"
+                                    {
+                                        "title": "vsdvsdv",
+                                        "type": "Input",
+                                        "dataIndex": "vsdvsdv",
+                                    },
+                                    {
+                                        "title": "sdvsv",
+                                        "type": "Input",
+                                        "dataIndex": "sdvsv"
+                                    }
                                 ]
-                            }
+                            },
+                            "dataIndex": "asass",
+                            "rowData": [],
+                            "userId": "rits_admin"
+                        }
+                        const dummyData = {
+                            "site": "1004",
+                            "componentLabel": "hjj",
+                            "dataType": "Reference Table",
+                            "unit": "kg",
+                            "defaultValue": null,
+                            "required": false,
+                            "validation": "",
+                            "dropdownOptions": [],
+                            "apiUrl": "",
+                            "tableConfig": {
+                                "columns": "2",
+                                "columnNames": [
+                                    {
+                                        "title": "555",
+                                        "type": "Input",
+                                        "dataIndex": "555"
+                                    },
+                                    {
+                                        "title": "66",
+                                        "type": "Input",
+                                        "dataIndex": "66"
+                                    }
+                                ],
+                                "rows": 1,
+                                "rowData": {
+                                    "row1-col0": "22",
+                                    "row1-col1": ""
+                                }
+                            },
+                            
+                            
+                            "userId": "rits_admin"
                         }
                         setPayloadData(response);
-
+                        setSelectedRowData(response);
                     }
 
                 }
@@ -562,14 +604,14 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                 return (<div
 
                     style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 270px', marginTop: '2%' }}
-                > <ApiConfigurationForm setFullScreen={setFullScreen} /> </div>)
+                > <ApiConfigurationForm setFullScreen={setFullScreen}  /> </div>)
 
             default:
                 return null;
         }
     };
 
-   
+
 
     const handleSearch = async () => {
 
@@ -592,6 +634,11 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
         }
     }
 
+    const handleOnAdd = () => {
+        setPayloadData(defaultFormData);
+        setSelectedRowData(null);
+    }
+
 
     return (
         <div className={styles.pageContainer}>
@@ -600,7 +647,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                     <div >
                         <div className={styles.split} >
                             <div >
-                                <p className={styles.headingtext}>
+                                <p className={styles.headingtext} style={{ marginLeft: '10px' }}>
                                     {selectedRowData ? selectedRowData?.componentLabel : t('createComponent')}
                                 </p>
 
@@ -661,8 +708,17 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                                     paddingBottom: "10px",
                                 }}
                             >
-                                <div style={{ fontWeight: 500, marginBottom: "16px" }}>
-                                    Components ({componentList?.length || 0})
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    fontWeight: 500,
+                                    marginBottom: "16px"
+                                }}>
+                                    <span>Components ({componentList?.length || 0})</span>
+                                    <Tooltip title="Add">
+                                        <AddIcon style={{ cursor: 'pointer' }} onClick={handleOnAdd} />
+                                    </Tooltip>
                                 </div>
                                 <Input.Search
                                     placeholder="Search components..."
@@ -755,7 +811,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                         <Col span={20} style={{ padding: '10px' }}>
                             {/* Existing content */}
                             {/* <div style={{ borderTop: '1px solid #e0e0e0', marginTop: '0%' }}></div> */}
-                            <ApiConfigurationForm setFullScreen={setFullScreen} />
+                            <ApiConfigurationForm setFullScreen={setFullScreen}  />
                         </Col>
                     </Row>
 
