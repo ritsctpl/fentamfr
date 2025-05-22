@@ -280,7 +280,7 @@ const ComponentBuilderMaintenance: React.FC = () => {
               className={`${styles.commonTableContainer} ${isAdding ? styles.shrink : ""
                 }`}
             >
-              <ApiConfigurationCommonBar
+              {/* <ApiConfigurationCommonBar
                 onSearch={handleSearch}
                 setFilteredData={setFilteredData}
                 button={
@@ -300,12 +300,8 @@ const ComponentBuilderMaintenance: React.FC = () => {
                 >
                   <AddIcon sx={{ fontSize: 30 }} />
                 </IconButton>
-              </div>
-              <CommonTable data={filteredData} onRowSelect={handleRowSelect} />
-            </div>
-            <div
-              className={`${styles.formContainer} ${isAdding ? `${styles.show} ${fullScreen ? styles.showFullScreen : styles.show}`: ""}`}
-            >
+              </div> */}
+              {/* <CommonTable data={filteredData} onRowSelect={handleRowSelect} /> */}
               <ComponentBuilderBody
                 call={call}
                 onClose={handleClose}
@@ -317,8 +313,10 @@ const ComponentBuilderMaintenance: React.FC = () => {
                 setAddClick={setAddClick}
                 // itemRowData={itemRowData}
                 fullScreen={fullScreen}
+                setSelectedRowData={setSelectedRowData}
               />
             </div>
+            
           </div>
         </div>
 

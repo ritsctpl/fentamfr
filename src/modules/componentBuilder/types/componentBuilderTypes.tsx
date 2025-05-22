@@ -9,15 +9,19 @@ export interface ComponentBuilderFormData {
   validation: string;
   dropdownOptions: any;
   apiUrl: string;
+  minValue: string;
+  maxValue: string;
 }
 
 export const defaultFormData: ComponentBuilderFormData = {
   componentLabel: '',
   dataType: 'Input',
-  unit: '',
+  unit: 'kg',
   defaultValue: 'NA',
   required: false,
   validation: '',
   dropdownOptions: [],
-  apiUrl: ''
+  apiUrl: '',
+  minValue: '0',
+  maxValue: '100'
 };

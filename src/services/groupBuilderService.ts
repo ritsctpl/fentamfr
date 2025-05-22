@@ -6,7 +6,7 @@ export const createGroup = async (group: any) => {
 };
 
 export const getTop50Groups = async () => {
-    const response = await api.post('/groupbuilder-service/getTop50', {site:'1004'});
+    const response = await api.post('/groupbuilder-service/getAllGroup', {site:'1004'});
     return response.data;
 };
 
@@ -20,7 +20,12 @@ export const deleteGroup = async (group: any) => {
     return response.data;
 };
 
-export const getSections = async () => {
-    const response = await api.post(`/sectionbuilder-service/getAllSection`, {site:'1004'});
+export const getSections = async (searchParams: any) => {
+    const response = await api.post(`/sectionbuilder-service/getAllSection`, searchParams);
+    return response.data;
+};
+
+export const getGroupPreview = async (group: any) => {
+    const response = await api.post(`/groupbuilder-service/previewGroup`, group);
     return response.data;
 };

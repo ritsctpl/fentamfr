@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import styles from '../styles/ComponentBuilder.module.css';
 import CloseIcon from '@mui/icons-material/Close';
-import { Form, Input, message, Button, Modal, Tooltip, Select, Switch } from 'antd';
+import { Form, Input, message, Button, Modal, Tooltip, Select, Switch, Typography, Row, Col, List } from 'antd';
 import CopyIcon from '@mui/icons-material/FileCopy'; // Import Copy icon
 import DeleteIcon from '@mui/icons-material/Delete'; // Import Delete icon
 import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
@@ -13,7 +13,11 @@ import { useTranslation } from 'react-i18next';
 import { useMyContext } from '../hooks/componentBuilderContext';
 import ApiConfigurationForm from './ComponentBuilderForm';
 import { parseCookies } from 'nookies';
-import { createComponent, deleteComponent, updateComponent } from '@services/componentBuilderService';
+import { createComponent, deleteComponent, retrieveAllComponents, retrieveComponent, retrieveTop50Components, updateComponent } from '@services/componentBuilderService';
+import camelCase from 'lodash/camelCase';
+import { PlusOneOutlined } from '@mui/icons-material';
+import AddIcon from "@mui/icons-material/Add";
+import { defaultFormData } from '../types/componentBuilderTypes';
 const { Option } = Select
 
 
@@ -31,6 +35,7 @@ interface ComponentBuilderBodyProps {
     fullScreen: boolean;
     call: number;
     setCall: (number) => void;
+    setSelectedRowData: (any) => void;
 }
 
 
@@ -38,24 +43,62 @@ interface ComponentBuilderBodyProps {
 
 
 const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
-    isAdding, selectedRowData, onClose, call, setCall, setFullScreen, setAddClick, fullScreen, }) => {
+    isAdding, selectedRowData, onClose, call, setCall, setFullScreen, setAddClick, fullScreen, setSelectedRowData }) => {
 
 
-    const { payloadData, setPayloadData, showAlert, setShowAlert, isRequired, setIsRequired } = useMyContext();
+    const { payloadData, setPayloadData, showAlert, setShowAlert, isRequired, setIsRequired,
+        transformedRowData, triggerSave, setTriggerSave, columnNames, setColumnNames, rowData, setRowData,
+        setTransformedRowData
+    } = useMyContext();
     const [activeTab, setActiveTab] = useState<number>(0);
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
     const [isCopyModalVisible, setIsCopyModalVisible] = useState<boolean>(false);
+    const [componentList, setComponentList] = useState<any>([]);
+    const [isLoading, setIsLoading] = useState<any>();
+    const [searchTerm, setSearchTerm] = useState<any>();
     const [form] = Form.useForm();
 
 
+    useEffect(() => {
+        const fetchTop50Data = async () => {
+            // debugger;
 
 
-    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-        // console.log("table data on tab change: ", customData);
-        setActiveTab(newValue);
-        setAddClick(false);
-        // debugger;
-    };
+            setTimeout(async () => {
+                try {
+                    // debugger;
+                    let top50ListData;
+                    const cookies = parseCookies();
+                    const site = cookies?.site;
+                    try {
+                        top50ListData = await retrieveTop50Components({ site });
+                        top50ListData = top50ListData.map((item: any) => ({
+                            componentLabel: item.componentLabel,
+                            dataType: item.dataType,
+                            defaultValue: item.defaultValue,
+                            required: item.required,
+                        }));
+                        if (!top50ListData?.errorCode) {
+                            setComponentList(top50ListData);
+                        }
+                        else {
+                            setComponentList([]);
+                        }
+                    }
+                    catch (e) {
+                        console.error("Error in retrieving top 50 components", e);
+                    }
+                } catch (error) {
+                    console.error("Error fetching top 50 components:", error);
+                }
+            }, 1000);
+
+        };
+
+        fetchTop50Data();
+    }, [call]);
+
+
 
     const handleOpenChange = () => {
         debugger
@@ -75,8 +118,39 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
     };
 
 
+
+
+    const handleTransformRowData = () => {
+    const transformed = Array.from({ length: Number(payloadData?.tableConfig?.rows) || 0 }).map((_, rowIdx) => {
+        const rowObj: { [key: string]: string } = {};
+
+        columnNames.forEach((column, colIdx) => {
+            const key = `row${rowIdx + 1}-col${colIdx}`;
+            rowObj[column.dataIndex] = payloadData?.tableConfig?.rowData?.[key] || '';
+        });
+
+        return rowObj;
+    });
+
+    // Update the local state
+    setTransformedRowData(transformed);
+
+    // Update the payload data
+    setPayloadData((prev) => ({
+        ...prev,
+        tableConfig: {
+            ...prev.tableConfig,
+            rowData: transformed
+        }
+    }));
+};
+
+
+
     const handleSave = async (oEvent) => {
         message.destroy();
+        // handleTransformRowData();
+        // setTriggerSave(triggerSave + 1);
         let flagToSave = true;
         let buttonLabel = oEvent.currentTarget.innerText;
 
@@ -110,7 +184,8 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
             }
 
             // Check if any column name is empty
-            const hasEmptyColumnName = columnNames.some(name => !name || name.trim() == '');
+            const hasEmptyColumnName = columnNames.some(item => !item?.title || item?.title?.trim() == '');
+
             if (hasEmptyColumnName) {
                 message.error("Column names cannot be empty");
                 return;
@@ -119,33 +194,33 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
 
         // Validation for Reference Table column names
         if (payloadData?.dataType == 'Reference Table') {
-            const columnNames = payloadData?.referenceTableConfig?.columnNames || [];
-            const numberOfColumns = parseInt(payloadData?.referenceTableConfig?.columns || '0', 10);
-            const numberOfRows = parseInt(payloadData?.referenceTableConfig?.rows || '0', 10);
+            const columnNames = payloadData?.tableConfig?.columnNames || [];
+            const numberOfColumns = parseInt(payloadData?.tableConfig?.columns || '0', 10);
+            const numberOfRows = parseInt(payloadData?.tableConfig?.rows || '0', 10);
 
-            if(numberOfColumns == 0){
-                message.error("No. of columns cannot be empty");
-                return;
-            }
+            // if (numberOfColumns == 0) {
+            //     message.error("No. of columns cannot be empty");
+            //     return;
+            // }
 
-            if (numberOfRows == 0) {
-                message.error("No. of rows cannot be empty");
-                return;
-            }
+            // if (numberOfRows == 0) {
+            //     message.error("No. of rows cannot be empty");
+            //     return;
+            // }
 
 
             // Check if column names are provided for all columns
-            if (columnNames.length != numberOfColumns) {
-                message.error(`Please provide names for all ${numberOfColumns} columns`);
-                return;
-            }
+            // if (columnNames.length != numberOfColumns) {
+            //     message.error(`Please provide names for all ${numberOfColumns} columns`);
+            //     return;
+            // }
 
             // Check if any column name is empty
-            const hasEmptyColumnName = columnNames.some(name => !name || name.trim() == '');
-            if (hasEmptyColumnName) {
-                message.error("Column names cannot be empty");
-                return;
-            }
+            const hasEmptyColumnName = columnNames.some(item => !item?.title || item?.title?.trim() == '');
+            // if (hasEmptyColumnName) {
+            //     message.error("Column names cannot be empty");
+            //     return;
+            // }
         }
 
 
@@ -156,6 +231,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                 const site = cookies?.site;
                 const user = cookies?.rl_user_id
                 let updatedRequest;
+
                 updatedRequest = {
                     site: site,
                     // componentLabel: payloadData?.componentLabel,
@@ -166,7 +242,18 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                     // validation: payloadData?.validation,
                     // dropdownOptions: payloadData?.dropdownOptions,
                     ...payloadData,
+                    dataIndex: camelCase(payloadData?.componentLabel),
+                    rowData: transformedRowData,
                     userId: user,
+                }
+
+                // if (payloadData?.dataType != "Table" && payloadData?.dataType != "Reference Table") {
+                //     delete updatedRequest?.rowData;
+                // }
+
+                if (payloadData?.dataType != "Integer" && payloadData?.dataType != "Decimal") {
+                    delete updatedRequest?.maxValue;
+                    delete updatedRequest?.minValue;
                 }
 
                 if (buttonLabel == "Create" || buttonLabel == "बनाएं"
@@ -230,7 +317,131 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
 
     };
 
+    const handleRowSelect = (row: any) => {
 
+        const fetchConfig = async () => {
+            try {
+                let response;
+                const cookies = parseCookies();
+                const site = cookies?.site;
+                const request = {
+                    site: site,
+                    componentLabel: row.componentLabel
+                }
+                try {
+                    response = await retrieveComponent(request);
+                    if (!response?.errorCode) {
+                        const dummyData1 = {
+                            "site": "1004",
+                            "componentLabel": "asass",
+                            "dataType": "Reference Table",
+                            "unit": "kg",
+                            "defaultValue": null,
+                            "required": false,
+                            "validation": "",
+                            "dropdownOptions": [],
+                            "apiUrl": "",
+                            "tableConfig": {
+                                "rows": "2",
+                                "rowData": {
+                                    "row1-col0": "55"
+                                },
+                                "columns": "2",
+                                "columnNames": [
+                                    {
+                                        "title": "vsdvsdv",
+                                        "type": "Input",
+                                        "dataIndex": "vsdvsdv",
+                                    },
+                                    {
+                                        "title": "sdvsv",
+                                        "type": "Input",
+                                        "dataIndex": "sdvsv"
+                                    }
+                                ]
+                            },
+                            "dataIndex": "asass",
+                            "rowData": [],
+                            "userId": "rits_admin"
+                        }
+                        const dummyData = {
+                            "site": "1004",
+                            "handle": "ComponentBO:1004,test002",
+                            "componentLabel": "test002",
+                            "dataType": "Table",
+                            "unit": "kg",
+                            "defaultValue": null,
+                            "required": false,
+                            "validation": "",
+                            "apiUrl": "",
+                            "tableConfig": {
+                                "columns": "2",
+                                "columnNames": [
+                                    {
+                                        "title": "date time",
+                                        "type": "DateTimePicker",
+                                        "dataIndex": "dateTime",
+                                        "required": true
+                                    },
+                                    {
+                                        "title": "age",
+                                        "type": "Input",
+                                        "dataIndex": "age",
+                                        "required": false
+                                    }
+                                ],
+                                "rows": "2",
+                                "rowData": {
+                                    "row2-col0": "2025-05-22 18:37:13",
+                                    "row2-col1": "",
+                                    "row1-col0": "2025-05-22 18:37:07"
+                                }
+                            },
+                            "active": 1,
+                            "userId": "rits_admin",
+                            "createdDateTime": "2025-05-22T18:30:41.144",
+                            "modifiedDateTime": "2025-05-22T18:37:21.766",
+                            "dataIndex": "test002",
+                            "rowData": []
+                        }
+                        setPayloadData(response);
+                        setSelectedRowData(response);
+                    }
+
+                }
+                catch (e) {
+                    console.error("Error in retrieveing the component", e);
+                }
+            } catch (error) {
+                console.error("Error fetching component:", error);
+            }
+        };
+
+        if (showAlert == true && isAdding == true) {
+            Modal.confirm({
+                title: t('confirm'),
+                content: t('rowSelectionMsg'),
+                okText: t('ok'),
+                cancelText: t('cancel'),
+                onOk: async () => {
+                    // Proceed with the API call if confirmed
+                    try {
+                        await fetchConfig();
+                    }
+                    catch (e) {
+                        console.error("Error in retrieveing the component: ", e);
+                    }
+                    setShowAlert(false)
+                },
+                onCancel() {
+                },
+            });
+        } else {
+            // If no data to confirm, proceed with the API call
+            fetchConfig();
+        }
+
+    };
 
 
     const handleCancel = () => {
@@ -398,7 +609,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                 return (<div
 
                     style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 270px', marginTop: '2%' }}
-                > <ApiConfigurationForm setFullScreen={setFullScreen} /> </div>)
+                > <ApiConfigurationForm setFullScreen={setFullScreen}  /> </div>)
 
             default:
                 return null;
@@ -407,38 +618,44 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
 
 
 
+    const handleSearch = async () => {
+
+        const cookies = parseCookies();
+        const site = cookies?.site;
+        const request = {
+            site: site,
+            componentLabel: searchTerm
+        }
+        try {
+            let response = await retrieveAllComponents(request);
+
+
+            // Update the filtered data state
+            setComponentList(response);
+
+        }
+        catch (e) {
+            console.log("Error in retrieving all configuration", e);
+        }
+    }
+
+    const handleOnAdd = () => {
+        setPayloadData(defaultFormData);
+        setSelectedRowData(null);
+    }
+
+
     return (
         <div className={styles.pageContainer}>
             <div className={styles.contentWrapper}>
                 <div className={styles.dataFieldBodyContents}>
-                    <div className={isAdding ? styles.heading : styles.headings}>
+                    <div >
                         <div className={styles.split} >
-                            <div style={{ marginTop: '-1.5%' }} >
-                                <p className={styles.headingtext}>
+                            <div >
+                                <p className={styles.headingtext} style={{ marginLeft: '10px' }}>
                                     {selectedRowData ? selectedRowData?.componentLabel : t('createComponent')}
                                 </p>
-                                {selectedRowData && (
-                                    <div style={{ marginTop: '-1%' }}>
 
-                                        <p className={styles.dateText}>
-                                            {t('createdDate')}
-                                            <span className={styles.fadedText}>
-                                                {selectedRowData?.createdDateTime
-                                                    ? dayjs(selectedRowData?.createdDateTime).format('DD-MM-YYYY HH:mm:ss')
-                                                    : 'N/A'}
-                                            </span>
-                                        </p>
-                                        <p className={styles.dateText}>
-                                            {t('modifiedTime')}
-                                            <span className={styles.fadedText}>
-                                                {payloadData?.modifiedDateTime
-                                                    ? dayjs(payloadData?.modifiedDateTime).format('DD-MM-YYYY HH:mm:ss')
-                                                    : 'N/A'}
-                                            </span>
-                                        </p>
-
-                                    </div>
-                                )}
                             </div>
 
                             <div className={styles.actionButtons}>
@@ -479,19 +696,131 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                         </div>
                     </div>
 
-                    {/* <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                        <Tabs value={activeTab} onChange={handleTabChange} aria-label="Item Maintenance Tabs">
-                            <Tab label={t("main")} />
-                        </Tabs>
-                    </Box>
-                    <Box sx={{ padding: 2 }}>
-                        {renderTabContent()}
-                    </Box> */}
+
 
                     <div style={{ borderTop: '1px solid #e0e0e0', marginTop: '0%' }}></div>
-                    {/* <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 270px', marginTop: '2%' }}> */}
-                    <ApiConfigurationForm setFullScreen={setFullScreen} />
-                    {/* </div> */}
+
+
+
+                    <Row className={styles["section-builder-container"]}>
+                        {/* Left side: List of dummy components */}
+                        <Col span={4} className={styles["left-section"]}>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    height: "100%",
+                                    paddingBottom: "10px",
+                                }}
+                            >
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    fontWeight: 500,
+                                    marginBottom: "16px"
+                                }}>
+                                    <span>Components ({componentList?.length || 0})</span>
+                                    <Tooltip title="Add">
+                                        <AddIcon style={{ cursor: 'pointer' }} onClick={handleOnAdd} />
+                                    </Tooltip>
+                                </div>
+                                <Input.Search
+                                    placeholder="Search components..."
+                                    style={{ marginBottom: "16px" }}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    value={searchTerm}
+                                    onSearch={handleSearch}
+                                />
+                                <div style={{ flex: 1, overflowY: "auto" }}>
+                                    {isLoading ? (
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                                height: "100%",
+                                            }}
+                                        >
+                                            Loading components...
+                                        </div>
+                                    ) : (
+                                        <List
+                                            dataSource={componentList}
+                                            renderItem={(component: any, index) => (
+                                                <List.Item
+                                                    key={index}
+                                                    style={{
+                                                        padding: "8px",
+                                                        backgroundColor: "#fff",
+                                                        marginBottom: "8px",
+                                                        borderRadius: "4px",
+                                                        cursor: "pointer",
+                                                        transition: "all 0.3s ease",
+                                                        border: "1px solid transparent",
+                                                        boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+                                                    }}
+                                                    onMouseEnter={(e) => {
+                                                        e.currentTarget.style.backgroundColor = "#f0f7ff";
+                                                        e.currentTarget.style.borderColor = "#1890ff";
+                                                        e.currentTarget.style.boxShadow =
+                                                            "0 2px 8px rgba(24,144,255,0.15)";
+                                                    }}
+                                                    onMouseLeave={(e) => {
+                                                        e.currentTarget.style.backgroundColor = "#fff";
+                                                        e.currentTarget.style.borderColor = "transparent";
+                                                        e.currentTarget.style.boxShadow =
+                                                            "0 2px 4px rgba(0,0,0,0.05)";
+                                                    }}
+                                                    onClick={() => handleRowSelect(component)}
+                                                >
+                                                    <div
+                                                        style={{
+                                                            display: "flex",
+                                                            justifyContent: "space-between",
+                                                            width: "100%",
+                                                        }}
+                                                    >
+                                                        <div
+                                                            style={{ display: "flex", flexDirection: "column" }}
+                                                        >
+                                                            <span style={{ fontWeight: 400 }}>
+                                                                {component.componentLabel}
+                                                            </span>
+                                                            {/* <span
+                                                                style={{
+                                                                    fontSize: "0.8em",
+                                                                    color: "#666",
+                                                                    marginTop: "4px",
+                                                                }}
+                                                            >
+                                                                {component.componentLabel}
+                                                            </span> */}
+                                                        </div>
+                                                        {/* <PlusOneOutlined style={{ color: "#1890ff" }} /> */}
+                                                        <Typography style={{
+                                                            fontSize: "12px",
+                                                            color: "#666",
+                                                            margin: 0,
+                                                        }}> {component.dataType} </Typography>
+                                                    </div>
+                                                </List.Item>
+                                            )}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+                        </Col>
+
+                        {/* Right side: Existing content */}
+                        <Col span={20} style={{ padding: '10px' }}>
+                            {/* Existing content */}
+                            {/* <div style={{ borderTop: '1px solid #e0e0e0', marginTop: '0%' }}></div> */}
+                            <ApiConfigurationForm setFullScreen={setFullScreen}  />
+                        </Col>
+                    </Row>
+
+
                 </div>
             </div>
             <footer className={styles.footer} style={{ marginTop: '-10%' }}>
@@ -513,6 +842,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                     </Button>
                 </div>
             </footer>
+
             <Modal
                 title={t("confirmDelete")}
                 open={isModalVisible}

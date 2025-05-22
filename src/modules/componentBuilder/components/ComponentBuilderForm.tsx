@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Select, Button, Switch, Table, Row, Col, Divider } from 'antd';
+import { Form, Input, Select, Button, Switch, Table, Row, Col, Divider, Dropdown, Typography, Space, DatePicker } from 'antd';
 import { useMyContext } from '../hooks/componentBuilderContext';
 import { useTranslation } from 'react-i18next';
+import { MenuProps } from 'antd/lib';
+import { DownOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
+import { title } from 'process';
 const { Option } = Select;
+
 
 const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }> = ({ setFullScreen }) => {
     const { t } = useTranslation();
@@ -13,8 +18,11 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
     } = useMyContext();
 
     // Add state for column and row configurations
-    const [columnNames, setColumnNames] = useState<string[]>([]);
+    const [columnNames, setColumnNames] = useState<any>([]);
     const [rowData, setRowData] = useState<{ [key: string]: string }>({});
+
+    // Add state for row selection
+    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
     useEffect(() => {
         form.setFieldsValue({
@@ -29,12 +37,12 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
 
         // Initialize column names and row data based on payload
         if (payloadData?.dataType === 'Table') {
-            const tableColumns = Number(payloadData?.tableConfig?.columns || 0);
-            setColumnNames(payloadData?.tableConfig?.columnNames || Array(tableColumns).fill(''));
-        } else if (payloadData?.dataType === 'Reference Table') {
-            const refTableColumns = Number(payloadData?.referenceTableConfig?.columns || 0);
-            setColumnNames(payloadData?.referenceTableConfig?.columnNames || Array(refTableColumns).fill(''));
-            setRowData(payloadData?.referenceTableConfig?.rowData || {});
+            const refTableColumns = Number(payloadData?.tableConfig?.columns || 0);
+            setColumnNames(
+                payloadData?.tableConfig?.columnNames?.map(title => title) ||
+                Array(refTableColumns).fill('')
+            );
+            setRowData(payloadData?.tableConfig?.rowData || {});
         }
     }, [payloadData]);
 
@@ -52,16 +60,14 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
 
     const handleSelectChange = (fieldName: string, value: string) => {
         // debugger
-        if (value == 'Input' || value == "TextArea" || value == "DatePicker" || value == "Select" || value == "Table" || value == "Reference Table") {
+        if (value == 'Input' || value == "TextArea" || value == "DatePicker" || value == "Select" || value == "Table") {
             setPayloadData((prev) => ({
                 ...prev,
                 defaultValue: null,
-                referenceTableConfig: fieldName != "Reference Table" ? {
-
-                } : value,
                 tableConfig: fieldName != "Table" ? {
 
                 } : value,
+
                 [fieldName]: value
             }));
             fieldType.current = value;
@@ -77,7 +83,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
             fieldType.current = value;
         }
 
-        if (value == "Table" || value == "Reference Table")
+        if (value == "Table")
             setFullScreen(true);
 
         else
@@ -102,12 +108,12 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                 [field]: value
             }
         }));
-        
+
         // Update column names when number of columns changes
         if (field === 'columns') {
             const newColumnNames = Array(Number(value)).fill('');
             setColumnNames(newColumnNames);
-            
+
             setPayloadData((prev) => ({
                 ...prev,
                 tableConfig: {
@@ -116,13 +122,24 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                 }
             }));
         }
-        
+
         setShowAlert(true);
     }
 
     const handleColumnNameChange = (index: number, value: string) => {
+        // Convert to camelCase
+        const camelCaseKeyName = value
+            .toLowerCase()
+            .replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
+            .replace(/^[A-Z]/, firstChar => firstChar.toLowerCase());
+
         const newColumnNames = [...columnNames];
-        newColumnNames[index] = value;
+        newColumnNames[index] = {
+            title: value,
+            type: newColumnNames[index]?.type || 'Input',
+            dataIndex: camelCaseKeyName,
+            required: newColumnNames[index]?.required || false
+        };
         setColumnNames(newColumnNames);
 
         // Update payload based on data type
@@ -134,65 +151,57 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                     columnNames: newColumnNames
                 }
             }));
-        } else if (payloadData?.dataType === 'Reference Table') {
-            setPayloadData((prev) => ({
-                ...prev,
-                referenceTableConfig: {
-                    ...prev.referenceTableConfig,
-                    columnNames: newColumnNames
-                }
-            }));
         }
-        
+
         setShowAlert(true);
     }
 
     const handleReferenceTableConfigChange = (field: string, value: any) => {
         setPayloadData((prev) => ({
             ...prev,
-            referenceTableConfig: {
-                ...prev.referenceTableConfig,
+            tableConfig: {
+                ...prev.tableConfig,
                 [field]: value
             }
         }));
-        
+
         // Update column names when number of columns changes
         if (field === 'columns') {
             const newColumnNames = Array(Number(value)).fill('');
             setColumnNames(newColumnNames);
-            
+
             setPayloadData((prev) => ({
                 ...prev,
-                referenceTableConfig: {
-                    ...prev.referenceTableConfig,
+                tableConfig: {
+                    ...prev.tableConfig,
                     columnNames: newColumnNames
                 }
             }));
         }
-        
+
         // Update row data when rows change
         if (field === 'rows') {
             const newRowData: { [key: string]: string } = {};
-            const columns = Number(payloadData?.referenceTableConfig?.columns || 0);
-            
+            const columns = Number(payloadData?.tableConfig?.columns || 0);
+
             for (let rowIndex = 0; rowIndex < Number(value); rowIndex++) {
                 for (let colIndex = 0; colIndex < columns; colIndex++) {
                     const key = `row${rowIndex + 1}-col${colIndex}`;
                     newRowData[key] = rowData[key] || '';
                 }
             }
-            
+
             setRowData(newRowData);
-            
+
             setPayloadData((prev) => ({
                 ...prev,
-                referenceTableConfig: {
-                    ...prev.referenceTableConfig,
+                tableConfig: {
+                    ...prev.tableConfig,
                     rowData: newRowData
                 }
             }));
         }
-        
+
         setShowAlert(true);
     }
 
@@ -201,29 +210,29 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
             ...rowData,
             [rowKey]: value
         };
-        
+
         setRowData(newRowData);
-        
-        if (payloadData?.dataType === 'Reference Table') {
+
+        if (payloadData?.dataType === 'Table') {
             setPayloadData((prev) => ({
                 ...prev,
-                referenceTableConfig: {
-                    ...prev.referenceTableConfig,
+                tableConfig: {
+                    ...prev.tableConfig,
                     rowData: newRowData
                 }
             }));
         }
-        
+
         setShowAlert(true);
     }
 
-    const renderTablePreview = () => {
+    const renderTablePreview1 = () => {
         if (!payloadData?.tableConfig) return null;
 
         const columns = Array.from({ length: payloadData?.tableConfig?.columns || 0 }).map((_, index) => ({
             title: (
                 <Input
-                    value={columnNames[index] || ''}
+                    value={columnNames[index]?.title || ''}
                     onChange={(e) => handleColumnNameChange(index, e.target.value)}
                     placeholder={`Column ${index + 1}`}
                     style={{ width: '100%' }}
@@ -231,7 +240,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
             ),
             dataIndex: `col${index}`,
             key: `col${index}`,
-            width: 200,
+            width: 150,
         }));
 
         const previewData1 = [{
@@ -242,66 +251,449 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
         const previewData: any[] = [];
 
         return (
-            <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center',    }}>
+            <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center', }}>
                 <Table
                     columns={columns}
                     dataSource={previewData}
                     pagination={false}
                     bordered
                     size="small"
-                    scroll={{ x: true,   }}
-                    style={{width: '99%', height: '100%'}}
-                    // locale={{ emptyText: 'No data' }}
+                    scroll={{ x: 'max-content' }}
+                    style={{ width: '99%', height: '100%' }}
                 />
             </div>
         );
     }
 
-    const renderReferenceTablePreview = () => {
-        if (!payloadData?.referenceTableConfig) return null;
+    
 
-        const columns = Array.from({ length: Number(payloadData?.referenceTableConfig?.columns) || 0 }).map((_, index) => ({
+    const renderReferenceTablePreview = () => {
+        if (!payloadData?.tableConfig) return null;
+
+        const items: MenuProps['items'] = [
+            {
+                key: 'Integer',
+                label: 'Integer',
+            },
+            {
+                key: 'Decimal',
+                label: 'Decimal',
+            },
+            {
+                key: 'Text',
+                label: 'Text',
+            },
+            {
+                key: 'TextArea',
+                label: 'TextArea',
+            },
+            {
+                key: 'Datepicker',
+                label: 'Datepicker',
+            },
+            {
+                key: 'DateTimePicker',
+                label: 'DateTimePicker',
+            },
+            // {
+            //   key: 'Select',
+            //   label: 'Select',
+            // },
+            {
+                key: 'Switch',
+                label: 'Switch',
+            },
+        ];
+
+        const columns = Array.from({ length: Number(payloadData?.tableConfig?.columns) || 0 }).map((_, index) => ({
             title: (
-                <Input
-                    value={columnNames[index] || ''}
-                    onChange={(e) => handleColumnNameChange(index, e.target.value)}
-                    placeholder={`Column ${index + 1}`}
-                    style={{ width: '100%' }}
-                />
+                <div style={{ display: 'flex' }}>
+                     {columnNames[index]?.required && (
+                                    <span style={{ color: 'red', marginRight: '5px' }}>*</span>
+                                )}
+                    <Input
+                        value={columnNames[index]?.title || ''}
+                        onChange={(e) => handleColumnNameChange(index, e.target.value)}
+                        placeholder={`Column ${index + 1}`}
+                        style={{ width: '100%' }}
+                        suffix={
+                            <>
+                               
+                                <Switch
+                                    size="small"
+                                    checked={columnNames[index]?.required || false}
+                                    onChange={(checked) => {
+                                        const updatedColumnNames = [...columnNames];
+                                        updatedColumnNames[index] = {
+                                            ...updatedColumnNames[index],
+                                            required: checked
+                                        };
+                                        setColumnNames(updatedColumnNames);
+
+                                        // Update payload with the new column required status
+                                        const updatedPayloadData = {
+                                            ...payloadData,
+                                            tableConfig: {
+                                                ...payloadData?.tableConfig,
+                                                columnNames: updatedColumnNames
+                                            }
+                                        };
+                                        setPayloadData(updatedPayloadData);
+                                    }}
+                                />
+                            </>
+                        }
+                    />
+                    <Dropdown
+
+                        menu={{
+                            items,
+                            selectable: true,
+                            defaultSelectedKeys: ['Input'],
+                            onSelect: (info) => {
+                                // Update column type when selected
+                                const updatedColumnNames = [...columnNames];
+                                updatedColumnNames[index] = {
+                                    title: updatedColumnNames?.[index]?.title || '',
+                                    type: info.key as string
+                                };
+                                setColumnNames(updatedColumnNames);
+
+                                // Update payload with the new column type
+                                const updatedPayloadData = {
+                                    ...payloadData,
+                                    tableConfig: {
+                                        ...payloadData?.tableConfig,
+                                        columnNames: updatedColumnNames
+                                    }
+                                };
+                                setPayloadData(updatedPayloadData);
+                            }
+                        }}
+                    >
+                        <Typography.Link style={{
+                            marginLeft: '5px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <Space align="center">
+                                {/* {columnNames[index]?.type || 'Input'} */}
+                                <DownOutlined style={{ verticalAlign: 'middle' }} />
+                            </Space>
+                        </Typography.Link>
+                    </Dropdown>
+                </div>
             ),
             dataIndex: `col${index}`,
             key: `col${index}`,
             width: 200,
-            render: (_: any, record: any) => (
-                <Input
-                    value={rowData[`row${record.key}-col${index}`] || ''}
-                    onChange={(e) => handleRowDataChange(`row${record.key}-col${index}`, index, e.target.value)}
-                    style={{ width: '100%' }}
-                />
-            )
+            render: (_: any, record: any) => {
+                const columnType = columnNames[index]?.type || 'Input';
+
+                switch (columnType) {
+                    case 'TextArea':
+                        return (
+                            <Input.TextArea
+                                value={rowData[`row${record.key}-col${index}`] || ''}
+                                onChange={(e) => handleRowDataChange(`row${record.key}-col${index}`, index, e.target.value)}
+                                style={{ width: '100%' }}
+                            />
+                        );
+                    case 'Datepicker':
+                        return (
+                            <DatePicker
+                                value={rowData[`row${record.key}-col${index}`]
+                                    ? dayjs(rowData[`row${record.key}-col${index}`])
+                                    : null}
+                                onChange={(date) => handleRowDataChange(
+                                    `row${record.key}-col${index}`,
+                                    index,
+                                    date ? date.format('YYYY-MM-DD') : ''
+                                )}
+                                style={{ width: '100%' }}
+                            />
+                        );
+                    case 'DateTimePicker':
+                        return (
+                            <DatePicker
+                                showTime
+                                value={rowData[`row${record.key}-col${index}`]
+                                    ? dayjs(rowData[`row${record.key}-col${index}`])
+                                    : null}
+                                onChange={(date) => handleRowDataChange(
+                                    `row${record.key}-col${index}`,
+                                    index,
+                                    date ? date.format('YYYY-MM-DD HH:mm:ss') : ''
+                                )}
+                                style={{ width: '100%' }}
+                                placeholder='Select date time'
+                            />
+                        );
+                    // case 'Select':
+                    //     return (
+                    //         <Select
+                    //             value={rowData[`row${record.key}-col${index}`] || undefined}
+                    //             onChange={(value) => handleRowDataChange(`row${record.key}-col${index}`, index, value)}
+                    //             style={{ width: '100%' }}
+                    //         >
+                    //             {/* Add options as needed */}
+                    //             <Select.Option value="option1">Option 1</Select.Option>
+                    //             <Select.Option value="option2">Option 2</Select.Option>
+                    //         </Select>
+                    //     );
+                    case 'Switch':
+                        return (
+                            <Switch
+                                checked={rowData[`row${record.key}-col${index}`] === 'true'}
+                                onChange={(checked) => handleRowDataChange(`row${record.key}-col${index}`, index, String(checked))}
+                            />
+                        );
+                    default:
+                        return (
+                            <Input
+                                value={rowData[`row${record.key}-col${index}`] || ''}
+                                onChange={(e) => handleRowDataChange(`row${record.key}-col${index}`, index, e.target.value)}
+                                style={{ width: '100%' }}
+                                placeholder={'Enter ' + columnType}
+                            />
+                        );
+                }
+            }
         }));
 
-        const previewData = Array.from({ length: Number(payloadData?.referenceTableConfig?.rows) || 1 }).map((_, rowIndex) => ({
+        const previewData = Array.from({ length: Number(payloadData?.tableConfig?.rows) || 1 }).map((_, rowIndex) => ({
             key: String(rowIndex + 1),
-            ...Object.fromEntries(Array.from({ length: Number(payloadData?.referenceTableConfig?.columns) || 0 }).map((_, colIndex) => 
+            ...Object.fromEntries(Array.from({ length: Number(payloadData?.tableConfig?.columns) || 0 }).map((_, colIndex) =>
                 [`col${colIndex}`, '']
             ))
         }));
 
+        const rowSelection = {
+            selectedRowKeys,
+            onChange: (newSelectedRowKeys: React.Key[]) => {
+                setSelectedRowKeys(newSelectedRowKeys);
+            },
+            type: 'checkbox' as const
+        };
+
+        const createNewRow = () => ({
+            key: String(previewData.length + 1),
+            ...Object.fromEntries(Array.from({ length: Number(payloadData?.tableConfig?.columns) || 0 }).map((_, colIndex) =>
+                [`col${colIndex}`, '']
+            ))
+        });
+
+        const handleInsertAppend = () => {
+            const columns = Number(payloadData?.tableConfig?.columns || 0);
+            const currentRows = Number(payloadData?.tableConfig?.rows || 1); // Default to 1 if undefined
+            const newRowIndex = currentRows + 1;
+
+            // Create new row data
+            const newRowData = { ...rowData };
+            for (let colIndex = 0; colIndex < columns; colIndex++) {
+                const key = `row${newRowIndex}-col${colIndex}`;
+                newRowData[key] = '';
+            }
+
+            setRowData(newRowData);
+
+            // Update payload
+            setPayloadData((prev) => {
+                // Create a new preview data array
+                const newPreviewData = Array.from({ length: newRowIndex }).map((_, rowIndex) => ({
+                    key: String(rowIndex + 1),
+                    ...Object.fromEntries(Array.from({ length: columns }).map((_, colIndex) =>
+                        [`col${colIndex}`, '']
+                    ))
+                }));
+
+                return {
+                    ...prev,
+                    tableConfig: {
+                        ...prev.tableConfig,
+                        rows: newRowIndex,
+                        rowData: newRowData
+                    }
+                };
+            });
+
+            setShowAlert(true);
+        };
+
+        const handleInsertBefore = () => {
+            if (selectedRowKeys.length === 0) {
+                handleInsertAppend(); // If no row selected, just add at the end
+                return;
+            }
+
+            const selectedRowIndex = Number(selectedRowKeys[0]);
+            const columns = Number(payloadData?.tableConfig?.columns || 0);
+            const currentRows = Number(payloadData?.tableConfig?.rows || 0);
+
+            const newRowData = { ...rowData };
+
+            // Shift existing rows down
+            for (let rowIndex = currentRows; rowIndex >= selectedRowIndex; rowIndex--) {
+                for (let colIndex = 0; colIndex < columns; colIndex++) {
+                    const currentKey = `row${rowIndex}-col${colIndex}`;
+                    const newKey = `row${rowIndex + 1}-col${colIndex}`;
+                    newRowData[newKey] = newRowData[currentKey] || '';
+                }
+            }
+
+            // Clear the selected row's data
+            for (let colIndex = 0; colIndex < columns; colIndex++) {
+                const key = `row${selectedRowIndex}-col${colIndex}`;
+                newRowData[key] = '';
+            }
+
+            setRowData(newRowData);
+
+            // Update payload
+            setPayloadData((prev) => ({
+                ...prev,
+                tableConfig: {
+                    ...prev.tableConfig,
+                    rows: currentRows + 1,
+                    rowData: newRowData
+                }
+            }));
+
+            setShowAlert(true);
+        }
+
+        const handleInsertAfter = () => {
+            if (selectedRowKeys.length === 0) {
+                handleInsertAppend(); // If no row selected, just add at the end
+                return;
+            }
+
+            const selectedRowIndex = Number(selectedRowKeys[0]);
+            const columns = Number(payloadData?.tableConfig?.columns || 0);
+            const currentRows = Number(payloadData?.tableConfig?.rows || 0);
+
+            const newRowData = { ...rowData };
+
+            // Shift existing rows down
+            for (let rowIndex = currentRows; rowIndex > selectedRowIndex; rowIndex--) {
+                for (let colIndex = 0; colIndex < columns; colIndex++) {
+                    const currentKey = `row${rowIndex}-col${colIndex}`;
+                    const newKey = `row${rowIndex + 1}-col${colIndex}`;
+                    newRowData[newKey] = newRowData[currentKey] || '';
+                }
+            }
+
+            // Clear the new row's data
+            for (let colIndex = 0; colIndex < columns; colIndex++) {
+                const key = `row${selectedRowIndex + 1}-col${colIndex}`;
+                newRowData[key] = '';
+            }
+
+            setRowData(newRowData);
+
+            // Update payload
+            setPayloadData((prev) => ({
+                ...prev,
+                tableConfig: {
+                    ...prev.tableConfig,
+                    rows: currentRows + 1,
+                    rowData: newRowData
+                }
+            }));
+
+            setShowAlert(true);
+        }
+
+        const handleRemoveRow = () => {
+            if (selectedRowKeys.length === 0) return;
+
+            const newRowData = previewData.filter(row => !selectedRowKeys.includes(row.key));
+
+            // If trying to remove all rows, keep at least one row
+            const finalRowData = newRowData.length > 0 ? newRowData : [previewData[0]];
+
+            // Reindex keys to ensure they are sequential
+            const reindexedRowData = finalRowData.map((row, index) => ({
+                ...row,
+                key: String(index + 1)
+            }));
+
+            setPayloadData(prev => ({
+                ...prev,
+                tableConfig: {
+                    ...prev.tableConfig,
+                    rows: reindexedRowData.length,
+                    rowData: reindexedRowData
+                }
+            }));
+
+            // Reset selection after remove
+            setSelectedRowKeys([]);
+        };
+
         return (
-            <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
-                {/* <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}> */}
-                    {/* <h4>Preview</h4> */}
-                    <Table
-                        columns={columns}
-                        dataSource={previewData}
-                        pagination={false}
-                        bordered
-                        size="small"
-                        scroll={{ x: true, y: 'calc(100vh - 450px)' }}
-                        style={{width: '99%'}}
-                    />
-                {/* </div> */}
+            <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{
+                    width: '99%',
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    marginBottom: 8
+                }}>
+                    <Space>
+                        <Button size="small" onClick={handleInsertAppend}>Insert</Button>
+                        <Button
+                            size="small"
+                            onClick={handleInsertBefore}
+                            disabled={selectedRowKeys.length === 0}
+                        >
+                            Insert Before
+                        </Button>
+                        <Button
+                            size="small"
+                            onClick={handleInsertAfter}
+                            disabled={selectedRowKeys.length === 0}
+                        >
+                            Insert After
+                        </Button>
+                        <Button
+                            size="small"
+                            onClick={handleRemoveRow}
+                            disabled={selectedRowKeys.length === 0}
+                        >
+                            Remove Selected
+                        </Button>
+                        <Button
+                            size="small"
+                            onClick={() => {
+                                // Remove all rows except the first one
+                                const newRowData = [previewData[0]];
+                                setPayloadData(prev => ({
+                                    ...prev,
+                                    tableConfig: {
+                                        ...prev.tableConfig,
+                                        rows: 1,
+                                        rowData: newRowData
+                                    }
+                                }));
+                                setSelectedRowKeys([]);
+                            }}
+                        >
+                            Remove All
+                        </Button>
+                    </Space>
+                </div>
+                <Table
+                    rowSelection={rowSelection}
+                    title={() => 'Table Preview'}
+                    columns={columns}
+                    dataSource={previewData}
+                    pagination={false}
+                    bordered
+                    size="small"
+                    scroll={{ x: true, y: 'calc(100vh - 450px)' }}
+                    style={{ width: '99%' }}
+                />
             </div>
         );
     }
@@ -309,27 +701,11 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
     const renderTableConfigFields = () => {
         return (
             <Row gutter={16}>
-                {payloadData?.dataType === "Table" && (
-                    <Col span={8}>
-                        <Form.Item
-                            label={t('noOfColumns')}
-                            labelCol={{ span: 8 }}
-                            wrapperCol={{ span: 12 }}
-                            style={{ marginBottom: '8px' }}
-                        >
-                            <Input
-                                type="number"
-                                value={payloadData?.tableConfig?.columns}
-                                onChange={(e) => handleTableConfigChange("columns", e.target.value)}
-                                min={1}
-                            />
-                        </Form.Item>
-                    </Col>
-                )}
 
-                {payloadData?.dataType === "Reference Table" && (
+
+                {payloadData?.dataType === "Table" && (
                     <>
-                        <Col span={8}>
+                        {/* <Col span={8}>
                             <Form.Item
                                 label={t('noOfRows')}
                                 labelCol={{ span: 8 }}
@@ -338,12 +714,12 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                             >
                                 <Input
                                     type="number"
-                                    value={payloadData?.referenceTableConfig?.rows}
+                                    value={payloadData?.tableConfig?.rows}
                                     onChange={(e) => handleReferenceTableConfigChange("rows", e.target.value)}
                                     min={1}
                                 />
                             </Form.Item>
-                        </Col>
+                        </Col> */}
                         <Col span={8}>
                             <Form.Item
                                 label={t('noOfColumns')}
@@ -353,7 +729,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                             >
                                 <Input
                                     type="number"
-                                    value={payloadData?.referenceTableConfig?.columns}
+                                    value={payloadData?.tableConfig?.columns}
                                     onChange={(e) => handleReferenceTableConfigChange("columns", e.target.value)}
                                     min={1}
                                 />
@@ -366,8 +742,8 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
     };
 
     const renderFormFields = () => {
-        // For Table and Reference Table, use two-column layout
-        if (payloadData?.dataType === "Table" || payloadData?.dataType === "Reference Table") {
+        // For Table  use two-column layout
+        if (payloadData?.dataType === "Table") {
             return (
                 <>
                     <Row gutter={16}>
@@ -384,7 +760,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                     onChange={(e) => handleInputChange("componentLabel", e.target.value)}
                                 />
                             </Form.Item>
-                            
+
                         </Col>
                         <Col span={8}>
                             <Form.Item
@@ -393,14 +769,21 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                 wrapperCol={{ span: 12 }}
                                 style={{ marginBottom: '8px' }}
                             >
-                                <Input
+                                <Select
                                     value={payloadData?.unit}
-                                    onChange={(e) => handleInputChange("unit", e.target.value)}
-                                />
+                                    onChange={(value) => handleInputChange("unit", value)}
+                                >
+                                    <Option value="kg">kg</Option>
+                                    <Option value="g">g</Option>
+                                    <Option value="m">m</Option>
+                                    <Option value="cm">cm</Option>
+                                    <Option value="mm">mm</Option>
+                                    <Option value="%">%</Option>
+                                </Select>
                             </Form.Item>
                         </Col>
                         <Col span={8}>
-                        <Form.Item
+                            <Form.Item
                                 label={t('dataType')}
                                 labelCol={{ span: 8 }}
                                 wrapperCol={{ span: 12 }}
@@ -418,10 +801,9 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                     <Option value="DatePicker">DatePicker</Option>
                                     <Option value="Integer">Integer</Option>
                                     <Option value="Decimal">Decimal</Option>
-                                    <Option value="Checkbox">Checkbox</Option>
+                                    {/* <Option value="Checkbox">Checkbox</Option> */}
                                     <Option value="Switch">Switch</Option>
                                     <Option value="Table">Table</Option>
-                                    <Option value="Reference Table">Reference Table</Option>
                                 </Select>
                             </Form.Item>
                         </Col>
@@ -441,7 +823,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                     onChange={(e) => handleInputChange("defaultValue", e.target.value)}
                                 />
                             </Form.Item>
-                           
+
                         </Col>
                         <Col span={8}>
                             <Form.Item
@@ -458,7 +840,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                             </Form.Item>
                         </Col>
                         <Col span={8}>
-                        <Form.Item
+                            <Form.Item
                                 label={t('required')}
                                 labelCol={{ span: 8 }}
                                 wrapperCol={{ span: 12 }}
@@ -474,7 +856,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                 </>
             );
         }
-        
+
         // For other data types, use single-column layout
         return (
             <>
@@ -508,10 +890,9 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                         <Option value="DatePicker">DatePicker</Option>
                         <Option value="Integer">Integer</Option>
                         <Option value="Decimal">Decimal</Option>
-                        <Option value="Checkbox">Checkbox</Option>
+                        {/* <Option value="Checkbox">Checkbox</Option> */}
                         <Option value="Switch">Switch</Option>
                         <Option value="Table">Table</Option>
-                        <Option value="Reference Table">Reference Table</Option>
                     </Select>
                 </Form.Item>
                 <Form.Item
@@ -520,10 +901,17 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                     wrapperCol={{ span: 10 }}
                     style={{ marginBottom: '8px' }}
                 >
-                    <Input
+                    <Select
                         value={payloadData?.unit}
-                        onChange={(e) => handleInputChange("unit", e.target.value)}
-                    />
+                        onChange={(value) => handleInputChange("unit", value)}
+                    >
+                        <Option value="kg">kg</Option>
+                        <Option value="g">g</Option>
+                        <Option value="m">m</Option>
+                        <Option value="cm">cm</Option>
+                        <Option value="mm">mm</Option>
+                        <Option value="%">%</Option>
+                    </Select>
                 </Form.Item>
 
                 {payloadData?.dataType == "Select" && (
@@ -581,19 +969,19 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
     return (
         <Form
             form={form}
-            style={{marginTop: 30}}
+            style={{ marginTop: 30 }}
         >
             {renderFormFields()}
-            
-            {(payloadData?.dataType === "Table" || payloadData?.dataType === "Reference Table") && (
+
+            {(payloadData?.dataType === "Table") && (
                 <>
                     {renderTableConfigFields()}
 
                     <Divider />
 
-                    {payloadData?.dataType === "Table" && renderTablePreview()}
-                    
-                    {payloadData?.dataType === "Reference Table" && renderReferenceTablePreview()}
+                    {/* {payloadData?.dataType === "Table" && renderTablePreview()} */}
+
+                    {payloadData?.dataType === "Table" && renderReferenceTablePreview()}
                 </>
             )}
         </Form>
