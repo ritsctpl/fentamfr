@@ -1095,4 +1095,14 @@ export const hindiLanguage = {
 
   "productGroup":"उत्पाद समूह",
   "selectProductGroup":"उत्पाद समूह चुनें",
+
+  "componentBuilderMaintenance": "कम्पोनेंट बिल्डर रखरखाव",
+  "validation": "प्रमाणीकरण",
+  "defaultValue": "डिफ़ॉल्ट मान",
+  "componentLabel": "कम्पोनेंट लेबल",
+  "createComponent": "कम्पोनेंट बनाएं",
+  "dropdownOptions": "ड्रॉपडाउन विकल्प",
+  "addOption": "विकल्प जोड़ें",
+  "noOfColumns": "स्तंभों की संख्या",
+  "noOfRows": "पंक्तियों की संख्या",
 }

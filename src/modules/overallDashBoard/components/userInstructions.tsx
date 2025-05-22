@@ -105,7 +105,7 @@ const UserInstructions: React.FC = () => {
                 <h2 style={style.sectionTitle}>2. Dashboard Screens</h2>
                 
                 <div style={style.section}>
-                    <h3 style={style.subTitle}>2.1. Prescriptive Insights Screen</h3>
+                    <h3 style={style.subTitle}>2.1. Management Dashboard Screen</h3>
                     <table style={style.table}>
                         <thead>
                             <tr>
@@ -264,41 +264,140 @@ const UserInstructions: React.FC = () => {
             </div>
 
             <div style={style.section}>
-                <h2 style={style.sectionTitle}>4. Navigation and Controls</h2>
-                <table style={style.table}>
-                    <thead>
-                        <tr>
-                            <th style={style.th}>Control</th>
-                            <th style={style.th}>Function</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td style={style.td}>Date Picker</td>
-                            <td style={style.td}>Select date range for data viewing</td>
-                        </tr>
-                        <tr>
-                            <td style={style.td}>Shift Selector</td>
-                            <td style={style.td}>Choose specific shift data</td>
-                        </tr>
-                        <tr>
-                            <td style={style.td}>Machine Toggle</td>
-                            <td style={style.td}>Switch between machine and manual data sources</td>
-                        </tr>
-                        <tr>
-                            <td style={style.td}>Work Center Filter</td>
-                            <td style={style.td}>Filter data by specific work centers</td>
-                        </tr>
-                        <tr>
-                            <td style={style.td}>Search Function</td>
-                            <td style={style.td}>Quick search for specific metrics or data</td>
-                        </tr>
-                        <tr>
-                            <td style={style.td}>Drill-Down Button</td>
-                            <td style={style.td}>Access detailed analysis view</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <h2 style={style.sectionTitle}>4. Navigation and User Flow</h2>
+                
+                <div style={style.section}>
+                    <h3 style={style.subTitle}>4.1. Dashboard Controls</h3>
+                    <table style={style.table}>
+                        <thead>
+                            <tr>
+                                <th style={style.th}>Control</th>
+                                <th style={style.th}>Function</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style={style.td}>Date Picker</td>
+                                <td style={style.td}>Select date range for data viewing</td>
+                            </tr>
+                            <tr>
+                                <td style={style.td}>Shift Selector</td>
+                                <td style={style.td}>Choose specific shift data</td>
+                            </tr>
+                            <tr>
+                                <td style={style.td}>Machine Toggle</td>
+                                <td style={style.td}>Switch between machine and manual data sources</td>
+                            </tr>
+                            <tr>
+                                <td style={style.td}>Search Button</td>
+                                <td style={style.td}>Apply date and shift filters to view relevant data</td>
+                            </tr>
+                            <tr>
+                                <td style={style.td}>Instructions Button</td>
+                                <td style={style.td}>Open this user manual for guidance</td>
+                            </tr>
+                            <tr>
+                                <td style={style.td}>Back Button</td>
+                                <td style={style.td}>Return to the previous screen</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style={style.section}>
+                    <h3 style={style.subTitle}>4.2. Navigation Flow</h3>
+                    <table style={style.table}>
+                        <thead>
+                            <tr>
+                                <th style={style.th}>Level</th>
+                                <th style={style.th}>Screen</th>
+                                <th style={style.th}>How to Access</th>
+                                <th style={style.th}>Available Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style={style.td}>Level 1</td>
+                                <td style={style.td}>Management Dashboard</td>
+                                <td style={style.td}>Default landing page</td>
+                                <td style={style.td}>
+                                    <ul style={style.list}>
+                                        <li style={style.listItem}>View OEE, Performance, Availability, and Quality metrics</li>
+                                        <li style={style.listItem}>Analyze trend graphs by day, week, month, and year</li>
+                                        <li style={style.listItem}>Select date and shift for specific data view</li>
+                                        <li style={style.listItem}>Toggle between machine and manual data sources</li>
+                                        <li style={style.listItem}><strong>Click on any Line card</strong> to drill down to that specific Work Center</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style={style.td}>Level 2</td>
+                                <td style={style.td}>Work Center Analysis</td>
+                                <td style={style.td}>Click on any Line card in the Management Dashboard</td>
+                                <td style={style.td}>
+                                    <ul style={style.list}>
+                                        <li style={style.listItem}>View detailed OEE breakdown for the selected Work Center</li>
+                                        <li style={style.listItem}>See Machine Timeline showing status of all resources</li>
+                                        <li style={style.listItem}>Analyze performance and output metrics</li>
+                                        <li style={style.listItem}>Explore What-If scenarios for process improvement</li>
+                                        <li style={style.listItem}>View all resources associated with this Work Center</li>
+                                        <li style={style.listItem}><strong>Click on any Resource card</strong> to drill down to that specific Resource</li>
+                                        <li style={style.listItem}>Click Back button to return to Management Dashboard</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style={style.td}>Level 3</td>
+                                <td style={style.td}>Resource Analysis</td>
+                                <td style={style.td}>Click on any Resource card in the Work Center Analysis screen</td>
+                                <td style={style.td}>
+                                    <ul style={style.list}>
+                                        <li style={style.listItem}>View detailed metrics for the selected Resource</li>
+                                        <li style={style.listItem}>See shift comparison data (current vs. previous)</li>
+                                        <li style={style.listItem}>Analyze Resource timeline showing status changes</li>
+                                        <li style={style.listItem}>Explore downtime reasons and duration</li>
+                                        <li style={style.listItem}>View quality rejection data and reasons</li>
+                                        <li style={style.listItem}>Simulate performance improvements with What-If analysis</li>
+                                        <li style={style.listItem}>Click Back button to return to Work Center Analysis</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style={style.section}>
+                    <h3 style={style.subTitle}>4.3. Step-by-Step Navigation Guide</h3>
+                    <ol style={style.list}>
+                        <li style={style.listItem}>
+                            <strong>Management Dashboard to Work Center:</strong>
+                            <ul style={style.list}>
+                                <li>Locate the Line Cards section in the Management Dashboard</li>
+                                <li>Each card shows a production line with its OEE, Performance, Availability, and Quality metrics</li>
+                                <li>Click on any Line card to navigate to the Work Center Analysis screen for that line</li>
+                                <li>The system will load detailed data specific to the selected Work Center</li>
+                            </ul>
+                        </li>
+                        <li style={style.listItem}>
+                            <strong>Work Center to Resource:</strong>
+                            <ul style={style.list}>
+                                <li>In the Work Center Analysis screen, locate the Resources section</li>
+                                <li>Each card represents a machine or resource within the selected Work Center</li>
+                                <li>Cards display key metrics such as OEE, utilization, and status</li>
+                                <li>Click on any Resource card to navigate to the Resource Analysis screen</li>
+                                <li>The system will load detailed data specific to the selected Resource</li>
+                            </ul>
+                        </li>
+                        <li style={style.listItem}>
+                            <strong>Returning to Previous Screens:</strong>
+                            <ul style={style.list}>
+                                <li>To return from Resource Analysis to Work Center Analysis, click the Back button</li>
+                                <li>To return from Work Center Analysis to Management Dashboard, click the Back button</li>
+                                <li>You can navigate directly to the Management Dashboard from any screen by clicking the Home icon</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
             </div>
 
             <div style={style.section}>

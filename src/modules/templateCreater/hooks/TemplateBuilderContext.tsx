@@ -1,7 +1,10 @@
 import { createContext } from "react";
 
 interface CombinedContextType {
-  formData: object;
-  setFormData :(value: Object) => void;
-  }
+  call: number;
+  setCall: (value: number) => void;
+  setShowEditor: (value: boolean) => void;
+  setIsFromTableClick: (value: boolean) => void;
+}
+
 export const TemplateBuilderContext = createContext<CombinedContextType | undefined>(undefined);

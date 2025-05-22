@@ -10,85 +10,31 @@ import { decryptToken } from '@/utils/encryption';
 import jwtDecode from 'jwt-decode';
 import CommonAppBar from '@components/CommonAppBar';
 import { useTranslation } from 'react-i18next';
-import CommonTable from '@components/CommonTable';
-import { Modal, Form, Input, Button } from 'antd';
+import { Modal, Form, Input, Button, Switch, message, Select, Table } from 'antd';
 import InstructionModal from '@components/InstructionModal';
 import { TemplateBuilderContext } from '../hooks/TemplateBuilderContext';
 import TemplateBuilderBar from './TemplateBuilderBar';
 import TemplateEditorScreen from './TemplateEditorScreen';
-
-// Updated dummy data to match the new table structure
-const dummyTableData: any[] = [
-  { 
-    templateId: 'TEMP-001', 
-    templateName: 'Introduction Template', 
-    version: '1.0', 
-    date: '2023-01-15',
-    description: 'A standard introduction template'
-  },
-  { 
-    templateId: 'TEMP-002', 
-    templateName: 'Report Template', 
-    version: '2.1', 
-    date: '2023-03-22',
-    description: 'Comprehensive report template'
-  },
-  { 
-    templateId: 'TEMP-003', 
-    templateName: 'Summary Template', 
-    version: '1.2', 
-    date: '2023-05-10',
-    description: 'Brief summary template'
-  },
-];
-
-// Define table columns configuration for CommonTable
-// const tableColumns = (any): any[] => [
-//   {
-//     title: 'Template ID',
-//     dataIndex: 'templateId',
-//     key: 'templateId',
-//   },
-//   {
-//     title: 'Template Name',
-//     dataIndex: 'templateName',
-//     key: 'templateName',
-//   },
-//   {
-//     title: 'Version',
-//     dataIndex: 'version',
-//     key: 'version',
-//   },
-//   {
-//     title: 'Date',
-//     dataIndex: 'date',
-//     key: 'date',
-//   },
-// ];
+import CommonTable from './CommonTable';
+import { createTemplate, getAllTemplates, getTop50Templates, retrieveTemplates } from '@services/templateService';
+import { fetchAllItemGroup, fetchTop50ItemGroup } from '@services/workInstructionService';
+import { GrChapterAdd } from 'react-icons/gr';
 
 const TemplateBuilderMain: React.FC = () => {
-  const cookies = parseCookies();
-  const [site, setSite] = useState<string | null>(cookies.site);
-  const [formData, setFormData] = useState<any>({});
-  const [selected, setSelected] = useState<object>({});
   const { isAuthenticated, token } = useAuth();
-  const [filteredData, setFilteredData] = useState<any[]>(dummyTableData);
-  const [isAdding, setIsAdding] = useState<boolean>(false);
+  const [filteredData, setFilteredData] = useState<any[]>([]);
   const [username, setUsername] = useState<string | null>(null);
-  const [resetValue, setResetValue] = useState<boolean>(false);
-  const [drag, setDrag] = useState<boolean>(false);
   const [call, setCall] = useState<number>(0);
-  const [resetValueCall, setResetValueCall] = useState<number>(0);
   const { t } = useTranslation();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isAddModalVisible, setIsAddModalVisible] = useState<boolean>(false);
   const [form] = Form.useForm();
-  const [fullScreen, setFullScreen] = useState<boolean>(false);
-  const [formChange, setFormChange] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<number>(0);
   const [showEditor, setShowEditor] = useState(false);
   const [editorData, setEditorData] = useState<any>(null);
   const [isFromTableClick, setIsFromTableClick] = useState<boolean>(false);
+  const [rowData, setRowData] = useState<any>(null);
+  const [itemGroupData, setItemGroupData] = useState<any>([]);
+  const [ItemGroupVisible, setItemGroupVisible] = useState(false);
 
   useEffect(() => {
     const fetchResourceData = async () => {
@@ -101,6 +47,14 @@ const TemplateBuilderMain: React.FC = () => {
           console.error('Error decoding token:', error);
         }
       }
+      const cookies = parseCookies();
+      const site = cookies.site;
+      try {
+        const response = await getTop50Templates(site);
+        setFilteredData(response);
+      } catch (error) {
+        console.error('Error fetching templates:', error);
+      }
     };
     fetchResourceData();
   }, [isAuthenticated, username, call]);
@@ -110,43 +64,80 @@ const TemplateBuilderMain: React.FC = () => {
     form.resetFields();
   };
 
-  const handleRowSelect = (row: any) => {
-    console.log("Row selected:", row);
-    setEditorData(row); // pass selected row data
-    setIsFromTableClick(true); // Mark that this is from a table click
-    setShowEditor(true);
+  const handleRowSelect = async (row: any) => {
+    const cookies = parseCookies();
+    const site = cookies.site;
+    const userId = cookies.rl_user_id;
+
+    const payload = {
+      site: site,
+      userId: userId,
+      templateLabel: row.templateLabel,
+      templateVersion: row.templateVersion,
+      currentVersion: row.currentVersion,
+    }
+
+    try {
+      const response = await retrieveTemplates(payload);
+      setIsFromTableClick(true);
+      setShowEditor(true);
+      setRowData(response);
+    } catch (error) {
+      console.error('Error fetching templates:', error);
+    }
   };
 
-  const handleCloseEditor = () => {
-    setShowEditor(false);
-    setEditorData(null);
-    setIsFromTableClick(false);
+  const handleSearchClick = async (searchTerm: string) => {
+    const cookies = parseCookies();
+    const site = cookies.site;
+    const payload = {
+      site: site,
+      templateLabel: searchTerm || '',
+    }
+
+    try {
+      const AllTemplateList = await getAllTemplates(payload);
+      setFilteredData(AllTemplateList);
+    } catch (error) {
+      console.error('Error fetching data fields:', error);
+    }
   };
 
-  const handleAddTemplate = () => {
-    form.validateFields().then(values => {
-      // Create new template and add to table
-      const newId = filteredData.length > 0 ? Math.max(...filteredData.map(item => 
-        item.templateId ? parseInt(item.templateId.split('-')[1]) : 0
-      )) + 1 : 1;
-      
-      const templateId = `TEMP-${String(newId).padStart(3, '0')}`;
-      const currentDate = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-      
-      const newTemplateData = {
-        templateId: templateId,
-        templateName: values.name,
-        version: values.version || '1.0',
-        date: currentDate,
-        description: values.description || ''
+  const handleAddTemplate = async () => {
+    const cookies = parseCookies();
+    const site = cookies.site;
+    const userId = cookies.rl_user_id;
+
+    try {
+      const values = await form.validateFields();
+      const payload = {
+        site: site,
+        userId: userId,
+        templateLabel: values.name,
+        templateVersion: values.version || 'A',
+        currentVersion: values.currentVersion,
+        templateType: values.templateType,
+        productGroup: values.productGroup,
+        groupIds: [],
       };
-      
-      setFilteredData(prev => [...prev, newTemplateData]);
-      
-      // Reset form and close modal
-      form.resetFields();
-      setIsAddModalVisible(false);
-    });
+
+      const response = await createTemplate(payload);
+      if (response.message_details) {
+        message.destroy();
+        message.success(response.message_details.msg)
+        form.resetFields();
+        setIsAddModalVisible(false);
+        setCall(call + 1);
+      } else {
+        message.destroy();
+        message.error('Failed to create template');
+        console.error('Failed to create template:', response.error);
+      }
+    } catch (error) {
+      console.error('Error creating template:', error);
+      message.destroy();
+      message.error('Error creating template');
+    }
   };
 
   const formLayout = {
@@ -155,13 +146,65 @@ const TemplateBuilderMain: React.FC = () => {
   };
 
   const buttonLayout = {
-    wrapperCol: { offset: 6, span: 18 },
+    wrapperCol: { offset: 9, span: 24 },
   };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
+    let newValue = e.target.value.toUpperCase().replace(/[^A-Z0-9_\-\(\)]/g, "");
+
+    const patterns: { [key: string]: RegExp } = {
+      productGroup: /^[A-Z0-9_\-\(\)]*$/,
+    };
+
+    if (patterns[key]?.test(newValue)) {
+      form.setFieldsValue({ [key]: newValue });
+    }
+  };
+
+  const handleCancel = () => {
+    setItemGroupVisible(false);
+  };
+
+  const handleProductGroupClick = async () => {
+    const cookies = parseCookies();
+    const site = cookies.site;
+    const typedValue = form.getFieldValue('productGroup');
+    const newValue = { itemGroup: typedValue };
+
+    try {
+      let response = typedValue ? await fetchAllItemGroup(site, newValue) : await fetchTop50ItemGroup(site);
+      if (response && !response.errorCode) {
+        const formattedData = response.groupNameList.map((item: any, index: number) => ({ id: index, ...item }));
+        setItemGroupData(formattedData);
+      } else {
+        setItemGroupData([]);
+      }
+    } catch (error) {
+      console.error('Error', error);
+    }
+    setItemGroupVisible(true);
+  };
+
+  const handleItemGroupOk = (selectedRow: any) => {
+    console.log(selectedRow,'selectedRow');
+    
+    if (selectedRow) {
+      form.setFieldsValue({ productGroup: selectedRow.itemGroup });
+      message.destroy();
+      message.success('Product group selected');
+    }
+    setItemGroupVisible(false);
+  };
+
+  const ItemGroupColumn = [
+    { title: t("itemGroup"), dataIndex: "itemGroup", key: "itemGroup" },
+    { title: t("groupDescription"), dataIndex: "groupDescription", key: "groupDescription" },
+  ];
 
   // Direct conditional rendering
   if (showEditor) {
     return (
-      <TemplateBuilderContext.Provider value={{ formData, setFormData }}>
+      <TemplateBuilderContext.Provider value={{ call, setCall, setShowEditor, setIsFromTableClick }}>
         <div className={styles.container}>
           <div className={styles.dataFieldNav}>
             <CommonAppBar
@@ -173,7 +216,7 @@ const TemplateBuilderMain: React.FC = () => {
           </div>
           <TemplateEditorScreen
             data={isFromTableClick ? editorData : {}}
-            onClose={handleCloseEditor}
+            rowData={rowData}
             isNewTemplate={!isFromTableClick || (editorData && Object.keys(editorData).length === 0)}
           />
         </div>
@@ -182,7 +225,7 @@ const TemplateBuilderMain: React.FC = () => {
   }
 
   return (
-    <TemplateBuilderContext.Provider value={{ formData, setFormData }}>
+    <TemplateBuilderContext.Provider value={{ call, setCall, setShowEditor, setIsFromTableClick }}>
       <div className={styles.container}>
         <div className={styles.dataFieldNav}>
           <CommonAppBar
@@ -194,10 +237,10 @@ const TemplateBuilderMain: React.FC = () => {
         </div>
         <div className={styles.dataFieldBody}>
           <div className={styles.dataFieldBodyContentsBottom}>
-            <div className={`${styles.commonTableContainer} ${isAdding ? styles.shrink : ''}`}>
+            <div className={styles.commonTableContainer}>
               <TemplateBuilderBar
-                handleSearchClicks={() => { }}
-                handleTop50={() => { }}
+                handleSearchClicks={handleSearchClick}
+                setFilteredData={setFilteredData}
                 button={
                   <InstructionModal title="Template Creator">
                   </InstructionModal>
@@ -205,16 +248,16 @@ const TemplateBuilderMain: React.FC = () => {
               />
               <div className={styles.dataFieldBodyContentsTop}>
                 <Typography className={styles.dataLength}>
-                  {t("templates")}({filteredData ? filteredData.length : 0})
+                  {t("Templates")}({filteredData ? filteredData.length : 0})
                 </Typography>
                 <IconButton onClick={handleAddClick} className={styles.circleButton}>
                   <AddIcon sx={{ fontSize: 30 }} />
                 </IconButton>
               </div>
-              <CommonTable 
-                data={filteredData} 
-                onRowSelect={handleRowSelect} 
-                // columns={tableColumns}
+              <CommonTable
+                data={filteredData || []}
+                onRowSelect={handleRowSelect}
+              // columns={tableColumns}
               />
               <Modal
                 title={t('confirmation')}
@@ -226,7 +269,7 @@ const TemplateBuilderMain: React.FC = () => {
               >
                 <p>{t('alertRow')}</p>
               </Modal>
-              
+
               {/* Add Template Modal */}
               <Modal
                 title={t('Add New Template')}
@@ -234,7 +277,7 @@ const TemplateBuilderMain: React.FC = () => {
                 onCancel={() => setIsAddModalVisible(false)}
                 footer={null}
               >
-                <Form 
+                <Form
                   form={form}
                   name="templateForm"
                   {...formLayout}
@@ -248,37 +291,75 @@ const TemplateBuilderMain: React.FC = () => {
                   >
                     <Input />
                   </Form.Item>
-                  
+
                   <Form.Item
                     name="version"
                     label={t('Version')}
-                    initialValue="1.0"
+                    initialValue="A"
                   >
                     <Input />
                   </Form.Item>
-                  
+
                   <Form.Item
-                    name="description"
-                    label={t('Description')}
+                    name="templateType"
+                    label={t('Template Type')}
                   >
-                    <Input.TextArea rows={4} />
+                    <Select
+                      options={[
+                        { value: "MFR", text: "MFR" },
+                        { value: "BMR", text: "BMR" },
+                        { value: "BPR", text: "BPR" },
+                      ]}
+                      placeholder={t('Select Template Type')}
+                    />
                   </Form.Item>
-                  
+
+                  <Form.Item
+                    name="productGroup"
+                    label={t('Product Group')}
+                  >
+                    <Input
+                      autoComplete='off'
+                      suffix={<GrChapterAdd onClick={() => {
+                        handleProductGroupClick();
+                      }} />}
+                      onChange={(e) => handleInputChange(e, 'productGroup')}
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    name="currentVersion"
+                    label={t('Current Version')}
+                  >
+                    <Switch />
+                  </Form.Item>
+
                   <Form.Item {...buttonLayout}>
-                    <Button 
+                    <Button
                       onClick={() => setIsAddModalVisible(false)}
                       style={{ marginRight: 8 }}
                     >
                       {t('Cancel')}
                     </Button>
-                    <Button 
-                      type="primary" 
+                    <Button
+                      type="primary"
                       htmlType="submit"
                     >
                       {t('Save')}
                     </Button>
                   </Form.Item>
                 </Form>
+              </Modal>
+              <Modal title={t("selectItemGroup")} open={ItemGroupVisible} onCancel={handleCancel} width={800} footer={null}>
+                <Table
+                  style={{ overflow: 'auto' }}
+                  onRow={(record) => ({ onDoubleClick: () => handleItemGroupOk(record) })}
+                  columns={ItemGroupColumn}
+                  dataSource={itemGroupData}
+                  rowKey="item"
+                  pagination={false}
+                  scroll={{ y: 'calc(100vh - 350px)' }}
+                />
               </Modal>
             </div>
           </div>
