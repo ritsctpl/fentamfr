@@ -17,214 +17,14 @@ import TemplateBuilderBar from './TemplateBuilderBar';
 import TemplateEditorScreen from './TemplateEditorScreen';
 import CommonTable from './CommonTable';
 import { createTemplate, getAllTemplates, getTop50Templates, retrieveTemplates } from '@services/templateService';
-import { get } from 'http';
+import { fetchAllItemGroup, fetchTop50ItemGroup } from '@services/workInstructionService';
 import { GrChapterAdd } from 'react-icons/gr';
-import { fetchAllMaterial, fetchTop50Material } from '@services/cycleTimeService';
-
-// const dummyTableData: any[] = [
-//   { 
-//     templateId: 'TEMP-001', 
-//     templateName: 'Standard Template', 
-//     version: 'A', 
-//     date: '2024-03-15',
-//     description: 'A standard template with sections and components',
-//     templateSections: [
-//       {
-//         id: 1,
-//         section: 'Header',
-//         type: 'Section',
-//         heading: 'Document Header',
-//         component: {
-//           title: { type: 'text', content: 'Document Title' },
-//           subtitle: { type: 'text', content: 'Document Subtitle' },
-//           date: { type: 'input', label: 'Document Date' },
-//           author: { type: 'input', label: 'Author Name' }
-//         }
-//       },
-//       {
-//         id: 2,
-//         section: 'Main Content',
-//         type: 'Group',
-//         heading: 'Main Content Group',
-//         sections: [
-//           {
-//             id: 3,
-//             section: 'Introduction',
-//             type: 'Component',
-//             heading: 'Introduction Component',
-//             component: {
-//               text: { type: 'text', content: 'Welcome to this document' },
-//               description: { type: 'text', content: 'This is a detailed introduction section' },
-//               input: { type: 'input', label: 'Additional Notes' },
-//               button: { type: 'button', label: 'Save Notes' }
-//             }
-//           },
-//           {
-//             id: 4,
-//             section: 'Details',
-//             type: 'Component',
-//             heading: 'Details Component',
-//             component: {
-//               table: {
-//                 type: 'table',
-//                 columns: ['Item', 'Description', 'Status'],
-//                 data: [
-//                   ['Item 1', 'Description 1', 'Active'],
-//                   ['Item 2', 'Description 2', 'Pending']
-//                 ]
-//               },
-//               notes: { type: 'text', content: 'Additional details can be added here' }
-//             }
-//           }
-//         ]
-//       }
-//     ]
-//   },
-//   { 
-//     templateId: 'TEMP-002', 
-//     templateName: 'Report Template', 
-//     version: '2.1', 
-//     date: '2024-03-20',
-//     description: 'Comprehensive report template with nested groups',
-//     templateSections: [
-//       {
-//         id: 1,
-//         section: 'Executive Summary',
-//         type: 'Section',
-//         heading: 'Executive Summary Section',
-//         component: {
-//           summary: { type: 'text', content: 'Executive Summary of the Report' },
-//           keyPoints: { type: 'text', content: 'Key points to be highlighted' },
-//           date: { type: 'input', label: 'Report Date' },
-//           status: { type: 'input', label: 'Report Status' }
-//         }
-//       },
-//       {
-//         id: 2,
-//         section: 'Report Body',
-//         type: 'Group',
-//         heading: 'Report Body Group',
-//         sections: [
-//           {
-//             id: 3,
-//             section: 'Findings',
-//             type: 'Component',
-//             heading: 'Findings Component',
-//             component: {
-//               table: {
-//                 type: 'table',
-//                 columns: ['Finding', 'Impact', 'Priority'],
-//                 data: [
-//                   ['Finding 1', 'High', 'Critical'],
-//                   ['Finding 2', 'Medium', 'Important']
-//                 ]
-//               },
-//               notes: { type: 'text', content: 'Additional findings notes' }
-//             }
-//           },
-//           {
-//             id: 4,
-//             section: 'Analysis',
-//             type: 'Component',
-//             heading: 'Analysis Component',
-//             component: {
-//               text: { type: 'text', content: 'Detailed analysis of findings' },
-//               input: { type: 'input', label: 'Analysis Notes' },
-//               button: { type: 'button', label: 'Update Analysis' }
-//             }
-//           }
-//         ]
-//       }
-//     ]
-//   },
-//   { 
-//     templateId: 'TEMP-003', 
-//     templateName: 'Project Template', 
-//     version: '1.2', 
-//     date: '2024-03-25',
-//     description: 'Project documentation template',
-//     templateSections: [
-//       {
-//         id: 1,
-//         section: 'Project Overview',
-//         type: 'Section',
-//         heading: 'Project Overview Section',
-//         component: {
-//           title: { type: 'text', content: 'Project Title' },
-//           description: { type: 'text', content: 'Project Description' },
-//           startDate: { type: 'input', label: 'Start Date' },
-//           endDate: { type: 'input', label: 'End Date' }
-//         }
-//       },
-//       {
-//         id: 2,
-//         section: 'Project Details',
-//         type: 'Group',
-//         heading: 'Project Details Group',
-//         sections: [
-//           {
-//             id: 3,
-//             section: 'Objectives',
-//             type: 'Component',
-//             heading: 'Objectives Component',
-//             component: {
-//               table: {
-//                 type: 'table',
-//                 columns: ['Objective', 'Status', 'Due Date'],
-//                 data: [
-//                   ['Objective 1', 'In Progress', '2024-04-01'],
-//                   ['Objective 2', 'Not Started', '2024-04-15']
-//                 ]
-//               },
-//               notes: { type: 'text', content: 'Additional objective details' }
-//             }
-//           },
-//           {
-//             id: 4,
-//             section: 'Timeline',
-//             type: 'Component',
-//             heading: 'Timeline Component',
-//             component: {
-//               text: { type: 'text', content: 'Project Timeline Overview' },
-//               input: { type: 'input', label: 'Timeline Notes' },
-//               button: { type: 'button', label: 'Update Timeline' }
-//             }
-//           }
-//         ]
-//       }
-//     ]
-//   },
-// ];
-
-// const tableColumns = [
-//   {
-//     title: 'Template Name',
-//     dataIndex: 'templateLabel',
-//     key: 'templateLabel',
-//   },
-//   {
-//     title: 'Template Version',
-//     dataIndex: 'templateVersion',
-//     key: 'templateVersion',
-//   },
-//   {
-//     title: 'Currect Version',
-//     dataIndex: 'currentVersion',
-//     key: 'currentVersion',
-//   }
-// ];
 
 const TemplateBuilderMain: React.FC = () => {
-  const cookies = parseCookies();
   const { isAuthenticated, token } = useAuth();
-  // const [filteredData, setFilteredData] = useState<any[]>(dummyTableData);
   const [filteredData, setFilteredData] = useState<any[]>([]);
-  const [isAdding, setIsAdding] = useState<boolean>(false);
   const [username, setUsername] = useState<string | null>(null);
-  const [resetValue, setResetValue] = useState<boolean>(false);
-  const [drag, setDrag] = useState<boolean>(false);
   const [call, setCall] = useState<number>(0);
-  const [resetValueCall, setResetValueCall] = useState<number>(0);
   const { t } = useTranslation();
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [isAddModalVisible, setIsAddModalVisible] = useState<boolean>(false);
@@ -233,8 +33,8 @@ const TemplateBuilderMain: React.FC = () => {
   const [editorData, setEditorData] = useState<any>(null);
   const [isFromTableClick, setIsFromTableClick] = useState<boolean>(false);
   const [rowData, setRowData] = useState<any>(null);
-  const [itemData, setItemData] = useState<any>([]);
-  const [ItemVisible, setItemVisible] = useState(false);
+  const [itemGroupData, setItemGroupData] = useState<any>([]);
+  const [ItemGroupVisible, setItemGroupVisible] = useState(false);
 
   useEffect(() => {
     const fetchResourceData = async () => {
@@ -310,7 +110,6 @@ const TemplateBuilderMain: React.FC = () => {
 
     try {
       const values = await form.validateFields();
-      // Prepare payload for API call
       const payload = {
         site: site,
         userId: userId,
@@ -318,20 +117,26 @@ const TemplateBuilderMain: React.FC = () => {
         templateVersion: values.version || 'A',
         currentVersion: values.currentVersion,
         templateType: values.templateType,
+        productGroup: values.productGroup,
         groupIds: [],
       };
 
       const response = await createTemplate(payload);
       if (response.message_details) {
+        message.destroy();
         message.success(response.message_details.msg)
         form.resetFields();
         setIsAddModalVisible(false);
         setCall(call + 1);
       } else {
+        message.destroy();
+        message.error('Failed to create template');
         console.error('Failed to create template:', response.error);
       }
     } catch (error) {
       console.error('Error creating template:', error);
+      message.destroy();
+      message.error('Error creating template');
     }
   };
 
@@ -343,11 +148,12 @@ const TemplateBuilderMain: React.FC = () => {
   const buttonLayout = {
     wrapperCol: { offset: 9, span: 24 },
   };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
     let newValue = e.target.value.toUpperCase().replace(/[^A-Z0-9_\-\(\)]/g, "");
 
     const patterns: { [key: string]: RegExp } = {
-      item: /^[A-Z0-9_\-\(\)]*$/,
+      productGroup: /^[A-Z0-9_\-\(\)]*$/,
     };
 
     if (patterns[key]?.test(newValue)) {
@@ -356,41 +162,43 @@ const TemplateBuilderMain: React.FC = () => {
   };
 
   const handleCancel = () => {
-    setItemVisible(false);
+    setItemGroupVisible(false);
   };
 
-  const handleItemClick = async () => {
+  const handleProductGroupClick = async () => {
     const cookies = parseCookies();
     const site = cookies.site;
-    const typedValue = form.getFieldValue('item');
-    const newValue = { item: typedValue };
+    const typedValue = form.getFieldValue('productGroup');
+    const newValue = { itemGroup: typedValue };
 
     try {
-      let response = typedValue ? await fetchAllMaterial(site, newValue) : await fetchTop50Material(site);
+      let response = typedValue ? await fetchAllItemGroup(site, newValue) : await fetchTop50ItemGroup(site);
       if (response && !response.errorCode) {
-        const formattedData = response.itemList.map((item: any, index: number) => ({ id: index, ...item }));
-        setItemData(formattedData);
+        const formattedData = response.groupNameList.map((item: any, index: number) => ({ id: index, ...item }));
+        setItemGroupData(formattedData);
       } else {
-        setItemData([]);
+        setItemGroupData([]);
       }
     } catch (error) {
       console.error('Error', error);
     }
-    setItemVisible(true);
+    setItemGroupVisible(true);
   };
 
-  const handleItemOk = (selectedRow: any) => {
+  const handleItemGroupOk = (selectedRow: any) => {
+    console.log(selectedRow,'selectedRow');
+    
     if (selectedRow) {
-      form.setFieldsValue({ productGroup: selectedRow.item });
+      form.setFieldsValue({ productGroup: selectedRow.itemGroup });
+      message.destroy();
+      message.success('Product group selected');
     }
-    setItemVisible(false);
+    setItemGroupVisible(false);
   };
 
-  const ItemColumn = [
-    { title: t("item"), dataIndex: "item", key: "item" },
-    { title: t("revision"), dataIndex: "revision", key: "revision" },
-    { title: t("description"), dataIndex: "description", key: "description" },
-    { title: t("status"), dataIndex: "status", key: "status" },
+  const ItemGroupColumn = [
+    { title: t("itemGroup"), dataIndex: "itemGroup", key: "itemGroup" },
+    { title: t("groupDescription"), dataIndex: "groupDescription", key: "groupDescription" },
   ];
 
   // Direct conditional rendering
@@ -429,7 +237,7 @@ const TemplateBuilderMain: React.FC = () => {
         </div>
         <div className={styles.dataFieldBody}>
           <div className={styles.dataFieldBodyContentsBottom}>
-            <div className={`${styles.commonTableContainer} ${isAdding ? styles.shrink : ''}`}>
+            <div className={styles.commonTableContainer}>
               <TemplateBuilderBar
                 handleSearchClicks={handleSearchClick}
                 setFilteredData={setFilteredData}
@@ -506,18 +314,18 @@ const TemplateBuilderMain: React.FC = () => {
                     />
                   </Form.Item>
 
-                  {/* <Form.Item
+                  <Form.Item
                     name="productGroup"
                     label={t('Product Group')}
                   >
                     <Input
                       autoComplete='off'
                       suffix={<GrChapterAdd onClick={() => {
-                        handleItemClick();
+                        handleProductGroupClick();
                       }} />}
                       onChange={(e) => handleInputChange(e, 'productGroup')}
                     />
-                  </Form.Item> */}
+                  </Form.Item>
 
                   <Form.Item
                     name="currentVersion"
@@ -542,12 +350,12 @@ const TemplateBuilderMain: React.FC = () => {
                   </Form.Item>
                 </Form>
               </Modal>
-              <Modal title={t("selectItem")} open={ItemVisible} onCancel={handleCancel} width={800} footer={null}>
+              <Modal title={t("selectItemGroup")} open={ItemGroupVisible} onCancel={handleCancel} width={800} footer={null}>
                 <Table
                   style={{ overflow: 'auto' }}
-                  onRow={(record) => ({ onDoubleClick: () => handleItemOk(record) })}
-                  columns={ItemColumn}
-                  dataSource={itemData}
+                  onRow={(record) => ({ onDoubleClick: () => handleItemGroupOk(record) })}
+                  columns={ItemGroupColumn}
+                  dataSource={itemGroupData}
                   rowKey="item"
                   pagination={false}
                   scroll={{ y: 'calc(100vh - 350px)' }}
