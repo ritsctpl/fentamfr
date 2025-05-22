@@ -115,6 +115,7 @@ const CycleTimeMain: React.FC = () => {
 
 
   const handleRowSelect = (row) => {
+    console.log(row, 'row')
     if (formChange) {
       setSelectRowData(row);
       setIsModalVisible(true);

@@ -330,16 +330,46 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
     
     const dataType = component.dataType;
     
+    const componentWrapperStyle = {
+      backgroundColor: '#fff',
+      borderRadius: '8px',
+      // padding: '20px',
+      marginBottom: '20px',
+      // boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+      // border: '1px solid #f0f0f0'
+    };
+
+    const componentLabelStyle = {
+      fontSize: '16px',
+      fontWeight: 500,
+      marginBottom: '12px',
+      color: '#262626',
+      borderBottom: '1px solid #f0f0f0',
+      paddingBottom: '8px'
+    };
+
+    const tableStyle = {
+      width: '100%',
+      border: '1px solid #f0f0f0',
+      borderRadius: '4px',
+      overflow: 'hidden'
+    };
+
+    const inputStyle = {
+      marginBottom: '10px',
+      width: '100%'
+    };
+    
     switch (dataType) {
       case 'Input':
         return (
-          <div key={component._id} className={styles.previewInputComponent}>
-            <div className={styles.componentLabel}>{component.componentLabel}</div>
+          <div key={component._id} style={componentWrapperStyle}>
+            <div style={componentLabelStyle}>{component.componentLabel}</div>
             <Input 
               placeholder={component.defaultValue || 'Enter value'}
               addonAfter={component.unit} 
               required={component.required}
-              style={{ marginBottom: '10px', width: '100%' }}
+              style={inputStyle}
             />
           </div>
         );
@@ -358,11 +388,32 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
             // Render based on the column type
             switch (col.type) {
               case 'Input':
-                return <Input placeholder={text || ''} size="small" defaultValue={text} />;
+                return (
+                  <Input 
+                    placeholder={text || ''} 
+                    size="small" 
+                    defaultValue={text}
+                    style={{ width: '100%', minWidth: '120px' }}
+                  />
+                );
               case 'Select':
-                return <Select style={{ width: '100%' }} size="small" placeholder={text || ''} />;
+                return (
+                  <Select 
+                    style={{ width: '100%', minWidth: '120px' }} 
+                    size="small" 
+                    placeholder={text || ''}
+                  />
+                );
               case 'Number':
-                return <Input type="number" placeholder={text || '0'} size="small" defaultValue={text} />;
+                return (
+                  <Input 
+                    type="number" 
+                    placeholder={text || '0'} 
+                    size="small" 
+                    defaultValue={text}
+                    style={{ width: '100%', minWidth: '120px' }}
+                  />
+                );
               default:
                 return text;
             }
@@ -376,47 +427,38 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
         }));
         
         return (
-          <div key={component._id} className={styles.previewTableComponent}>
-            {/* <div className={styles.componentLabel}>{component.componentLabel}</div> */}
-            <div className={styles.tableContainer}>
+          <div key={component._id} style={componentWrapperStyle}>
+            <div style={componentLabelStyle}>{component.componentLabel}</div>
+            <div style={tableStyle}>
               <AntTable
                 bordered
                 size="small"
                 pagination={false}
                 columns={columns}
                 dataSource={dataSource}
+                style={{ 
+                  backgroundColor: '#fff',
+                }}
               />
-              {component.unit && <div className={styles.tableUnit}>{component.unit}</div>}
+              {component.unit && (
+                <div style={{ 
+                  padding: '8px 16px',
+                  borderTop: '1px solid #f0f0f0',
+                  color: '#595959',
+                  fontSize: '12px'
+                }}>
+                  Unit: {component.unit}
+                </div>
+              )}
             </div>
           </div>
         );
-      // case 'Reference Table':
-      //   return (
-      //     <div key={component._id} className={styles.previewTableComponent}>
-      //       <div className={styles.componentLabel}>{component.componentLabel}</div>
-      //       <div className={styles.tableContainer}>
-      //         <AntTable
-      //           bordered
-      //           size="small"
-      //           pagination={false}
-      //           columns={component.columns || [
-      //             { title: 'Reference', dataIndex: 'reference', key: 'reference' },
-      //             { title: 'Value', dataIndex: 'value', key: 'value' },
-      //           ]}
-      //           dataSource={component.data || [
-      //             { key: '1', reference: 'Ref 1', value: '' },
-      //             { key: '2', reference: 'Ref 2', value: '' },
-      //           ]}
-      //         />
-      //       </div>
-      //     </div>
-      //   );
       default:
         return (
-          <div key={component._id} className={styles.previewComponent}>
-            <div className={styles.componentLabel}>{component.componentLabel}</div>
-            <div className={styles.componentValue}>
-              <Input placeholder="Component value" />
+          <div key={component._id} style={componentWrapperStyle}>
+            <div style={componentLabelStyle}>{component.componentLabel}</div>
+            <div style={{ padding: '8px 0' }}>
+              <Input placeholder="Component value" style={inputStyle} />
             </div>
           </div>
         );
@@ -936,8 +978,8 @@ const TemplateEditorScreen: React.FC<TemplateEditorScreenProps> = ({ data, onClo
       <div className={styles.header}>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <span style={{ fontSize: '22px', fontWeight: '600' }}>{rowData?.templateLabel || ''} <span style={{ fontSize: '14px', fontWeight: '400' }}>( Template Editor )</span></span>
-          <span style={{ marginTop: '10px', fontSize: '14px' }}>Created on: {rowData?.createdDateTime || ''}</span>
-          <span style={{ marginTop: '3px', fontSize: '14px' }}>Modified on: {rowData?.updatedDateTime || ''}</span>
+          {/* <span style={{ marginTop: '10px', fontSize: '14px' }}>Created on: {rowData?.createdDateTime || ''}</span>
+          <span style={{ marginTop: '3px', fontSize: '14px' }}>Modified on: {rowData?.updatedDateTime || ''}</span> */}
         </div>
         <span style={{ display: 'flex', alignItems: 'center', fontSize: '14px' }} className={styles.actionButtons}>
           <Tooltip title={t("copy")}>

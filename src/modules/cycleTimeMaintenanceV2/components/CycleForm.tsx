@@ -28,9 +28,10 @@ interface CycleDynamicFormProps {
     data: any;
     fields: string[];
     onValuesChange: (changedValues: FormValues) => void;
+    onSearch?: (payload: any) => void;
 }
 
-const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChange }) => {
+const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChange, onSearch }) => {
     const { t } = useTranslation();
     const [form] = Form.useForm();
     const { formData, setFormData, isFormDisabled, setIsFormDisabled, call, setCall, formChange, setFormChange } = useContext<any>(CycleTimeUseContext);
@@ -125,6 +126,63 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
         }
     }, [fields, form]);
 
+    const validateItemOrOperation = async (key: string, value: string) => {
+        const cookies = parseCookies();
+        const site = cookies.site;
+
+        try {
+            let response;
+            let versionKey: string;
+            let versionFieldName: string;
+
+            if (key === 'item') {
+                response = await fetchAllMaterial(site, { item: value });
+                versionKey = 'revision';
+                versionFieldName = 'itemVersion';
+            } else if (key === 'operation') {
+                response = await fetchAllOperation(site, { operation: value });
+                versionKey = 'revision';
+                versionFieldName = 'operationVersion';
+            } else {
+                return false;
+            }
+
+            if (response && !response.errorCode) {
+                const matchingItems = key === 'item' 
+                    ? response.itemList 
+                    : response.operationList;
+
+                const matchedItem = matchingItems.find((item: any) => 
+                    item[key.toLowerCase()] === value.toUpperCase()
+                );
+
+                if (matchedItem) {
+                    // Automatically set the version if found
+                    form.setFieldsValue({ 
+                        [versionFieldName]: matchedItem[versionKey] 
+                    });
+                    onValuesChange({ 
+                        [versionFieldName]: matchedItem[versionKey].toUpperCase() 
+                    });
+                    return true;
+                } else {
+                    // Clear version if no match found
+                    form.setFieldsValue({ 
+                        [versionFieldName]: '' 
+                    });
+                    onValuesChange({ 
+                        [versionFieldName]: '' 
+                    });
+                    return false;
+                }
+            }
+            return false;
+        } catch (error) {
+            console.error(`Error validating ${key}:`, error);
+            return false;
+        }
+    };
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
         let newValue = e.target.value.toUpperCase().replace(/[^A-Z0-9_\-\(\)]/g, "");
 
@@ -154,6 +212,11 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
             } else {
                 form.setFieldsValue({ [key]: newValue });
                 onValuesChange({ [key]: newValue });
+
+                // Trigger validation for item and operation
+                if (key === 'item' || key === 'operation') {
+                    validateItemOrOperation(key, newValue);
+                }
             }
         }
     };
@@ -167,6 +230,18 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
             // Validate required fields based on form state
             const hasResource = formData?.resource || formData?.resourceType;
             const hasOperation = formData?.operation;
+            const hasItem = formData?.item;
+            
+            // Validate versions for item and operation
+            if (hasItem && !formData?.itemVersion) {
+                message.error(t('Please validate Item Version'));
+                return;
+            }
+            
+            if (hasOperation && !formData?.operationVersion) {
+                message.error(t('Please validate Operation Version'));
+                return;
+            }
             
             // Determine which time field is required
             if ((hasResource || hasOperation) && (!formData?.cycleTime && formData?.cycleTime !== 0)) {
@@ -190,6 +265,8 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
 
             const payload = {
                 ...formData,
+                resource: formData?.resource ? formData?.resource : '',
+                resourceType: formData?.resourceType ? formData?.resourceType : '',
                 site: site,
                 userId: userId,
                 time: formattedTime,
@@ -221,8 +298,16 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
     };
 
     const onCancel = () => {
-        setIsFormDisabled(true);
+        // Reset form fields
         form.resetFields();
+        
+        // Reset context state
+        setFormData(defaultCycleTimeRequest);
+        setFormChange(false);
+        setIsFormDisabled(true);
+        setTimeValue(dayjs().hour(0).minute(0).second(0));
+        setCycleTimeEnabled(true);
+        setManufacturedTimeEnabled(false);
     };
 
     // const handleBrowseInputChange = (fieldName: string, value: string) => {
@@ -301,17 +386,17 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
             form.setFieldsValue({ resource: selectedRow.resource });
             onValuesChange({ resource: selectedRow.resource });
 
-            try {
-                const response = await RetriveResourceSelectedRow(site, { resource: selectedRow.resource });
-                // Check if response has the expected structure and data
-                if (response?.resourceTypeList?.length > 0) {
-                    const resourceType = response.resourceTypeList[0].resourceType;
-                    form.setFieldsValue({ resourceType: resourceType });
-                    onValuesChange({ resourceType: resourceType });
-                }
-            } catch (error) {
-                console.error('Error fetching resource type:', error);
-            }
+            // try {
+            //     const response = await RetriveResourceSelectedRow(site, { resource: selectedRow.resource });
+            //     // Check if response has the expected structure and data
+            //     if (response?.resourceTypeList?.length > 0) {
+            //         const resourceType = response.resourceTypeList[0].resourceType;
+            //         form.setFieldsValue({ resourceType: resourceType });
+            //         onValuesChange({ resourceType: resourceType });
+            //     }
+            // } catch (error) {
+            //     console.error('Error fetching resource type:', error);
+            // }
         }
         setResourceVisible(false);
     };
@@ -528,6 +613,26 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
         setInstructionVisible(true)
     };
 
+    const handleSearch = async () => {
+        const cookies = parseCookies();
+        const site = cookies.site;
+        const userId = cookies.rl_user_id;
+
+        // Get current form values
+        const formValues = form.getFieldsValue();
+        const searchPayload = {
+            resource: formValues.resource || '',
+            resourceType: formValues.resourceType || '',
+            workCenter: formValues.workCenter || '',
+            item: formValues.item || ''
+        };
+
+        // Call the search function from parent
+        if (onSearch) {
+            onSearch(searchPayload);
+        }
+    };
+
     return (
         <Form
             form={form}
@@ -685,11 +790,16 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
                     <Button type="primary" htmlType="submit" style={{ marginRight: '10px' }}>
                         Save
                     </Button>
-                    <Button onClick={onCancel} style={{ marginRight: '10px' }}>
-                        Cancel
+                    <Button onClick={() => onCancel()} style={{ marginRight: '10px' }}>
+                        {t("cancel")}
                     </Button>
-                    <Button onClick={onShowInstructions}>
-                        <QuestionCircleOutlined />
+                    {/* <Button onClick={handleSearch} style={{ marginRight: '10px' }}>{t("search")}</Button> */}
+                    <Button 
+                        icon={<QuestionCircleOutlined />} 
+                        onClick={onShowInstructions} 
+                        style={{ marginRight: '10px' }}
+                    >
+                        {t("instructions")}
                     </Button>
                 </Col>
             </Row>

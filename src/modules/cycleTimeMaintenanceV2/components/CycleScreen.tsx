@@ -6,14 +6,13 @@ import jwtDecode from 'jwt-decode';
 import React, { useEffect, useState } from 'react';
 import styles from '@modules/cycleTimeMaintenance/styles/CycleTime.module.css';
 import { useTranslation } from 'react-i18next';
-import { Form, Table, Modal, message } from 'antd';
-import { EditOutlined } from '@ant-design/icons';
-import CycleDynamicForm from './CycleDynamicForm';
+import { Form, Modal, message } from 'antd';
 import { CycleTimeUseContext } from '../hooks/CycleTimeUseContext';
 import { CycleTimeRequest, defaultCycleTimeRequest } from '../types/cycleTimeTypes';
 import CycleForm from './CycleForm';
 import CommonTable from './CommonTable';
-import { fetchCycleTimes, retriveCycleTimeRow } from '@services/cycleTimeService';
+import { fetchCycleTimes, retriveCycleTimeRow, fetchAllResource, fetchAllWorkCenter, fetchAllMaterial } from '@services/cycleTimeService';
+import { fetchAllResourceType } from '@services/workInstructionService';
 import { parseCookies } from 'nookies';
 
 interface DecodedToken {
@@ -69,6 +68,8 @@ const CycleScreen: React.FC = () => {
           try {
             const item = await fetchCycleTimes(site);
             const itemWithoutId = item.map(({ itemId,material,materialVersion, ...rest }) => rest);
+            console.log(itemWithoutId, 'item without id')
+            
             setFilteredData(itemWithoutId);
             setCall(0)
           } catch (error) {
@@ -96,6 +97,29 @@ const CycleScreen: React.FC = () => {
 
     const handleSiteChange = (newSite: string) => {
         console.log(newSite, 'new site')
+        // Reset form state when site changes
+        form.resetFields();
+        setFormData(defaultCycleTimeRequest);
+        setFormChange(false);
+        setIsFormDisabled(true);
+        setActiveTab(0);
+    };
+
+    const resetFormState = () => {
+        // Reset form fields
+        form.resetFields();
+        
+        // Reset main state
+        setFormData(defaultCycleTimeRequest);
+        setFormChange(false);
+        setIsFormDisabled(true);
+        setActiveTab(0);
+        setSelected({});
+        setSelectRowData(null);
+        
+        // Force re-render of components by triggering call state update
+        // This ensures any cached data in child components is also refreshed
+        setCall(prevCall => prevCall + 1);
     };
 
     const fieldsFormData = [
@@ -122,16 +146,26 @@ const CycleScreen: React.FC = () => {
 
     const handleRowSelect = (row) => {
         if (formChange) {
-          setSelectRowData(row);
-          setFormChange(false)
+            Modal.confirm({
+                title: t('confirm'),
+                content: t('closePageMsg'),
+                okText: t('ok'),
+                cancelText: t('cancel'),
+                onOk: () => {
+                    resetFormState();
+                    SelectRow(row);
+                    setSelected(row);
+                    setActiveTab(0);
+                }
+            });
         } else {
-          SelectRow(row);
-          setSelected(row)
-          setActiveTab(0);
+            SelectRow(row);
+            setSelected(row);
+            setActiveTab(0);
         }
-      };
+    };
     
-      const SelectRow = async (row) => {
+    const SelectRow = async (row) => {
         const cookies = parseCookies();
         const site = cookies.site;
         const userId = cookies.rl_user_id;
@@ -157,7 +191,72 @@ const CycleScreen: React.FC = () => {
         } catch (error) {
           console.error('Error fetching data fields:', error);
         }
-      };
+    };
+
+    const handleSearch = async (searchPayload: any) => {
+        console.log(searchPayload, 'search payload')
+        const searchPayloads : any = {
+            itemAndVersion: searchPayload?.itemAndVersion || searchPayload?.item,
+            resource: searchPayload?.resource,
+            resourceType: searchPayload?.resourceType,
+            workCenter: searchPayload?.workCenter
+        }
+        
+        try {
+            // Fetch all data or use existing data
+            const allData = await fetchCycleTimes(site);
+            
+            // If no search criteria is provided, show all data
+            if (!searchPayloads.itemAndVersion && !searchPayloads.resource && 
+                !searchPayloads.resourceType && !searchPayloads.workCenter) {
+                const itemWithoutId = allData.map(({ itemId, material, materialVersion, ...rest }) => rest);
+                setFilteredData(itemWithoutId);
+                resetFormState(); // Reset form when showing all data
+                return;
+            }
+
+            // Filter data based on search criteria
+            const filteredItems = allData.filter(item => {
+                // Match by item/version if provided
+                if (searchPayloads.itemAndVersion && 
+                    !item.itemAndVersion?.toLowerCase().includes(searchPayloads.itemAndVersion.toLowerCase())) {
+                    return false;
+                }
+                
+                // Check if any record matches the remaining criteria
+                if (item.records && item.records.length > 0) {
+                    return item.records.some(record => {
+                        const resourceMatch = !searchPayloads.resource || 
+                            (record.resource && record.resource.toLowerCase().includes(searchPayloads.resource.toLowerCase()));
+                        
+                        const resourceTypeMatch = !searchPayloads.resourceType || 
+                            (record.resourceType && record.resourceType.toLowerCase().includes(searchPayloads.resourceType.toLowerCase()));
+                        
+                        const workCenterMatch = !searchPayloads.workCenter || 
+                            (record.workCenter && record.workCenter.toLowerCase().includes(searchPayloads.workCenter.toLowerCase()));
+                        
+                        return resourceMatch && resourceTypeMatch && workCenterMatch;
+                    });
+                }
+                
+                return false;
+            });
+            
+            // Format data for display
+            const itemWithoutId = filteredItems.map(({ itemId, material, materialVersion, ...rest }) => rest);
+            setFilteredData(itemWithoutId);
+            
+            // Reset form state if no results found
+            if (itemWithoutId.length === 0) {
+                resetFormState();
+                message.info('No records found for the search criteria.');
+            }
+
+        } catch (error) {
+            console.error('Error filtering data:', error);
+            message.error('Failed to filter data');
+        }
+    };
 
     return (
         <CycleTimeUseContext.Provider value={{ formData, setFormData, setFormChange, formChange, activeTab, setActiveTab, isFormDisabled, setIsFormDisabled, call, setCall }}>
@@ -177,6 +276,7 @@ const CycleScreen: React.FC = () => {
                     data={formData}
                     fields={fieldsFormData}
                     onValuesChange={handleValuesChange}
+                    onSearch={handleSearch}
                 />
 
                 <CommonTable data={filteredData} onRowSelect={handleRowSelect}/>
