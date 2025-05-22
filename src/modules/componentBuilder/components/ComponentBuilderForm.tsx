@@ -137,7 +137,8 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
         newColumnNames[index] = {
             title: value,
             type: newColumnNames[index]?.type || 'Input',
-            dataIndex: camelCaseKeyName
+            dataIndex: camelCaseKeyName,
+            required: newColumnNames[index]?.required || false
         };
         setColumnNames(newColumnNames);
 
@@ -264,155 +265,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
         );
     }
 
-    const renderTablePreview = () => {
-        if (!payloadData?.tableConfig) return null;
-
-        const items: MenuProps['items'] = [
-            {
-                key: 'Integer',
-                label: 'Integer',
-            },
-            {
-                key: 'Decimal',
-                label: 'Decimal',
-            },
-            {
-                key: 'Text',
-                label: 'Text',
-            },
-            {
-                key: 'TextArea',
-                label: 'TextArea',
-            },
-            {
-                key: 'Datepicker',
-                label: 'Datepicker',
-            },
-            {
-                key: 'DateTimePicker',
-                label: 'DateTimePicker',
-            },
-            {
-                key: 'Switch',
-                label: 'Switch',
-            },
-        ];
-
-        const columns = Array.from({ length: payloadData?.tableConfig?.columns || 0 }).map((_, index) => ({
-            title: (
-                <div style={{ display: 'flex' }}>
-                    <Input
-                        value={columnNames[index]?.title || ''}
-                        onChange={(e) => handleColumnNameChange(index, e.target.value)}
-                        placeholder={`Column ${index + 1}`}
-                        style={{ width: '100%' }}
-                    />
-                    <Dropdown
-                        menu={{
-                            items,
-                            selectable: true,
-                            defaultSelectedKeys: ['Input'],
-                            onSelect: (info) => {
-                                // Update column type when selected
-                                const updatedColumnNames = [...columnNames];
-                                updatedColumnNames[index] = {
-                                    title: updatedColumnNames?.[index]?.title || '',
-                                    type: info.key as string
-                                };
-                                setColumnNames(updatedColumnNames);
-
-                                // Update payload with the new column type
-                                const updatedPayloadData = {
-                                    ...payloadData,
-                                    tableConfig: {
-                                        ...payloadData?.tableConfig,
-                                        columnNames: updatedColumnNames
-                                    }
-                                };
-                                setPayloadData(updatedPayloadData);
-                            }
-                        }}
-                    >
-                        <Typography.Link style={{
-                            marginLeft: '5px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
-                            <Space >
-                                <DownOutlined style={{ verticalAlign: 'middle' }} />
-                            </Space>
-                        </Typography.Link>
-                    </Dropdown>
-                </div>
-            ),
-            dataIndex: `col${index}`,
-            key: `col${index}`,
-            width: 200,
-            render: (_: any, record: any) => {
-                const columnType = columnNames[index]?.type || 'Input';
-
-                switch (columnType) {
-                    case 'TextArea':
-                        return (
-                            <Input.TextArea
-                                style={{ width: '100%' }}
-                                placeholder={'Enter TextArea'}
-                            />
-                        );
-                    case 'Datepicker':
-                        return (
-                            <DatePicker
-                                style={{ width: '100%' }}
-                                placeholder={'Select Date'}
-                            />
-                        );
-                    case 'DateTimePicker':
-                        return (
-                            <DatePicker
-                                showTime
-                                style={{ width: '100%' }}
-                                placeholder='Select date time'
-                            />
-                        );
-                    case 'Switch':
-                        return (
-                            <Switch />
-                        );
-                    default:
-                        return (
-                            <Input
-                                style={{ width: '100%' }}
-                                placeholder={'Enter ' + columnType}
-                            />
-                        );
-                }
-            }
-        }));
-
-        const previewData = Array.from({ length: Number(payloadData?.tableConfig?.rows) || 1 }).map((_, rowIndex) => ({
-            key: String(rowIndex + 1),
-            ...Object.fromEntries(Array.from({ length: Number(payloadData?.tableConfig?.columns) || 0 }).map((_, colIndex) =>
-                [`col${colIndex}`, '']
-            ))
-        }));
-
-        return (
-            <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
-                <Table
-                    title={() => 'Table Preview'}
-                    columns={columns}
-                    dataSource={previewData}
-                    pagination={false}
-                    bordered
-                    size="small"
-                    scroll={{ x: true, y: 'calc(100vh - 450px)' }}
-                    style={{ width: '99%' }}
-
-                />
-            </div>
-        );
-    }
+    
 
     const renderReferenceTablePreview = () => {
         if (!payloadData?.tableConfig) return null;
@@ -455,11 +308,41 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
         const columns = Array.from({ length: Number(payloadData?.tableConfig?.columns) || 0 }).map((_, index) => ({
             title: (
                 <div style={{ display: 'flex' }}>
+                     {columnNames[index]?.required && (
+                                    <span style={{ color: 'red', marginRight: '5px' }}>*</span>
+                                )}
                     <Input
                         value={columnNames[index]?.title || ''}
                         onChange={(e) => handleColumnNameChange(index, e.target.value)}
                         placeholder={`Column ${index + 1}`}
                         style={{ width: '100%' }}
+                        suffix={
+                            <>
+                               
+                                <Switch
+                                    size="small"
+                                    checked={columnNames[index]?.required || false}
+                                    onChange={(checked) => {
+                                        const updatedColumnNames = [...columnNames];
+                                        updatedColumnNames[index] = {
+                                            ...updatedColumnNames[index],
+                                            required: checked
+                                        };
+                                        setColumnNames(updatedColumnNames);
+
+                                        // Update payload with the new column required status
+                                        const updatedPayloadData = {
+                                            ...payloadData,
+                                            tableConfig: {
+                                                ...payloadData?.tableConfig,
+                                                columnNames: updatedColumnNames
+                                            }
+                                        };
+                                        setPayloadData(updatedPayloadData);
+                                    }}
+                                />
+                            </>
+                        }
                     />
                     <Dropdown
 
@@ -891,11 +774,11 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                     onChange={(value) => handleInputChange("unit", value)}
                                 >
                                     <Option value="kg">kg</Option>
-                                    <Option value="lbs">lbs</Option>
                                     <Option value="g">g</Option>
                                     <Option value="m">m</Option>
                                     <Option value="cm">cm</Option>
                                     <Option value="mm">mm</Option>
+                                    <Option value="%">%</Option>
                                 </Select>
                             </Form.Item>
                         </Col>
@@ -1023,11 +906,11 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                         onChange={(value) => handleInputChange("unit", value)}
                     >
                         <Option value="kg">kg</Option>
-                        <Option value="lbs">lbs</Option>
                         <Option value="g">g</Option>
                         <Option value="m">m</Option>
                         <Option value="cm">cm</Option>
                         <Option value="mm">mm</Option>
+                        <Option value="%">%</Option>
                     </Select>
                 </Form.Item>
 

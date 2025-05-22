@@ -165,12 +165,12 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
             return;
         }
 
-        // if (payloadData?.dataType == "Table") {
-        //     if ((payloadData?.tableConfig?.columns == "" || payloadData?.tableConfig?.columns == null || payloadData?.tableConfig?.columns == undefined)) {
-        //         message.error("No. of columns cannot be empty");
-        //         return;
-        //     }
-        // }
+        if (payloadData?.dataType == "Table") {
+            if ((payloadData?.tableConfig?.columns == "" || payloadData?.tableConfig?.columns == null || payloadData?.tableConfig?.columns == undefined)) {
+                message.error("No. of columns cannot be empty");
+                return;
+            }
+        }
 
         // New validation for table column names
         if (payloadData?.dataType == 'Table') {
@@ -178,19 +178,18 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
             const numberOfColumns = parseInt(payloadData?.tableConfig?.columns || '0', 10);
 
             // Check if column names are provided for all columns
-            // if (columnNames.length != numberOfColumns) {
-            //     message.error(`Please provide names for all ${numberOfColumns} columns`);
-            //     return;
-            // }
+            if (columnNames.length != numberOfColumns) {
+                message.error(`Please provide names for all ${numberOfColumns} columns`);
+                return;
+            }
 
             // Check if any column name is empty
-            // const hasEmptyColumnName = columnNames.some(name => !name || name.trim() == '');
             const hasEmptyColumnName = columnNames.some(item => !item?.title || item?.title?.trim() == '');
 
-            // if (hasEmptyColumnName) {
-            //     message.error("Column names cannot be empty");
-            //     return;
-            // }
+            if (hasEmptyColumnName) {
+                message.error("Column names cannot be empty");
+                return;
+            }
         }
 
         // Validation for Reference Table column names
@@ -367,37 +366,43 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                         }
                         const dummyData = {
                             "site": "1004",
-                            "componentLabel": "hjj",
-                            "dataType": "Reference Table",
+                            "handle": "ComponentBO:1004,test002",
+                            "componentLabel": "test002",
+                            "dataType": "Table",
                             "unit": "kg",
                             "defaultValue": null,
                             "required": false,
                             "validation": "",
-                            "dropdownOptions": [],
                             "apiUrl": "",
                             "tableConfig": {
                                 "columns": "2",
                                 "columnNames": [
                                     {
-                                        "title": "555",
-                                        "type": "Input",
-                                        "dataIndex": "555"
+                                        "title": "date time",
+                                        "type": "DateTimePicker",
+                                        "dataIndex": "dateTime",
+                                        "required": true
                                     },
                                     {
-                                        "title": "66",
+                                        "title": "age",
                                         "type": "Input",
-                                        "dataIndex": "66"
+                                        "dataIndex": "age",
+                                        "required": false
                                     }
                                 ],
-                                "rows": 1,
+                                "rows": "2",
                                 "rowData": {
-                                    "row1-col0": "22",
-                                    "row1-col1": ""
+                                    "row2-col0": "2025-05-22 18:37:13",
+                                    "row2-col1": "",
+                                    "row1-col0": "2025-05-22 18:37:07"
                                 }
                             },
-                            
-                            
-                            "userId": "rits_admin"
+                            "active": 1,
+                            "userId": "rits_admin",
+                            "createdDateTime": "2025-05-22T18:30:41.144",
+                            "modifiedDateTime": "2025-05-22T18:37:21.766",
+                            "dataIndex": "test002",
+                            "rowData": []
                         }
                         setPayloadData(response);
                         setSelectedRowData(response);
