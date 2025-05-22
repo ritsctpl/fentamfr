@@ -453,7 +453,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                 <Input.TextArea
                                     value={payloadData?.validation}
                                     onChange={(e) => handleInputChange("validation", e.target.value)}
-                                    rows={2}
+                                    rows={1}
                                 />
                             </Form.Item>
                         </Col>
