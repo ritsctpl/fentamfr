@@ -1163,4 +1163,8 @@ export const englishLanguage = {
 
   "productGroup":"Product Group",
   "selectProductGroup":"Select Product Group",
+  // Section Builder
+  "sectionLabel": "Section Label",
+  "instructions": "Instructions", 
+  "effectiveDateTime": "Effective Date Time"
 }
