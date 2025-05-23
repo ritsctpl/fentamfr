@@ -155,26 +155,40 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
     }
   };
 
-  const handleDelete = async (record: any) => {
+  const handleDelete = async (record: any, parentRecord?: any) => {
     const cookies = parseCookies();
     const site = cookies.site;
     const userId = cookies.rl_user_id;
-
+    
     try {
+      // Extract item and itemVersion from parent record if available
+      let itemInfo = {};
+      if (parentRecord && parentRecord.itemAndVersion) {
+        const [itemWithVersion, _] = parentRecord.itemAndVersion.split(' ');
+        const [item, itemVersion] = itemWithVersion?.split('/') || ['', ''];
+        itemInfo = {
+          item,
+          itemVersion
+        };
+      }
+      
       const payload = {
         site: site,
         userId: userId,
         resourceType: record.resourceType,
         time: record.time,
-        ...record  
+        ...record,
+        ...itemInfo
       }
       
       const rowData = await retriveCycleTimeRow(site, payload);
+      message.destroy();
       const response = await deleteCycleTime(site, userId, rowData);
       if (response.message) {
         message.error(response.message)
       }
       else {
+        message.destroy();
         message.success(response.message_details.msg)
         setCall(call + 1);
         setFormChange(false)
@@ -210,19 +224,19 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
       {
         title: t('actions'),
         key: 'actions',
-        render: (_, record: RecordItem) => (
+        render: (_, nestedRecord: RecordItem) => (
           <span onClick={(e) => e.stopPropagation()}>
-            {(record.resource || record.resourceType) && (
+            {(nestedRecord.resource || nestedRecord.resourceType) && (
               <AiFillEdit
                 className={styles.actionIcon}
-                onClick={() => handleEdit(record)}
+                onClick={() => handleEdit(nestedRecord)}
                 style={{ color: 'green', marginRight: 8 }}
               />
             )}
             <Popconfirm
               title="Delete the task"
               description="Are you sure to delete this cycle time?"
-              onConfirm={() => handleDelete(record)}
+              onConfirm={() => handleDelete(nestedRecord, record)}
               onCancel={() => console.log('Cancel')}
               okText="Yes"
               cancelText="No"

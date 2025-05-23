@@ -66,14 +66,24 @@ const CycleTimeBody: React.FC<CycleTimeBodyProps> = ({ selected,
                 okText: t('ok'),
                 cancelText: t('cancel'),
                 onOk: async () => {
-                    onClose();
+                    // Reset all form states
+                    form.resetFields();
+                    setFormData(defaultCycleTimeRequest);
                     setFormChange(false);
+                    setIsFormDisabled(true);
+                    setActiveTab(0);
+                    onClose();
                 }
             });
         }
         else{
-            onClose();
+            // Reset all form states even if no changes
+            form.resetFields();
+            setFormData(defaultCycleTimeRequest);
             setFormChange(false);
+            setIsFormDisabled(true);
+            setActiveTab(0);
+            onClose();
         }
     };
 
@@ -145,14 +155,24 @@ const CycleTimeBody: React.FC<CycleTimeBodyProps> = ({ selected,
                 okText: t('ok'),
                 cancelText: t('cancel'),
                 onOk: async () => {
+                    // Reset all form states
+                    form.resetFields();
+                    setFormData(defaultCycleTimeRequest);
                     setFormChange(false);
+                    setIsFormDisabled(true);
+                    setActiveTab(0);
                     onClose();
                 }
             });
         }
         else{
-            onClose();
+            // Reset all form states even if no changes
+            form.resetFields();
+            setFormData(defaultCycleTimeRequest);
             setFormChange(false);
+            setIsFormDisabled(true);
+            setActiveTab(0);
+            onClose();
         }
     };
 
