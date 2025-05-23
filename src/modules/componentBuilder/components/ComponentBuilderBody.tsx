@@ -452,7 +452,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
             cancelText: t('cancel'),
             onOk: async () => {
                 // Proceed with the API call if confirmed
-                onClose();
+                setPayloadData(defaultFormData);
             },
             onCancel() {
             },
@@ -485,7 +485,8 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                     if (!response.errorCode) {
                         message.success(response?.message_details?.msg);
                         setCall(call + 1);
-                        onClose();
+                        setPayloadData(defaultFormData);
+                        setSelectedRowData(null);
                         setShowAlert(false);
                     }
                     else {
@@ -557,6 +558,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                             defaultValue: form.getFieldValue('defaultValue'),
                             required: form.getFieldValue('required'),
                             validation: form.getFieldValue('validation'),
+                            ...(payloadData?.dataType === 'Table' && { tableConfig: payloadData?.tableConfig }),
                             userId: user
                         }
 
@@ -659,7 +661,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                             </div>
 
                             <div className={styles.actionButtons}>
-                                {(payloadData?.dataType != 'Table' && payloadData?.dataType != 'Reference Table') &&
+                                {/* {(payloadData?.dataType != 'Table' && payloadData?.dataType != 'Reference Table') &&
                                     <Tooltip title={fullScreen ? "Exit Full Screen" : "Enter Full Screen"}>
                                         <Button
                                             onClick={handleOpenChange}
@@ -668,7 +670,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                                             {fullScreen ? <CloseFullscreenIcon sx={{ color: '#1874CE' }} /> : <OpenInFullIcon sx={{ color: '#1874CE' }} />}
                                         </Button>
                                     </Tooltip>
-                                }
+                                } */}
 
                                 {selectedRowData && (
                                     <>
@@ -704,7 +706,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
 
                     <Row className={styles["section-builder-container"]}>
                         {/* Left side: List of dummy components */}
-                        <Col span={4} className={styles["left-section"]}>
+                        <Col span={5} className={styles["left-section"]}>
                             <div
                                 style={{
                                     display: "flex",
@@ -781,23 +783,10 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                                                             width: "100%",
                                                         }}
                                                     >
-                                                        <div
-                                                            style={{ display: "flex", flexDirection: "column" }}
-                                                        >
                                                             <span style={{ fontWeight: 400 }}>
                                                                 {component.componentLabel}
                                                             </span>
-                                                            {/* <span
-                                                                style={{
-                                                                    fontSize: "0.8em",
-                                                                    color: "#666",
-                                                                    marginTop: "4px",
-                                                                }}
-                                                            >
-                                                                {component.componentLabel}
-                                                            </span> */}
-                                                        </div>
-                                                        {/* <PlusOneOutlined style={{ color: "#1890ff" }} /> */}
+                                                            
                                                         <Typography style={{
                                                             fontSize: "12px",
                                                             color: "#666",
@@ -813,7 +802,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                         </Col>
 
                         {/* Right side: Existing content */}
-                        <Col span={20} style={{ padding: '10px' }}>
+                        <Col span={19} style={{ paddingLeft: '10px' }}>
                             {/* Existing content */}
                             {/* <div style={{ borderTop: '1px solid #e0e0e0', marginTop: '0%' }}></div> */}
                             <ApiConfigurationForm setFullScreen={setFullScreen}  />

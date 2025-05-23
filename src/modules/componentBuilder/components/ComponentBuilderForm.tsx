@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Select, Button, Switch, Table, Row, Col, Divider, Dropdown, Typography, Space, DatePicker } from 'antd';
+import { Form, Input, Select, Button, Switch, Table, Row, Col, Divider, Dropdown, Typography, Space, DatePicker, Checkbox } from 'antd';
 import { useMyContext } from '../hooks/componentBuilderContext';
 import { useTranslation } from 'react-i18next';
 import { MenuProps } from 'antd/lib';
@@ -23,6 +23,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
 
     // Add state for row selection
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+    const [disableUnitField, setDisableUnitField] = useState<boolean>(false);
 
     useEffect(() => {
         form.setFieldsValue({
@@ -83,11 +84,12 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
             fieldType.current = value;
         }
 
-        if (value == "Table")
-            setFullScreen(true);
-
-        else
-            setFullScreen(false);
+        if(value == 'Select' || value == 'DatePicker' || value == 'Table' || value == 'Switch' ){
+            setDisableUnitField(true);
+        }
+        else{
+            setDisableUnitField(false);
+        }
 
         setShowAlert(true);
     }
@@ -316,17 +318,17 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                         onChange={(e) => handleColumnNameChange(index, e.target.value)}
                         placeholder={`Column ${index + 1}`}
                         style={{ width: '100%' }}
+                        
                         suffix={
                             <>
                                
-                                <Switch
-                                    size="small"
+                                <Checkbox
                                     checked={columnNames[index]?.required || false}
-                                    onChange={(checked) => {
+                                    onChange={(e) => {
                                         const updatedColumnNames = [...columnNames];
                                         updatedColumnNames[index] = {
                                             ...updatedColumnNames[index],
-                                            required: checked
+                                            required: e.target.checked
                                         };
                                         setColumnNames(updatedColumnNames);
 
@@ -691,8 +693,9 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                     pagination={false}
                     bordered
                     size="small"
-                    scroll={{ x: true, y: 'calc(100vh - 450px)' }}
-                    style={{ width: '99%' }}
+                    scroll={{ x: 'max-content', y: 'calc(100vh - 450px)' }}
+                    style={{ width: '99%',
+                     }}
                 />
             </div>
         );
@@ -724,7 +727,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                             <Form.Item
                                 label={t('noOfColumns')}
                                 labelCol={{ span: 8 }}
-                                wrapperCol={{ span: 12 }}
+                                wrapperCol={{ span: 14 }}
                                 style={{ marginBottom: '8px' }}
                             >
                                 <Input
@@ -745,13 +748,15 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
         // For Table  use two-column layout
         if (payloadData?.dataType === "Table") {
             return (
-                <>
+                <div 
+                style={{marginTop: '-1%',}}
+                >
                     <Row gutter={16}>
                         <Col span={8}>
                             <Form.Item
                                 label={t('componentLabel')}
                                 labelCol={{ span: 8 }}
-                                wrapperCol={{ span: 12 }}
+                                wrapperCol={{ span: 14 }}
                                 required={true}
                                 style={{ marginBottom: '8px' }}
                             >
@@ -766,12 +771,13 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                             <Form.Item
                                 label={t('unit')}
                                 labelCol={{ span: 8 }}
-                                wrapperCol={{ span: 12 }}
+                                wrapperCol={{ span: 14 }}
                                 style={{ marginBottom: '8px' }}
                             >
                                 <Select
                                     value={payloadData?.unit}
                                     onChange={(value) => handleInputChange("unit", value)}
+                                    disabled={disableUnitField}
                                 >
                                     <Option value="kg">kg</Option>
                                     <Option value="g">g</Option>
@@ -786,7 +792,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                             <Form.Item
                                 label={t('dataType')}
                                 labelCol={{ span: 8 }}
-                                wrapperCol={{ span: 12 }}
+                                wrapperCol={{ span: 14 }}
                                 required={true}
                                 style={{ marginBottom: '8px' }}
                             >
@@ -814,7 +820,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                             <Form.Item
                                 label={t('defaultValue')}
                                 labelCol={{ span: 8 }}
-                                wrapperCol={{ span: 12 }}
+                                wrapperCol={{ span: 14 }}
                                 required={isRequired}
                                 style={{ marginBottom: '8px' }}
                             >
@@ -829,7 +835,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                             <Form.Item
                                 label={t('validation')}
                                 labelCol={{ span: 8 }}
-                                wrapperCol={{ span: 12 }}
+                                wrapperCol={{ span: 14 }}
                                 style={{ marginBottom: '8px' }}
                             >
                                 <Input.TextArea
@@ -843,7 +849,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                             <Form.Item
                                 label={t('required')}
                                 labelCol={{ span: 8 }}
-                                wrapperCol={{ span: 12 }}
+                                wrapperCol={{ span: 14 }}
                                 style={{ marginBottom: '8px' }}
                             >
                                 <Switch
@@ -853,7 +859,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                             </Form.Item>
                         </Col>
                     </Row>
-                </>
+                </div>
             );
         }
 
@@ -904,6 +910,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                     <Select
                         value={payloadData?.unit}
                         onChange={(value) => handleInputChange("unit", value)}
+                        disabled={disableUnitField}
                     >
                         <Option value="kg">kg</Option>
                         <Option value="g">g</Option>
