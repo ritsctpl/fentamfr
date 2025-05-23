@@ -1,11 +1,10 @@
 import React, { useState, useRef, useContext } from 'react';
 import { Table, Input, Button, InputRef, Modal, Popconfirm, message, Space } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SearchOutlined } from '@ant-design/icons';
 import type { FilterConfirmProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import styles from '@modules/cycleTimeMaintenance/styles/CycleTime.module.css';
-import DynamicModal from '@components/DynamicModal';
 import ResourceDetails from './ResourceDetails';
 import { useTranslation } from 'react-i18next';
 import { AiFillEdit } from 'react-icons/ai';
@@ -44,6 +43,7 @@ const capitalizeFirstLetter = (text: string): string => {
 };
 
 const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
+  console.log(data, 'dssata')
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<any | null>(null);
@@ -216,6 +216,7 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
     const columns = [
       { title: t('operation'), dataIndex: 'operation', key: 'operation', render: text => text || '---' },
       { title: t('operationVersion'), dataIndex: 'operationVersion', key: 'operationVersion', render: text => text || '---' },
+      { title: t('resource'), dataIndex: 'resource', key: 'resource', render: text => text || '---' },
       { title: t('resourceType'), dataIndex: 'resourceType', key: 'resourceType', render: text => text || '---' },
       { title: t('workCenter'), dataIndex: 'workCenter', key: 'workCenter', render: text => text || '---' },
       { title: t('cycleTime'), dataIndex: 'cycleTime', key: 'cycleTime', render: text => text !== null && text !== undefined ? Number(text).toFixed(4) : '---' },
@@ -226,7 +227,7 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
         key: 'actions',
         render: (_, nestedRecord: RecordItem) => (
           <span onClick={(e) => e.stopPropagation()}>
-            {(nestedRecord.resource || nestedRecord.resourceType) && (
+            {nestedRecord.resourceType && (
               <AiFillEdit
                 className={styles.actionIcon}
                 onClick={() => handleEdit(nestedRecord)}

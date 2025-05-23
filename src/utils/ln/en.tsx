@@ -1170,4 +1170,5 @@ export const englishLanguage = {
   "validation": "Validation",
   "componentBuilderMaintenance": "Componenet Builder",
   "noOfColumns": "No. of columns",
+  "resourceDetails": "Resource Details",
 }

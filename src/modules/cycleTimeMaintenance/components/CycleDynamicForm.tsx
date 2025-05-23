@@ -131,7 +131,7 @@ const CycleDynamicForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onVal
     }, [fields, form]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
-        let newValue = e.target.value.toUpperCase().replace(/[^A-Z0-9_\-\(\)]/g, "");
+        let newValue = e.target.value.toUpperCase().replace(/[^A-Z0-9_\-\(\)\.]/g, "");
 
         const patterns: { [key: string]: RegExp } = {
             resource: /^[A-Z0-9_\-\(\)]*$/,

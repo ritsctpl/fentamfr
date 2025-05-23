@@ -1118,4 +1118,5 @@ export const tamilLanguage = {
   "addOption": "விருப்பம் சேர்க்க",
   "noOfColumns": "நிரல்களின் எண்ணிக்கை",
   "noOfRows": "வரிகளின் எண்ணிக்கை",
+  "resourceDetails": "வள விவரம்",
 }
