@@ -42,7 +42,7 @@ const capitalizeFirstLetter = (text: string): string => {
   return text.charAt(0).toUpperCase() + text.slice(1);
 };
 
-const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
+const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect }) => {
   console.log(data, 'dssata')
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
@@ -134,22 +134,30 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
   });
 
   const handleEdit = async (record: any) => {
+    console.log(record, 'record')
     const cookies = parseCookies();
     const site = cookies.site;
     const userId = cookies.rl_user_id;
     try {
 
       const payload = {
+        ...record,
         site: site,
         userId: userId,
         resourceType: record.resourceType,
+        operation: record.operation || null,
+        operationVersion: record.operationVersion || null,
         time: record.time,
-        ...record
       }
-
       const rowData = await retriveCycleTimeRow(site, payload);
-      setSelectedRecord(rowData);
-      setModalVisible(true);
+      console.log(rowData, 'rowData')
+      if (rowData?.message) {
+        message.error(rowData?.message)
+      }
+      else {
+        setSelectedRecord(rowData);
+        setModalVisible(true);
+      }
     } catch (error) {
       console.error('Error fetching data fields:', error);
     }
@@ -159,7 +167,7 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
     const cookies = parseCookies();
     const site = cookies.site;
     const userId = cookies.rl_user_id;
-    
+
     try {
       // Extract item and itemVersion from parent record if available
       let itemInfo = {};
@@ -171,7 +179,7 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
           itemVersion
         };
       }
-      
+
       const payload = {
         site: site,
         userId: userId,
@@ -180,7 +188,7 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
         ...record,
         ...itemInfo
       }
-      
+
       const rowData = await retriveCycleTimeRow(site, payload);
       message.destroy();
       const response = await deleteCycleTime(site, userId, rowData);
