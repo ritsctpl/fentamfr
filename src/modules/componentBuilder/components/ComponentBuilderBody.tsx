@@ -243,7 +243,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                     // dropdownOptions: payloadData?.dropdownOptions,
                     ...payloadData,
                     dataIndex: camelCase(payloadData?.componentLabel),
-                    rowData: transformedRowData,
+                    // rowData: transformedRowData,
                     userId: user,
                 }
 
