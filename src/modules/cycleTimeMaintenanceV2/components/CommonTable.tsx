@@ -1,11 +1,10 @@
 import React, { useState, useRef, useContext } from 'react';
 import { Table, Input, Button, InputRef, Modal, Popconfirm, message, Space } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { SearchOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { SearchOutlined } from '@ant-design/icons';
 import type { FilterConfirmProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import styles from '@modules/cycleTimeMaintenance/styles/CycleTime.module.css';
-import DynamicModal from '@components/DynamicModal';
 import ResourceDetails from './ResourceDetails';
 import { useTranslation } from 'react-i18next';
 import { AiFillEdit } from 'react-icons/ai';
@@ -43,7 +42,8 @@ const capitalizeFirstLetter = (text: string): string => {
   return text.charAt(0).toUpperCase() + text.slice(1);
 };
 
-const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
+const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect }) => {
+  console.log(data, 'dssata')
   const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<any | null>(null);
@@ -134,22 +134,30 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
   });
 
   const handleEdit = async (record: any) => {
+    console.log(record, 'record')
     const cookies = parseCookies();
     const site = cookies.site;
     const userId = cookies.rl_user_id;
     try {
 
       const payload = {
+        ...record,
         site: site,
         userId: userId,
         resourceType: record.resourceType,
+        operation: record.operation || null,
+        operationVersion: record.operationVersion || null,
         time: record.time,
-        ...record
       }
-
       const rowData = await retriveCycleTimeRow(site, payload);
-      setSelectedRecord(rowData);
-      setModalVisible(true);
+      console.log(rowData, 'rowData')
+      if (rowData?.message) {
+        message.error(rowData?.message)
+      }
+      else {
+        setSelectedRecord(rowData);
+        setModalVisible(true);
+      }
     } catch (error) {
       console.error('Error fetching data fields:', error);
     }
@@ -159,7 +167,7 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
     const cookies = parseCookies();
     const site = cookies.site;
     const userId = cookies.rl_user_id;
-    
+
     try {
       // Extract item and itemVersion from parent record if available
       let itemInfo = {};
@@ -171,7 +179,7 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
           itemVersion
         };
       }
-      
+
       const payload = {
         site: site,
         userId: userId,
@@ -180,7 +188,7 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
         ...record,
         ...itemInfo
       }
-      
+
       const rowData = await retriveCycleTimeRow(site, payload);
       message.destroy();
       const response = await deleteCycleTime(site, userId, rowData);
@@ -216,6 +224,7 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
     const columns = [
       { title: t('operation'), dataIndex: 'operation', key: 'operation', render: text => text || '---' },
       { title: t('operationVersion'), dataIndex: 'operationVersion', key: 'operationVersion', render: text => text || '---' },
+      { title: t('resource'), dataIndex: 'resource', key: 'resource', render: text => text || '---' },
       { title: t('resourceType'), dataIndex: 'resourceType', key: 'resourceType', render: text => text || '---' },
       { title: t('workCenter'), dataIndex: 'workCenter', key: 'workCenter', render: text => text || '---' },
       { title: t('cycleTime'), dataIndex: 'cycleTime', key: 'cycleTime', render: text => text !== null && text !== undefined ? Number(text).toFixed(4) : '---' },
@@ -226,7 +235,7 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect  }) => {
         key: 'actions',
         render: (_, nestedRecord: RecordItem) => (
           <span onClick={(e) => e.stopPropagation()}>
-            {(nestedRecord.resource || nestedRecord.resourceType) && (
+            {nestedRecord.resourceType && (
               <AiFillEdit
                 className={styles.actionIcon}
                 onClick={() => handleEdit(nestedRecord)}

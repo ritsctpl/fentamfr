@@ -1177,4 +1177,5 @@ export const englishLanguage = {
   "appliesTo": "Applies To",
   "isActive": "Is Active",
   "isEnd": "Is End",
+  "resourceDetails": "Resource Details",
 }

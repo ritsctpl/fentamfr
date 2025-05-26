@@ -1104,4 +1104,5 @@ export const kannadaLanguage = {
   "addOption": "ಆಯ್ಕೆ ಸೇರಿಸಿ",
   "noOfColumns": "ಸ್ತಂಭಗಳ ಸಂಖ್ಯೆ",
   "noOfRows": "ಸಾಲುಗಳ ಸಂಖ್ಯೆ",
+  "resourceDetails": "ಸಂಸ್ಥಾನ ವಿವರಣೆ",
 }

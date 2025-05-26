@@ -1105,4 +1105,5 @@ export const hindiLanguage = {
   "addOption": "विकल्प जोड़ें",
   "noOfColumns": "स्तंभों की संख्या",
   "noOfRows": "पंक्तियों की संख्या",
+  "resourceDetails": "संसाधन विवरण",
 }

@@ -46,8 +46,8 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
     const [operationData, setOperationData] = useState<OperationData[]>([]);
     const [ItemVisible, setItemVisible] = useState(false);
     const [itemData, setItemData] = useState<MaterialData[]>([]);
-    const [cycleTimeEnabled, setCycleTimeEnabled] = useState(true); 
-    const [manufacturedTimeEnabled, setManufacturedTimeEnabled] = useState(false); 
+    const [cycleTimeEnabled, setCycleTimeEnabled] = useState(true);
+    const [manufacturedTimeEnabled, setManufacturedTimeEnabled] = useState(false);
     const [timeValue, setTimeValue] = useState<dayjs.Dayjs>(dayjs().hour(0).minute(0).second(0));
     const [instructionVisible, setInstructionVisible] = useState(false);
 
@@ -148,30 +148,30 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
             }
 
             if (response && !response.errorCode) {
-                const matchingItems = key === 'item' 
-                    ? response.itemList 
+                const matchingItems = key === 'item'
+                    ? response.itemList
                     : response.operationList;
 
-                const matchedItem = matchingItems.find((item: any) => 
+                const matchedItem = matchingItems.find((item: any) =>
                     item[key.toLowerCase()] === value.toUpperCase()
                 );
 
                 if (matchedItem) {
                     // Automatically set the version if found
-                    form.setFieldsValue({ 
-                        [versionFieldName]: matchedItem[versionKey] 
+                    form.setFieldsValue({
+                        [versionFieldName]: matchedItem[versionKey]
                     });
-                    onValuesChange({ 
-                        [versionFieldName]: matchedItem[versionKey].toUpperCase() 
+                    onValuesChange({
+                        [versionFieldName]: matchedItem[versionKey].toUpperCase()
                     });
                     return true;
                 } else {
                     // Clear version if no match found
-                    form.setFieldsValue({ 
-                        [versionFieldName]: '' 
+                    form.setFieldsValue({
+                        [versionFieldName]: ''
                     });
-                    onValuesChange({ 
-                        [versionFieldName]: '' 
+                    onValuesChange({
+                        [versionFieldName]: ''
                     });
                     return false;
                 }
@@ -184,16 +184,16 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
-        let newValue = e.target.value.toUpperCase().replace(/[^A-Z0-9_\-\(\)]/g, "");
+        let newValue = e.target.value.toUpperCase();
 
         const patterns: { [key: string]: RegExp } = {
-            resource: /^[A-Z0-9_\-\(\)]*$/,
-            resourceType: /^[A-Z0-9_\-\(\)]*$/,
-            workCenter: /^[A-Z0-9_\-\(\)]*$/,
-            operation: /^[A-Z0-9_\-\(\)]*$/,
-            item: /^[A-Z0-9_\-\(\)]*$/,
-            operationVersion: /^[A-Z0-9_\-\(\)]*$/,
-            itemVersion: /^[A-Z0-9_\-\(\)]*$/,
+            resource: /^[A-Z0-9_\-\(\)\.\,\;\:\!\@\#\$\%\^\&\*\+\=\[\]\{\}\|\<\>\?\/]*$/,
+            resourceType: /^[A-Z0-9_\-\(\)\.\,\;\:\!\@\#\$\%\^\&\*\+\=\[\]\{\}\|\<\>\?\/]*$/,
+            workCenter: /^[A-Z0-9_\-\(\)\.\,\;\:\!\@\#\$\%\^\&\*\+\=\[\]\{\}\|\<\>\?\/]*$/,
+            operation: /^[A-Z0-9_\-\(\)\.\,\;\:\!\@\#\$\%\^\&\*\+\=\[\]\{\}\|\<\>\?\/]*$/,
+            item: /^[A-Z0-9_\-\(\)\.\,\;\:\!\@\#\$\%\^\&\*\+\=\[\]\{\}\|\<\>\?\/]*$/,
+            operationVersion: /^[A-Z0-9_\-\(\)\.\,\;\:\!\@\#\$\%\^\&\*\+\=\[\]\{\}\|\<\>\?\/]*$/,
+            itemVersion: /^[A-Z0-9_\-\(\)\.\,\;\:\!\@\#\$\%\^\&\*\+\=\[\]\{\}\|\<\>\?\/]*$/,
             cycleTime: /.*/,
             manufacturedTime: /.*/,
         };
@@ -226,29 +226,29 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
             const cookies = parseCookies();
             const site = cookies.site;
             const userId = cookies.rl_user_id;
-            
+
             // Validate required fields based on form state
             const hasResource = formData?.resource || formData?.resourceType;
             const hasOperation = formData?.operation;
             const hasItem = formData?.item;
-            
+
             // Validate versions for item and operation
             if (hasItem && !formData?.itemVersion) {
                 message.error(t('Please validate Item Version'));
                 return;
             }
-            
+
             if (hasOperation && !formData?.operationVersion) {
                 message.error(t('Please validate Operation Version'));
                 return;
             }
-            
+
             // Determine which time field is required
             if ((hasResource || hasOperation) && (!formData?.cycleTime && formData?.cycleTime !== 0)) {
                 message.error(t('Please Enter Cycle Time'));
                 return;
             }
-            
+
             if (!hasResource && !hasOperation && (!formData?.manufacturedTime && formData?.manufacturedTime !== 0)) {
                 message.error(t('Please Enter Production Time'));
                 return;
@@ -256,12 +256,12 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
 
             // Ensure time is properly formatted
             const timeValue = formData.time || '00:00:00';
-            
-            const formattedTime = typeof timeValue === 'string' ? 
+
+            const formattedTime = typeof timeValue === 'string' ?
                 timeValue : // If already formatted string, use as is
-                dayjs(timeValue).isValid() ? 
-                    dayjs(timeValue).format('HH:mm:ss') : 
-                    '00:00:00'; 
+                dayjs(timeValue).isValid() ?
+                    dayjs(timeValue).format('HH:mm:ss') :
+                    '00:00:00';
 
             const payload = {
                 ...formData,
@@ -270,7 +270,7 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
                 site: site,
                 userId: userId,
                 time: formattedTime,
-                cycleTimeRequestList: formData?.cycleTimeResponseList 
+                cycleTimeRequestList: formData?.cycleTimeResponseList
                     ? formData.cycleTimeResponseList.map(item => ({
                         ...item,
                         site: site
@@ -300,7 +300,7 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
     const onCancel = () => {
         // Reset form fields
         form.resetFields();
-        
+
         // Reset context state
         setFormData(defaultCycleTimeRequest);
         setFormChange(false);
@@ -530,7 +530,7 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
         if (isFormDisabled) {
             return false;
         }
-        else{
+        else {
             const hasWorkCenter = data?.workCenter;
             const hasOtherValues = data?.operation || data?.item || data?.resource || data?.resourceType;
             return hasOtherValues;
@@ -544,17 +544,23 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
             if (fieldName === 'manufacturedTime') {
                 return true;
             }
-            
+
             // All other fields are enabled
             return false;
         }
 
         // When form is not disabled (isFormDisabled is false)
-        const hasResource = data?.resource || data?.resourceType;
-        
-        // If resource or resourceType exists, disable all fields
-        if (hasResource) {
+        const hasResource = data?.resource;
+        const hasResourceType = data?.resourceType;
+
+        // If resourceType exists, disable all fields
+        if (hasResourceType) {
             return true;
+        }
+
+        // If only resource exists (without resourceType), enable time, targetQuantity, and cycleTime
+        if (hasResource && !hasResourceType) {
+            return fieldName !== 'time' && fieldName !== 'targetQuantity' && fieldName !== 'cycleTime';
         }
 
         const hasOperation = data?.operation;
@@ -571,34 +577,38 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
 
     const shouldEnableCycleTime = () => {
         if (isFormDisabled) {
-            const hasResource = form.getFieldValue('resource') || form.getFieldValue('resourceType');
+            const hasResource = form.getFieldValue('resource');
+            const hasResourceType = form.getFieldValue('resourceType');
             const hasOperation = form.getFieldValue('operation');
-            
-            // Enable cycleTime if either resource/resourceType or operation exists
-            return hasResource || hasOperation;
+
+            // Enable cycleTime if either resource (without resourceType) or operation exists
+            return (hasResource && !hasResourceType) || hasOperation || hasResourceType;
         }
 
         // When not in form disabled mode
-        const hasResource = data?.resource || data?.resourceType;
+        const hasResource = data?.resource;
+        const hasResourceType = data?.resourceType;
         const hasOperation = data?.operation;
-        
-        return hasOperation && !hasResource;
+
+        return (hasResource && !hasResourceType) || hasOperation || hasResourceType;
     };
 
     const shouldEnableManufacturedTime = () => {
         if (isFormDisabled) {
-            const hasResource = form.getFieldValue('resource') || form.getFieldValue('resourceType');
+            const hasResource = form.getFieldValue('resource');
+            const hasResourceType = form.getFieldValue('resourceType');
             const hasOperation = form.getFieldValue('operation');
-            
-            // Enable manufacturedTime if neither resource/resourceType nor operation exists
-            return !hasResource && !hasOperation;
+
+            // Enable manufacturedTime if neither resource nor resourceType nor operation exists
+            return !hasResource && !hasResourceType && !hasOperation;
         }
 
         // When not in form disabled mode
-        const hasResource = data?.resource || data?.resourceType;
+        const hasResource = data?.resource;
+        const hasResourceType = data?.resourceType;
         const hasOperation = data?.operation;
-        
-        return !hasOperation && !hasResource;
+
+        return !hasResource && !hasResourceType && !hasOperation;
     };
 
     const handleCancel = () => {
@@ -671,7 +681,7 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
                                                     disabled={isFieldDisabled(key)}
                                                     autoComplete='off'
                                                     suffix={key !== 'operationVersion' && key !== 'itemVersion' ? <GrChapterAdd onClick={() => {
-                                                        switch(key) {
+                                                        switch (key) {
                                                             case 'operation': handleOperationClick(); break;
                                                             case 'resource': handleResourceClick(); break;
                                                             case 'resourceType': handleResourceTypeClick(); break;
@@ -785,7 +795,7 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
                 })}
             </Row>
 
-             <Row>
+            <Row>
                 <Col span={24} style={{ textAlign: 'center' }}>
                     <Button type="primary" htmlType="submit" style={{ marginRight: '10px' }}>
                         Save
@@ -794,9 +804,9 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
                         {t("cancel")}
                     </Button>
                     {/* <Button onClick={handleSearch} style={{ marginRight: '10px' }}>{t("search")}</Button> */}
-                    <Button 
-                        icon={<QuestionCircleOutlined />} 
-                        onClick={onShowInstructions} 
+                    <Button
+                        icon={<QuestionCircleOutlined />}
+                        onClick={onShowInstructions}
                         style={{ marginRight: '10px' }}
                     >
                         {t("instructions")}
@@ -877,7 +887,7 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
                     <p>• Use time picker to select operation time</p>
                     <p>• Click Save to store your entries</p>
                     <p>• Click Cancel to reset the form</p>
-                    
+
                     <h3>Form Behavior Rules:</h3>
                     <p>• Cycle Time = Total Time / Target Quantity</p>
                     <p>• Production Time = Total Time / Target Quantity</p>
@@ -885,12 +895,12 @@ const CycleForm: React.FC<CycleDynamicFormProps> = ({ data, fields, onValuesChan
                     <p>• When Item and ItemVersion are selected without other fields, Production Time is enabled</p>
                     <p>• When Item or WorkCenter is selected without Resource, ResourceType, or Operation, Production Time is enabled</p>
                     <p>• Input fields automatically convert to uppercase and only accept alphanumeric characters plus underscore</p>
-                    
+
                     <h3>Data Selection:</h3>
                     <p>• Click the Add icon next to fields to browse available values</p>
                     <p>• Double-click a row in the browse modal to select that value</p>
                     <p>• When selecting a Resource, the ResourceType will be automatically filled if available</p>
-                    
+
                     <h3>Time Calculations:</h3>
                     <p>• Changing Target Quantity or Time will automatically recalculate the appropriate time field</p>
                     <p>• Fields are enabled/disabled dynamically based on your selections to guide proper data entry</p>
