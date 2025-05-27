@@ -8,6 +8,9 @@ export interface TemplateListItem {
 export interface GroupId {
   handle: string;
   label: string;
+  componentLabel?: string;
+  sectionLabel?: string;
+  groupLabel?: string;
 }
 
 export interface TemplateDetails {

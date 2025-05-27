@@ -14,10 +14,12 @@ import {
   Select,
   Switch,
   Table,
+  Tabs,
 } from "antd";
 import {
   PlusOutlined,
   EyeOutlined,
+  EyeInvisibleOutlined,
   ArrowLeftOutlined,
 } from "@ant-design/icons";
 import { GrChapterAdd } from "react-icons/gr";
@@ -25,9 +27,17 @@ import { parseCookies } from "nookies";
 import moment from "moment";
 import CopyIcon from "@mui/icons-material/FileCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
+import PreviewContent from './PreviewContent';
 
 // Types
-import { TemplateListItem, TemplateDetails, GroupId, BuilderType, ComponentItem, SectionItem, GroupItem, ItemGroupResponse } from "../types/TemplateTypes";
+import type {
+  TemplateListItem as ImportedTemplateListItem,
+  BuilderType,
+  ComponentItem,
+  SectionItem,
+  GroupItem,
+  ItemGroupResponse,
+} from "../types/TemplateTypes";
 
 // Styles
 import styles from "../styles/TemplateBuilderTab.module.css";
@@ -36,10 +46,51 @@ import styles from "../styles/TemplateBuilderTab.module.css";
 import { DragableTable } from "./DragableTable";
 import { TemplateStructureTree } from "./TemplateStructureTree";
 import { fetchTemplateBuilderData } from "@services/templateBuilderService";
+import { ConfigureTab } from "./ConfigureTab";
 
 // Type guard to check if item is a TemplateListItem
-function isTemplateListItem(item: any): item is TemplateListItem {
+function isTemplateListItem(item: any): item is ImportedTemplateListItem {
   return item && "templateLabel" in item && "templateType" in item;
+}
+
+// Update the interface for TemplateDetails to include proper types
+interface TemplateDetails {
+  templateLabel: string;
+  templateVersion: string;
+  templateType: string;
+  productGroup: string;
+  currentVersion: boolean;
+  groupIds: GroupId[];
+  handle?: string;
+}
+
+// Add interface for API response
+interface TemplateDetailsResponse {
+  templateLabel: string;
+  templateVersion: string;
+  templateType: string;
+  productGroup: string;
+  currentVersion: boolean;
+  groupIds: GroupId[];
+  handle?: string;
+}
+
+// Define local GroupId interface
+interface GroupId {
+  handle: string;
+  label: string;
+  uniqueId: string;
+  groupLabel?: string;
+  sectionLabel?: string;
+  componentLabel?: string;
+  config?: {
+    type: 'header' | 'body' | 'footer';
+    logo: string;
+    pageOccurrence: 'all' | null;
+    margin: number;
+    height: number;
+    alignment: 'left' | 'center' | 'right';
+  };
 }
 
 function TemplateBuilderTab() {
@@ -47,7 +98,7 @@ function TemplateBuilderTab() {
   const [leftTemplateForm] = Form.useForm();
   const cookies = parseCookies();
 
-  const [templateData, setTemplateData] = useState<TemplateListItem[]>([]);
+  const [templateData, setTemplateData] = useState<ImportedTemplateListItem[]>([]);
   const [templatesData, setTemplatesData] = useState<GroupId[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateDetails | null>(null);
   const [selectedComponents, setSelectedComponents] = useState<GroupId[]>([]);
@@ -58,14 +109,14 @@ function TemplateBuilderTab() {
     templateVersion: string;
     templateType: string;
     productGroup: string;
-    currentVersion: string;
+    currentVersion: boolean;
     groupIds: GroupId[];
   }>({
     templateLabel: "",
     templateVersion: "",
     templateType: "",
     productGroup: "",
-    currentVersion: "",
+    currentVersion: false,
     groupIds: [],
   });
 
@@ -93,41 +144,52 @@ function TemplateBuilderTab() {
     templateVersion: "",
     templateType: "",
     productGroup: "",
-    currentVersion: "",
+    currentVersion: false,
   });
-  const [previewGroup, setPreviewGroup] = useState<any>([]);
+  const [previewGroup, setPreviewGroup] = useState<any[]>([]);
   const [selectedBuilderType, setSelectedBuilderType] = useState<BuilderType>("Group");
   const [componentsList, setComponentsList] = useState<ComponentItem[]>([]);
   const [sectionsList, setSectionsList] = useState<SectionItem[]>([]);
   const [groupsList, setGroupsList] = useState<GroupItem[]>([]);
 
+  console.log(previewGroup, 'previewGroup');
+
+
   // Add new state for the new form fields
   const [ItemGroupVisible, setItemGroupVisible] = useState(false);
   const [itemGroupData, setItemGroupData] = useState<any[]>([]);
 
+  // Inside the TemplateBuilderTab component, add state for selected row and active tab
+  const [selectedRow, setSelectedRow] = useState<GroupId | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("structure");
+
+  // Add state for preview mode
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [previewContent, setPreviewContent] = useState<any>(null);
+
   // Update original template state when a template is selected
   useEffect(() => {
     if (selectedTemplate) {
-        setOriginalTemplateState({
+      setOriginalTemplateState({
         templateLabel: selectedTemplate.templateLabel || "",
         templateVersion: selectedTemplate.templateVersion || "",
         templateType: selectedTemplate.templateType || "",
         productGroup: selectedTemplate.productGroup || "",
-        currentVersion: selectedTemplate.currentVersion ? "true" : "false",
+        currentVersion: selectedTemplate.currentVersion === true,
       });
     }
-    }, [selectedTemplate, templateFormValues.groupIds]);
+  }, [selectedTemplate, templateFormValues.groupIds]);
 
   // Track form changes
   useEffect(() => {
     // Check if there are any meaningful changes compared to the original state
     const hasChanges =
       templateFormValues.templateLabel.trim() !==
-        originalTemplateState.templateLabel.trim() ||
+      originalTemplateState.templateLabel.trim() ||
       templateFormValues.templateVersion.trim() !==
-        originalTemplateState.templateVersion.trim() ||
+      originalTemplateState.templateVersion.trim() ||
       templateFormValues.templateType !==
-        originalTemplateState.templateType;
+      originalTemplateState.templateType;
 
     setHasUnsavedChanges(hasChanges);
   }, [templateFormValues, originalTemplateState]);
@@ -146,7 +208,7 @@ function TemplateBuilderTab() {
           payloads,
           "templatebuilder-service",
           "getAllTemplate"
-        ) as TemplateListItem[];
+        ) as ImportedTemplateListItem[];
 
         setTemplateData(templateResponse);
         setTemplatesData([]);
@@ -173,41 +235,91 @@ function TemplateBuilderTab() {
           userId: cookies.rl_user_id,
           templateLabel: templateLabel,
           templateVersion: templateVersion,
-          currentVersion: currentVersion,
+          currentVersion: currentVersion === true,
         };
 
         const response = await fetchTemplateBuilderData(
           payload,
           "templatebuilder-service",
           "getTemplate"
-        ) as TemplateDetails;
+        ) as TemplateDetailsResponse;
 
-        setTemplateDetails(response);
-        setSelectedTemplate(response);
-
-        // Update selected components with groupIds
-        setSelectedComponents(response.groupIds);
-
-        // Update form values
-        const formValues = {
-          templateLabel: response.templateLabel,
-          templateVersion: response.templateVersion,
-          templateType: response.templateType,
-          productGroup: response.productGroup,
-          currentVersion: response.currentVersion ? "true" : "false",
-          groupIds: response.groupIds,
+        const normalizedResponse : any = {
+          ...response,
+          currentVersion: response.currentVersion,
+          groupIds: response.groupIds.map(group => ({
+            ...group,
+            config: group.config || {
+              type: "body",
+              logo: "",
+              pageOccurrence: "all",
+              margin: "10",
+              height: "10",
+              alignment: "center"
+            }
+          }))
         };
 
-        setTemplateFormValues(formValues);
-
-        // Update form fields
-        form.setFieldsValue({
-          templateLabel: response.templateLabel,
-          templateVersion: response.templateVersion,
-          templateType: response.templateType,
-          productGroup: response.productGroup,
-          currentVersion: response.currentVersion,
+        setTemplateDetails(normalizedResponse);
+        setSelectedTemplate(normalizedResponse);
+        setSelectedComponents(normalizedResponse.groupIds);
+        setTemplateFormValues({
+          ...normalizedResponse,
+          templateLabel: normalizedResponse.templateLabel,
+          templateVersion: normalizedResponse.templateVersion,
+          templateType: normalizedResponse.templateType,
+          productGroup: normalizedResponse.productGroup,
+          currentVersion: normalizedResponse.currentVersion === true,
+          groupIds: normalizedResponse.groupIds,
         });
+
+        // Call preview API after setting up the template details
+        const previewPayload = {
+          site: "1004",
+          groupIds: normalizedResponse.groupIds.map((group) => ({
+            handle: group.handle,
+            label: group.label,
+            config: group.config
+          })),
+        };
+
+        const previewResponse = await fetchTemplateBuilderData(
+          previewPayload,
+          "templatebuilder-service",
+          "preview"
+        ) as any;
+
+        // Transform the preview response to match the tree structure
+        const transformedData = previewResponse?.map((item: any) => {
+          if (item.groupLabel) {
+            // Handle Group
+            return {
+              _id: item._id,
+              groupLabel: item.groupLabel,
+              sectionIds: item.sectionIds?.map((section: any) => ({
+                _id: section._id,
+                sectionLabel: section.sectionLabel,
+                components: section.components || []
+              })) || []
+            };
+          } else if (item.sectionLabel) {
+            // Handle Section
+            return {
+              _id: item._id,
+              sectionLabel: item.sectionLabel,
+              components: item.components || []
+            };
+          } else {
+            // Handle Component
+            return {
+              _id: item._id,
+              componentLabel: item.componentLabel,
+              dataType: item.dataType
+            };
+          }
+        }) || [];
+
+        setPreviewGroup(transformedData);
 
       } catch (error) {
         console.error("Failed to fetch Template details:", error);
@@ -220,7 +332,7 @@ function TemplateBuilderTab() {
         setLeftTemplateLoadingMessage("");
       }
     },
-    [cookies.site, cookies.rl_user_id, form]
+    [cookies.site, cookies.rl_user_id]
   );
 
   useEffect(() => {
@@ -235,9 +347,7 @@ function TemplateBuilderTab() {
         templateVersion: templateFormValues.templateVersion,
         templateType: templateFormValues.templateType,
         productGroup: templateFormValues.productGroup,
-        currentVersion: templateFormValues.currentVersion
-          ? moment(templateFormValues.currentVersion)
-          : null,
+        currentVersion: templateFormValues.currentVersion === true,
       });
     }
   }, [selectedTemplate, templateFormValues, form]);
@@ -273,13 +383,14 @@ function TemplateBuilderTab() {
     );
   };
 
-    const handleTemplateClick = (template: any) => {
+  const handleTemplateClick = (template: any) => {
     // Check if this is a new template
     const isNewTemplate = !template?.templateLabel;
 
     // Create a mutable copy of the template
     const updatedTemplate = { ...template };
     setSelectedTemplate(updatedTemplate);
+    setActiveTab("structure"); // Set default tab to structure when template is loaded
 
     if (isNewTemplate) {
       // Reset form for a new template
@@ -288,13 +399,17 @@ function TemplateBuilderTab() {
         templateVersion: "",
         templateType: "",
         productGroup: "",
-        currentVersion: "",
+        currentVersion: false,
         groupIds: [],
       });
       setSelectedComponents([]);
     } else {
       // Existing flow for existing templates
-      fetchTemplateDetails(template.templateLabel, template.templateVersion, template.currentVersion);
+      fetchTemplateDetails(
+        template.templateLabel,
+        template.templateVersion,
+        template.currentVersion === true
+      );
     }
   };
 
@@ -324,7 +439,7 @@ function TemplateBuilderTab() {
             templateVersion: "",
             templateType: "",
             productGroup: "",
-            currentVersion: "",
+            currentVersion: false,
             groupIds: [],
           });
 
@@ -342,6 +457,7 @@ function TemplateBuilderTab() {
       setSelectedComponents([]);
       setTemplateDetails(null);
       setPreviewGroup([]); // Reset preview component
+      setIsPreviewMode(false);
       fetchData();
     }
   };
@@ -412,25 +528,52 @@ function TemplateBuilderTab() {
     }
   }, [selectedBuilderType, selectedTemplate, handleSearch]);
 
+  // Add a utility function to generate unique ID
+  const generateUniqueId = (prefix: string) => {
+    return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  };
+
+  // Update handleAddGroup function
   const handleAddGroup = useCallback(
     async (group: any) => {
-      // Add a new instance of the component with a unique id
+      setSelectedRow(null);
+      // Generate a unique ID based on the type of item
+      const itemType = group.groupLabel ? 'group' : 
+                      group.sectionLabel ? 'section' : 
+                      group.componentLabel ? 'component' : 'item';
+      
+      // Add a new instance of the group with a unique id, proper label, and default config
       const newGroup = {
         ...group,
-        id: `${Date.now()}-${group.label}`, // Ensure unique id
+        id: generateUniqueId(itemType), // Generate unique ID
+        uniqueId: generateUniqueId(itemType), // Additional unique ID for internal tracking
+        label: group.groupLabel || group.sectionLabel || group.componentLabel || group.label,
+        config: {
+          type: 'body',
+          logo: '',
+          pageOccurrence: 'all',
+          margin: 10,
+          height: 10,
+          alignment: 'center',
+        }
       };
 
       const updatedSelectedComponents = [...selectedComponents, newGroup];
       setSelectedComponents(updatedSelectedComponents);
 
-    // Update template form values with group IDs
+      // Update template form values with group IDs, labels, and config
       setTemplateFormValues((prev) => ({
         ...prev,
         groupIds: [
           ...prev.groupIds,
           {
             handle: group.handle,
-            label: group.label,
+            label: group.groupLabel || group.sectionLabel || group.componentLabel || group.label,
+            uniqueId: newGroup.uniqueId, // Add unique ID to groupIds
+            config: newGroup.config,
+            groupLabel: group.groupLabel,
+            sectionLabel: group.sectionLabel,
+            componentLabel: group.componentLabel,
           },
         ],
       }));
@@ -442,29 +585,37 @@ function TemplateBuilderTab() {
   );
 
   const handleRemoveComponent = useCallback(
-    async (record: any & { id: string }) => {
-      // Remove from selected components
+    async (record: any & { uniqueId: string }) => {
+      if (selectedRow?.uniqueId === record.uniqueId) {
+        setSelectedRow(null);
+      }
+      // Remove from selected components using uniqueId
       const updatedComponents = selectedComponents.filter(
-        (component) => component.handle !== record.handle
+        (component) => component.uniqueId !== record.uniqueId
       );
       setSelectedComponents(updatedComponents);
 
-      // Update template form values with remaining component IDs
+      // Update template form values with remaining component IDs and their labels
       setTemplateFormValues((prev) => ({
         ...prev,
         groupIds: updatedComponents.map((component) => ({
           handle: component.handle,
-          label: component.label,
+          label: component.groupLabel || component.sectionLabel || component.componentLabel || component.label,
+          uniqueId: component.uniqueId,
+          config: component.config,
+          groupLabel: component.groupLabel,
+          sectionLabel: component.sectionLabel,
+          componentLabel: component.componentLabel,
         })),
       }));
 
       // Call preview API
       await handlePreviewGroups(updatedComponents);
     },
-    [selectedComponents]
+    [selectedComponents, selectedRow]
   );
 
-  const handleDragEnd = (dragIndex: number, dropIndex: number) => {
+  const handleDragEnd = async (dragIndex: number, dropIndex: number) => {
     const newComponents = [...selectedComponents];
     const [removed] = newComponents.splice(dragIndex, 1);
     newComponents.splice(dropIndex, 0, removed);
@@ -472,38 +623,53 @@ function TemplateBuilderTab() {
     // Update selected components
     setSelectedComponents(newComponents);
 
-      // Reorder componentIds based on the new order
-    setTemplateFormValues((prev) => ({
+    // Reorder groupIds based on the new order, maintaining all properties
+    setTemplateFormValues((prev: any) => ({
       ...prev,
       groupIds: newComponents.map((component) => ({
-        handle: component.handle, 
-        label: component.label,
+        handle: component.handle,
+        label: component.groupLabel || component.sectionLabel || component.componentLabel || component.label,
+        ...(component.groupLabel && { groupLabel: component.groupLabel }),
+        ...(component.sectionLabel && { sectionLabel: component.sectionLabel }),
+        ...(component.componentLabel && { componentLabel: component.componentLabel }),
       })),
     }));
+
+    // Call preview API after reordering
+    await handlePreviewGroups(newComponents);
   };
 
   const handleOpenPreview = async () => {
+    if (isPreviewMode) {
+      setIsPreviewMode(false);
+      return;
+    }
+
+    const groupIds = selectedComponents.map((group) => ({
+      handle: group.handle,
+      label: group.groupLabel || group.sectionLabel || group.componentLabel || group.label,
+    }));
+
     const payload = {
       site: "1004",
-      groupIds: selectedComponents,
+      groupIds: groupIds,
     };
+
     try {
-      const previewResponse = (await fetchTemplateBuilderData(
+      const previewResponse = await fetchTemplateBuilderData(
         payload,
         "templatebuilder-service",
         "preview"
-      )) as any;
+      ) as any;
 
-      setPreviewGroup(previewResponse?.componentList);
-      console.log("Preview Response:", previewResponse?.componentList);
+      setPreviewContent(previewResponse);
+      setIsPreviewMode(true);
     } catch (error) {
       message.error(
-        `Something went wrong while previewing: ${
-          error instanceof Error ? error.message : error
+        `Something went wrong while previewing: ${error instanceof Error ? error.message : error
         }`
       );
     }
-    console.log("Open Preview", selectedComponents);
   };
 
   // Handler for copying template
@@ -577,7 +743,7 @@ function TemplateBuilderTab() {
           templateVersion: "",
           templateType: "",
           productGroup: "",
-          currentVersion: "",
+          currentVersion: false,
           groupIds: [],
         });
         setSelectedComponents([]);
@@ -615,7 +781,9 @@ function TemplateBuilderTab() {
         try {
           const payload = {
             site: cookies.site,
+            userId: cookies.rl_user_id,
             templateLabel: selectedTemplate.templateLabel,
+            templateVersion: selectedTemplate.templateVersion,
           };
 
           const response = await fetchTemplateBuilderData(
@@ -639,7 +807,7 @@ function TemplateBuilderTab() {
               templateVersion: "",
               templateType: "",
               productGroup: "",
-              currentVersion: "",
+              currentVersion: false,
               groupIds: [],
             });
             setSelectedComponents([]);
@@ -676,12 +844,12 @@ function TemplateBuilderTab() {
   const handleAddTemplate = () => {
     // Create a temporary template object similar to existing templates
     const newTemplate: any = {
-        handle: "",
-        templateLabel: "",
+      handle: "",
+      templateLabel: "",
       templateVersion: "",
       templateType: "",
       productGroup: "",
-      currentVersion: "",   
+      currentVersion: false,
     };
 
     // Reset original template state for new template
@@ -690,7 +858,7 @@ function TemplateBuilderTab() {
       templateVersion: "",
       templateType: "",
       productGroup: "",
-      currentVersion: "",
+      currentVersion: false,
     });
 
     // Use the existing template click handler
@@ -705,7 +873,7 @@ function TemplateBuilderTab() {
       templateVersion: "",
       templateType: "",
       productGroup: "",
-      currentVersion: "",
+      currentVersion: false,
       groupIds: [],
     });
     setSelectedComponents([]);
@@ -794,7 +962,7 @@ function TemplateBuilderTab() {
       return;
     }
 
-    // Prepare payload
+    // Prepare payload with config data
     const payload = {
       site: cookies.site,
       templateLabel: templateFormValues.templateLabel,
@@ -805,6 +973,14 @@ function TemplateBuilderTab() {
       groupIds: templateFormValues.groupIds.map((group) => ({
         handle: group.handle,
         label: group.label,
+        config: group.config || {
+          type: "body",
+          logo: "",
+          pageOccurance: "allPages",
+          margin: "10",
+          height: "10",
+          alignment: "center",
+        }
       })),
     };
 
@@ -812,6 +988,8 @@ function TemplateBuilderTab() {
     setMainFormLoadingMessage(
       isNewTemplate ? "Creating template..." : "Updating template..."
     );
+
+    console.log(payload, "payloadss");
 
     try {
       const response = await fetchTemplateBuilderData(
@@ -826,9 +1004,9 @@ function TemplateBuilderTab() {
       ) {
         message.success(
           response.message_details.msg ||
-            (isNewTemplate
-              ? "Template created successfully."
-              : "Template updated successfully.")
+          (isNewTemplate
+            ? "Template created successfully."
+            : "Template updated successfully.")
         );
 
         // Reset form and state
@@ -839,13 +1017,12 @@ function TemplateBuilderTab() {
           templateVersion: "",
           templateType: "",
           productGroup: "",
-          currentVersion: "",
+          currentVersion: false,
           groupIds: [],
         });
         setSelectedComponents([]);
         fetchData();
       } else {
-        // Handle error response
         const errorMsg =
           response?.message_details?.msg || "Failed to Create/save the template";
         message.error(errorMsg);
@@ -880,7 +1057,7 @@ function TemplateBuilderTab() {
             templateVersion: "",
             templateType: "",
             productGroup: "",
-            currentVersion: "",
+            currentVersion: false,
             groupIds: [],
           });
           setSelectedComponents([]);
@@ -899,7 +1076,7 @@ function TemplateBuilderTab() {
         templateVersion: "",
         templateType: "",
         productGroup: "",
-        currentVersion: "",
+        currentVersion: false,
         groupIds: [],
       });
       setSelectedComponents([]);
@@ -910,40 +1087,10 @@ function TemplateBuilderTab() {
     }
   };
 
-  // New function to handle preview API call
-  const handlePreviewGroups = async (groups: any[]) => {
-    if (groups.length === 0) {
-      // Clear preview when no components
-      setPreviewGroup([]);
-      return;
-    }
-
-    const payload = {
-      site: "1004",
-      groupIds: groups,
-    };
-    try {
-      const previewResponse = (await fetchTemplateBuilderData(
-        payload,
-        "templatebuilder-service",
-        "preview"
-      )) as any;
-
-      setPreviewGroup(previewResponse?.componentList || []);
-    } catch (error) {
-      message.error(
-        `Something went wrong while previewing: ${
-          error instanceof Error ? error.message : error
-        }`
-      );
-      setPreviewGroup([]);
-    }
-  };
-
   // Get the current list based on selected type
   const getCurrentList = () => {
     if (!selectedTemplate) return templateData;
-    
+
     switch (selectedBuilderType) {
       case "Component":
         return componentsList;
@@ -957,15 +1104,16 @@ function TemplateBuilderTab() {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
-    let newValue = e.target.value.toUpperCase().replace(/[^A-Z0-9_\-\(\)]/g, "");
+    const value = e.target.value.toUpperCase().replace(/[^A-Z0-9_\-\(\)]/g, "");
 
-    const patterns: { [key: string]: RegExp } = {
-      productGroup: /^[A-Z0-9_\-\(\)]*$/,
-    };
+    // Update form value
+    form.setFieldsValue({ [key]: value });
 
-    if (patterns[key]?.test(newValue)) {
-      form.setFieldsValue({ [key]: newValue });
-    }
+    // Update template form values
+    setTemplateFormValues((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
   };
 
   const handleCancel = () => {
@@ -979,16 +1127,16 @@ function TemplateBuilderTab() {
     const newValue = { itemGroup: typedValue };
 
     try {
-      let response = typedValue ? 
+      let response = typedValue ?
         await fetchTemplateBuilderData(
           { site, ...newValue },
           "itemgroup-service",
-          "getAllItemGroup"
-        ) as ItemGroupResponse : 
+          "retrieveAll"
+        ) as ItemGroupResponse :
         await fetchTemplateBuilderData(
           { site },
           "itemgroup-service",
-          "getTop50ItemGroup"
+          "retrieveTop50"
         ) as ItemGroupResponse;
 
       if (response && !response.errorCode) {
@@ -1006,9 +1154,16 @@ function TemplateBuilderTab() {
 
   const handleItemGroupOk = (selectedRow: any) => {
     if (selectedRow) {
-      form.setFieldsValue({ productGroup: selectedRow.itemGroup });
-      message.destroy();
-      message.success('Product group selected');
+      const value = selectedRow.itemGroup;
+
+      // Update form value
+      form.setFieldsValue({ productGroup: value });
+
+      // Update template form values
+      setTemplateFormValues((prev) => ({
+        ...prev,
+        productGroup: value,
+      }));
     }
     setItemGroupVisible(false);
   };
@@ -1017,6 +1172,130 @@ function TemplateBuilderTab() {
     { title: "Item Group", dataIndex: "itemGroup", key: "itemGroup" },
     { title: "Group Description", dataIndex: "groupDescription", key: "groupDescription" },
   ];
+
+  console.log(selectedComponents, 'selectedComponents');
+
+
+  // Add handlePreviewGroups function here
+  const handlePreviewGroups = async (groups: any[]) => {
+    if (groups.length === 0) {
+      setPreviewGroup([]);
+      return;
+    }
+
+    const groupIds = groups.map((group) => ({
+      handle: group.handle,
+      label: group.groupLabel || group.sectionLabel || group.componentLabel || group.label,
+    }));
+
+    const payload = {
+      site: "1004",
+      groupIds: groupIds,
+    };
+
+    try {
+      const previewResponse = await fetchTemplateBuilderData(
+        payload,
+        "templatebuilder-service",
+        "preview"
+      ) as any[];
+
+      if (!Array.isArray(previewResponse)) {
+        setPreviewGroup([]);
+        return;
+      }
+
+      // Transform the preview response to match the tree structure
+      const transformedData = previewResponse.map((item: any) => {
+        // Case 1: Group object
+        if (item._id?.startsWith('GroupBO:')) {
+          return {
+            _id: item._id,
+            groupLabel: item.groupLabel,
+            sectionIds: item.sectionIds?.map((section: any) => ({
+              _id: section._id,
+              sectionLabel: section.sectionLabel,
+              components: section.components?.map((comp: any) => ({
+                _id: comp._id,
+                componentLabel: comp.componentLabel,
+                dataType: comp.dataType,
+                unit: comp.unit,
+                defaultValue: comp.defaultValue,
+                required: comp.required,
+                validation: comp.validation,
+                tableConfig: comp.tableConfig
+              }))
+            })) || []
+          };
+        }
+        // Case 2: Section object
+        else if (item._id?.startsWith('SectionBO:')) {
+          return {
+            _id: item._id,
+            sectionLabel: item.sectionLabel,
+            components: item.components?.map((comp: any) => ({
+              _id: comp._id,
+              componentLabel: comp.componentLabel,
+              dataType: comp.dataType,
+              unit: comp.unit,
+              defaultValue: comp.defaultValue,
+              required: comp.required,
+              validation: comp.validation,
+              tableConfig: comp.tableConfig
+            }))
+          };
+        }
+        // Case 3: Component object
+        else if (item._id?.startsWith('ComponentBO:')) {
+          return {
+            _id: item._id,
+            componentLabel: item.componentLabel,
+            dataType: item.dataType,
+            unit: item.unit,
+            defaultValue: item.defaultValue,
+            required: item.required,
+            validation: item.validation,
+            tableConfig: item.tableConfig
+          };
+        }
+        return null;
+      }).filter(Boolean);
+
+      setPreviewGroup(transformedData);
+    } catch (error) {
+      message.error(
+        `Something went wrong while previewing: ${error instanceof Error ? error.message : error
+        }`
+      );
+      setPreviewGroup([]);
+    }
+  };
+
+  // Add handleRowClick function
+  const handleRowClick = useCallback((record: GroupId) => {
+    setSelectedRow(record);
+    setActiveTab("configure"); // Switch to configure tab when row is clicked
+  }, []);
+
+  // Add handleConfigChange function
+  const handleConfigChange = (handle: string, config: any) => {
+    setSelectedComponents((prevComponents) =>
+      prevComponents.map((component) =>
+        component.handle === handle
+          ? { ...component, config }
+          : component
+      )
+    );
+
+    setTemplateFormValues((prev) => ({
+      ...prev,
+      groupIds: prev.groupIds.map((group) =>
+        group.handle === handle
+          ? { ...group, config }
+          : group
+      ),
+    }));
+  };
 
   return (
     <>
@@ -1050,7 +1329,7 @@ function TemplateBuilderTab() {
           <span style={{ fontWeight: 500 }}>Template Builder</span>
           {selectedTemplate && (
             <span style={{ color: "#666", marginLeft: "0px" }}>
-            - {selectedTemplate.templateLabel}
+              - {selectedTemplate.templateLabel}
             </span>
           )}
         </span>
@@ -1064,16 +1343,32 @@ function TemplateBuilderTab() {
         >
           {selectedTemplate && (
             <>
-                <Tooltip title="Preview Template Builder">
-                <EyeOutlined
-                  style={{
-                    color: "#1890ff",
-                    cursor: "pointer",
-                    fontSize: "22px",
-                  }}
-                  onClick={handleOpenPreview}
-                />
-              </Tooltip>
+              {
+                isPreviewMode ? (
+                  <Tooltip title="Un Preview Template Builder">
+                    <EyeInvisibleOutlined
+                      style={{
+                        color: "#1890ff",
+                        cursor: "pointer",
+                        fontSize: "22px",
+                      }}
+                      onClick={handleOpenPreview}
+                    />
+                  </Tooltip>
+                ) : (
+                  <Tooltip title="Preview Template Builder">
+                    <EyeOutlined
+                      style={{
+                        color: "#1890ff",
+                        cursor: "pointer",
+                        fontSize: "22px",
+                      }}
+                      onClick={handleOpenPreview}
+                    />
+                  </Tooltip>
+                )
+              }
+
               <Tooltip title="Copy Template">
                 <CopyIcon
                   style={{
@@ -1252,7 +1547,7 @@ function TemplateBuilderTab() {
                 }}
               >
                 <Input.Search
-                    placeholder="Search templates..."
+                  placeholder="Search templates..."
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onSearch={handleSearch}
                   value={searchTerm}
@@ -1283,7 +1578,7 @@ function TemplateBuilderTab() {
 
         {/* Main Section - Selected Groups */}
         <Col
-          span={14}
+          span={13}
           className={styles["main-section"]}
           style={{ position: "relative" }} // Add positioning for loading overlay
         >
@@ -1313,168 +1608,221 @@ function TemplateBuilderTab() {
             </div>
           )}
 
-          <div>
-            {!selectedTemplate && !isCreateMode ? (
-              <span
-                style={{
-                  color: "#999",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: "85vh",
-                  width: "100%",
-                  padding: "20px",
-                  boxSizing: "border-box",
-                  textAlign: "center",
-                }}
-              >
-                Please select a template or create a new one to get started
-              </span>
-            ) : (
-              <>
-                <Form
-                  form={form}
-                  layout="vertical"
+          {isPreviewMode ? (
+            <div style={{ position: 'relative' }}>
+              <PreviewContent previewData={previewContent} />
+            </div>
+          ) : (
+            <div>
+              {!selectedTemplate && !isCreateMode ? (
+                <span
                   style={{
-                    marginBottom: "16px",
+                    color: "#999",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "85vh",
                     width: "100%",
+                    padding: "20px",
+                    boxSizing: "border-box",
+                    textAlign: "center",
                   }}
                 >
-                  <Row gutter={16}>
-                    <Col span={8}>
-                      <Form.Item
-                        name="templateLabel"
-                        label="Template Name"
-                        rules={[{ required: true, message: 'Please enter template name' }]}
-                      >
-                        <Input
-                          placeholder="Enter Template Name"
-                          disabled={selectedTemplate?.handle ? true : false}
-                          onChange={(e) => {
-                            const value = e.target.value
-                              .toUpperCase()
-                              .replace(/[^A-Z_]/g, "");
-                            setTemplateFormValues((prev) => ({
-                              ...prev,
-                              templateLabel: value,
-                            }));
-                            setSelectedTemplate((prev) =>
-                              prev
-                                ? {
+                  Please select a template or create a new one to get started
+                </span>
+              ) : (
+                <>
+                  <Form
+                    form={form}
+                    layout="vertical"
+                    style={{
+                      marginBottom: "16px",
+                      width: "100%",
+                    }}
+                  >
+                    <Row gutter={16}>
+                      <Col span={8}>
+                        <Form.Item
+                          name="templateLabel"
+                          label="Template Name"
+                          rules={[{ required: true, message: 'Please enter template name' }]}
+                        >
+                          <Input
+                            placeholder="Enter Template Name"
+                            disabled={selectedTemplate?.handle ? true : false}
+                            onChange={(e) => {
+                              const value = e.target.value
+                              setTemplateFormValues((prev) => ({
+                                ...prev,
+                                templateLabel: value,
+                              }));
+                              setSelectedTemplate((prev) =>
+                                prev
+                                  ? {
                                     ...prev,
                                     templateLabel: value,
                                   }
-                                : null
-                            );
-                          }}
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                      <Form.Item
-                        name="templateVersion"
-                        label="Version"
-                        initialValue="A"
-                      >
-                        <Input />
-                      </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                      <Form.Item
-                        name="templateType"
-                        label="Template Type"
-                      >
-                        <Select
-                          options={[
-                            { value: "MFR", label: "MFR" },
-                            { value: "BMR", label: "BMR" },
-                            { value: "BPR", label: "BPR" },
-                          ]}
-                          placeholder="Select Template Type"
-                        />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                  <Row gutter={16}>
-                    <Col span={8}>
-                      <Form.Item
-                        name="productGroup"
-                        label="Product Group"
-                      >
-                        <Input
-                          autoComplete="off"
-                          suffix={
-                            <GrChapterAdd
-                              style={{ cursor: 'pointer' }}
-                              onClick={handleProductGroupClick}
-                            />
-                          }
-                          onChange={(e) => handleInputChange(e, 'productGroup')}
-                        />
-                      </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                      <Form.Item
-                        name="currentVersion"
-                        label="Current Version"
-                        valuePropName="checked"
-                      >
-                        <Switch />
-                      </Form.Item>
-                    </Col>
-                  </Row>
-                </Form>
+                                  : null
+                              );
+                            }}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={8}>
+                        <Form.Item
+                          name="templateVersion"
+                          label="Version"
+                          initialValue="A"
+                        >
+                          <Input
+                            disabled={selectedTemplate?.handle ? true : false}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setTemplateFormValues((prev) => ({
+                                ...prev,
+                                templateVersion: value,
+                              }));
+                            }}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={8}>
+                        <Form.Item
+                          name="templateType"
+                          label="Template Type"
+                        >
+                          <Select
+                            options={[
+                              { value: "MFR", label: "MFR" },
+                              { value: "BMR", label: "BMR" },
+                              { value: "BPR", label: "BPR" },
+                            ]}
+                            placeholder="Select Template Type"
+                            onChange={(value) => {
+                              setTemplateFormValues((prev) => ({
+                                ...prev,
+                                templateType: value,
+                              }));
+                            }}
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                    <Row gutter={16}>
+                      <Col span={8}>
+                        <Form.Item
+                          name="productGroup"
+                          label="Product Group"
+                        >
+                          <Input
+                            autoComplete="off"
+                            suffix={
+                              <GrChapterAdd
+                                style={{ cursor: 'pointer' }}
+                                onClick={handleProductGroupClick}
+                              />
+                            }
+                            onChange={(e) => {
+                              const value = e.target.value.toUpperCase().replace(/[^A-Z0-9_\-\(\)]/g, "");
+                              setTemplateFormValues((prev) => ({
+                                ...prev,
+                                productGroup: value,
+                              }));
+                              handleInputChange(e, 'productGroup');
+                            }}
+                          />
+                        </Form.Item>
+                      </Col>
+                      <Col span={8}>
+                        <Form.Item
+                          name="currentVersion"
+                          label="Current Version"
+                          valuePropName="checked"
+                          getValueProps={(value: boolean) => ({
+                            checked: value === true
+                          })}
+                        >
+                          <Switch
+                            onChange={(checked: boolean) => {
+                              const booleanValue = checked ? true : false;
 
-                {/* Add Modal for Product Group selection */}
-                <Modal 
-                  title="Select Item Group" 
-                  open={ItemGroupVisible} 
-                  onCancel={handleCancel} 
-                  width={800} 
-                  footer={null}
-                >
-                  <Table
-                    style={{ overflow: 'auto' }}
-                    onRow={(record) => ({
-                      onDoubleClick: () => handleItemGroupOk(record)
-                    })}
-                    columns={ItemGroupColumn}
-                    dataSource={itemGroupData}
-                    rowKey="id"
-                    pagination={false}
-                    scroll={{ y: 'calc(100vh - 350px)' }}
-                  />
-                </Modal>
+                              // Update form value
+                              form.setFieldsValue({ currentVersion: booleanValue });
 
-                {(selectedTemplate || isCreateMode) && (
-                  <DragableTable
-                    dataSource={selectedComponents.map((component) => ({
-                      ...component,
-                      id:
-                        component.handle ||
-                        `${Date.now()}-${component.label}`,
-                    }))}
-                    onDragEnd={handleDragEnd}
-                    onRemoveComponent={handleRemoveComponent}
-                    onClearComponents={handleClearGroups}
-                  />
-                )}
-              </>
-            )}
-          </div>
+                              // Update template form values state
+                              setTemplateFormValues((prev) => ({
+                                ...prev,
+                                currentVersion: booleanValue,
+                              }));
+
+                              // Update selected template if it exists
+                              if (selectedTemplate) {
+                                setSelectedTemplate((prev) =>
+                                  prev ? {
+                                    ...prev,
+                                    currentVersion: booleanValue,
+                                  }
+                                    : null
+                                );
+                              }
+                            }}
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  </Form>
+
+                  {/* Add Modal for Product Group selection */}
+                  <Modal
+                    title="Select Item Group"
+                    open={ItemGroupVisible}
+                    onCancel={handleCancel}
+                    width={800}
+                    footer={null}
+                  >
+                    <Table
+                      style={{ overflow: 'auto' }}
+                      onRow={(record) => ({
+                        onDoubleClick: () => handleItemGroupOk(record)
+                      })}
+                      columns={ItemGroupColumn}
+                      dataSource={itemGroupData}
+                      rowKey="id"
+                      pagination={false}
+                      scroll={{ y: 'calc(100vh - 350px)' }}
+                    />
+                  </Modal>
+
+                  {(selectedTemplate || isCreateMode) && (
+                    <DragableTable
+                      dataSource={selectedComponents.map((component) => ({
+                        ...component,
+                        id: component.handle || `${Date.now()}-${component.label}`,
+                      }))}
+                      onDragEnd={handleDragEnd}
+                      onRemoveComponent={handleRemoveComponent}
+                      onClearComponents={handleClearGroups}
+                      onRowClick={handleRowClick}
+                      selectedRow={selectedRow}
+                    />
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </Col>
 
         {/* Right Section */}
         <Col
-          span={5}
+          span={6}
           className={styles["right-section"]}
           style={{
-            height: "calc(100vh - 90px)", // Adjust height to account for header and footer
+            height: "calc(100vh - 90px)",
             display: "flex",
             flexDirection: "column",
             position: "relative",
-            backgroundColor: "#f5f5f5", // Add positioning for loading overlay
+            backgroundColor: "#f5f5f5",
           }}
         >
           {!selectedTemplate && !isCreateMode ? (
@@ -1495,13 +1843,34 @@ function TemplateBuilderTab() {
               Select a template or create a new one to view structure
             </span>
           ) : (
-            <TemplateStructureTree
-              label={""}
-              selectedGroups={previewGroup}
+            <Tabs
+              activeKey={activeTab}
+              onChange={(key) => setActiveTab(key)}
+              items={[
+                {
+                  key: "structure",
+                  label: "Template Structure",
+                  children: (
+                    <TemplateStructureTree
+                      selectedGroups={previewGroup}
+                    />
+                  ),
+                },
+                {
+                  key: "configure",
+                  label: "Configure",
+                  children: (
+                    <ConfigureTab
+                      selectedRow={selectedRow}
+                      templateDetails={templateDetails}
+                      onConfigChange={handleConfigChange}
+                    />
+                  ),
+                },
+              ]}
             />
           )}
         </Col>
-
 
         {/* Footer */}
         {(selectedTemplate || isCreateMode) && (
