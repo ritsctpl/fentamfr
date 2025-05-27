@@ -1199,6 +1199,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                 labelCol={{ span: 8 }}
                                 wrapperCol={{ span: 14 }}
                                 style={{ marginBottom: '8px' }}
+                                required
                             >
                                 <Input
                                     type="number"

@@ -1106,4 +1106,14 @@ export const hindiLanguage = {
   "noOfColumns": "स्तंभों की संख्या",
   "noOfRows": "पंक्तियों की संख्या",
   "resourceDetails": "संसाधन विवरण",
+
+
+  "workflowStates": "कार्यप्रवाह अवस्थाएँ",
+  "states": "अवस्थाएँ",
+  "editableFields": "संपादन योग्य फ़ील्ड्स",
+  "appliesTo": "लागू होता है",
+  "isActive": "सक्रिय है",
+  "isEnd": "अंतिम है",
+  "createState": "अवस्था बनाएं",
+  "workflowStatesMaster": "कार्यप्रवाह अवस्था मास्टर",
 }

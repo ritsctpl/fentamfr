@@ -23,6 +23,7 @@ import { defaultFormData } from "../types/WorkflowStatesTypes";
 import { retrieveAllApiConfigurations, retrieveApiConfigurations, retrieveTop50ApiConfigurations } from "@services/apiConfigurationService";
 import InstructionModal from "@components/InstructionModal";
 import UserInstructions from "./userInstructions";
+import { retrieveAllWorkFlowStatesMaster, retrieveTop50States, retrieveWorkFlowStatesMaster } from "@services/workflowStatesMasterService";
 
 
 
@@ -77,8 +78,11 @@ const WorkflowStatesMain: React.FC = () => {
           // debugger;
           const cookies = parseCookies();
           const site = cookies?.site;
+          const request = {
+            site: site
+          }
           try {
-            const item = await retrieveTop50ApiConfigurations(site);
+            const item = await retrieveTop50States(request);
             if (!item?.errorCode) {
               setTop50Data(item);
               setFilteredData(item); // Initialize filtered data
@@ -107,13 +111,17 @@ const WorkflowStatesMain: React.FC = () => {
       const lowercasedTerm = searchTerm.toLowerCase();
       const cookies = parseCookies();
       const site = cookies?.site;
+      const request = {
+        site: site,
+        name: searchTerm,
+      }
       try {
-        let oAllItem = await retrieveAllApiConfigurations(searchTerm);
+        let oAllItem = await retrieveAllWorkFlowStatesMaster(request);
         // Once the item list is fetched, filter the data
         let filtered;
         if (lowercasedTerm) {
           if (!oAllItem?.errorCode)
-            filtered = [oAllItem];
+            filtered = oAllItem;
         } else {
           filtered = top50Data; // If no search term, show all items
         }
@@ -151,11 +159,14 @@ const WorkflowStatesMain: React.FC = () => {
     const fetchConfig = async () => {
       try {
         let response;
-        const id = row.id;
         const cookies = parseCookies();
         const site = cookies?.site;
+        const request = {
+          site: site,
+          name: row?.name,
+        }
         try {
-          response = await retrieveApiConfigurations(id);
+          response = await retrieveWorkFlowStatesMaster(request);
           if (!response?.errorCode) {
             setPayloadData(response);
             setSelectedRowData(response);
@@ -212,7 +223,7 @@ const WorkflowStatesMain: React.FC = () => {
           allActivities={[]}
           username={username}
           site={null}
-          appTitle={t("workflowStates")} onSiteChange={function (newSite: string): void {
+          appTitle={t("workflowStatesMaster")} onSiteChange={function (newSite: string): void {
             setCall(call + 1);
           }} />
       </div>
