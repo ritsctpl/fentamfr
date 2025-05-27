@@ -8,6 +8,7 @@ import { parseCookies } from 'nookies';
 import { retrieveTop50ApiConfigurations } from '@services/apiConfigurationService';
 import { useTranslation } from 'react-i18next';
 import { Button } from 'antd';
+import { retrieveTop50States } from '@services/workflowStatesMasterService';
 
 interface DataFieldCommonBarProps {
   onSearch: (searchTerm: string) => void;
@@ -32,8 +33,11 @@ const ApiConfigurationCommonBar: React.FC<DataFieldCommonBarProps> = ({ onSearch
     const fetchTop50 = async () => {
       const cookies = parseCookies();
       const site = cookies?.site;
+      const request = {
+        site: site
+      }
       try {
-        top50List = await retrieveTop50ApiConfigurations(site);
+        top50List = await retrieveTop50States(request);
         
         if(!top50List.errorCode)
           setFilteredData(top50List);
@@ -75,12 +79,12 @@ const ApiConfigurationCommonBar: React.FC<DataFieldCommonBarProps> = ({ onSearch
             <SearchIcon className={styles.searchIcon} />
           </IconButton>
         </Paper>
-        {/* <div className={styles.goButton}>
+        <div className={styles.goButton}>
           <Button type='primary' onClick={handleItemFetch} >
             {t("go")}
           </Button>
-          {button}
-        </div> */}
+          {/* {button} */}
+        </div>
       </div>
       {filter && (
         <div className={styles.searchFilter}>

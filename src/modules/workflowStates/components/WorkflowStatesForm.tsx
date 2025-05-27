@@ -36,6 +36,14 @@ const WorlFlowStatesForm = () => {
         }));
         setShowAlert(true);
     }
+    
+    const handleSwitchChange = (fieldName: string, value: any) => {
+        setPayloadData((prev) => ({
+            ...prev,
+            [fieldName]: value
+        }));
+        setShowAlert(true);
+    }
 
     return (
         <Form
@@ -79,7 +87,7 @@ const WorlFlowStatesForm = () => {
                     <Option value="BPR">BPR</Option>
                     <Option value="eBMR">eBMR</Option>
                     <Option value="Deviation">Deviation</Option>
-                    <Option value="ChangeControl">Change Control</Option>
+                    <Option value="Change Control">Change Control</Option>
                     <Option value="*">All</Option>
                 </Select>
             </Form.Item>
@@ -105,7 +113,7 @@ const WorlFlowStatesForm = () => {
             >
                 <Switch
                     checked={payloadData?.isEnd}
-                    onChange={(checked) => handleSelectChange("isEnd", checked)}
+                    onChange={(checked) => handleSwitchChange("isEnd", checked)}
                 />
             </Form.Item>
             <Form.Item
@@ -115,7 +123,7 @@ const WorlFlowStatesForm = () => {
             >
                 <Switch
                     checked={payloadData?.isActive}
-                    onChange={(checked) => handleSelectChange("isActive", checked)}
+                    onChange={(checked) => handleSwitchChange("isActive", checked)}
                 />
             </Form.Item>
 

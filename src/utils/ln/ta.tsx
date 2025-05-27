@@ -1119,4 +1119,14 @@ export const tamilLanguage = {
   "noOfColumns": "நிரல்களின் எண்ணிக்கை",
   "noOfRows": "வரிகளின் எண்ணிக்கை",
   "resourceDetails": "வள விவரம்",
+
+
+  "workflowStates": "பணிப்ரவாக நிலைகள்",
+  "states": "நிலைகள்",
+  "editableFields": "திருத்தக்கூடிய புலங்கள்",
+  "appliesTo": "பொருந்தும்",
+  "isActive": "செயலில் உள்ளது",
+  "isEnd": "இறுதி நிலை",
+  "createState": "நிலை உருவாக்கு",
+  "workflowStatesMaster": "பணிப்ரவாக நிலைகள் தலைமை",
 }

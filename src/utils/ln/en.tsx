@@ -1178,4 +1178,6 @@ export const englishLanguage = {
   "isActive": "Is Active",
   "isEnd": "Is End",
   "resourceDetails": "Resource Details",
+  "createState": "Create State",
+  "workflowStatesMaster": "Workflow States Master",
 }

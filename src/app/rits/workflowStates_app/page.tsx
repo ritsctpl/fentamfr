@@ -7,7 +7,7 @@ import WorkflowStatesMain from '@modules/workflowStates/components/WorkflowState
 const ApiConfigurationMainPage: React.FC = () => {
   return (
     <MyProvider >
-      <WorkflowStatesMain />;
+      <WorkflowStatesMain />
     </MyProvider>
   )
 };

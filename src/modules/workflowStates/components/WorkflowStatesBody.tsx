@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { useMyContext } from '../hooks/WorkflowStatesContext';
 import WorlFlowStatesForm from './WorkflowStatesForm';
 import { parseCookies } from 'nookies';
+import { createWorkFlowStatesMaster, deleteWorkFlowStatesMaster, updateWorkFlowStatesMaster } from '@services/workflowStatesMasterService';
 const { Option } = Select
 
 interface CustomData {
@@ -96,9 +97,9 @@ const ApiConfigurationMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyP
             return;
         }
 
-        if (payloadData?.appliesTo == "" || payloadData?.appliesTo == null || payloadData?.appliesTo == undefined) {
+        if (payloadData?.appliesTo?.length == 0 || payloadData?.appliesTo == "" || payloadData?.appliesTo == null || payloadData?.appliesTo == undefined) {
             flagToEncode = false;
-            message.error("Applies To cannot be empty");
+            message.error("AppliesTo cannot be empty");
             return;
         }
 
@@ -113,20 +114,20 @@ const ApiConfigurationMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyP
                 const user = cookies?.rl_user_id
                 let updatedRequest;
                 updatedRequest = {
-                    // site: site,
-                    id: payloadData?.id,
-                    apiName: payloadData?.apiName,
-                    storedProcedure: payloadData?.storedProcedure,
-                    httpMethod: payloadData?.httpMethod,
-                    inputParameters: payloadData?.inputParameters,
-                    outputStructure: payloadData?.outputStructure,
-                    // userId: user
+                    site: site,
+                    name:  payloadData?.name,
+                    description:  payloadData?.description,
+                    appliesTo: payloadData?.appliesTo,
+                    editableFields: payloadData?.editableFields,
+                    isEnd: payloadData?.isEnd,
+                    isActive: payloadData?.isActive,
+                    userId: user
                 }
 
                 if (buttonLabel == "Create" || buttonLabel == "बनाएं"
                     || buttonLabel == "ರಚಿಸಿ" || buttonLabel == "உருவாக்க") {
                     try {
-                        const createResponse = await createApiConfiguration(updatedRequest);
+                        const createResponse = await createWorkFlowStatesMaster(updatedRequest);
                         if (createResponse) {
                             if (createResponse?.errorCode) {
                                 message.error(createResponse?.message);
@@ -134,8 +135,7 @@ const ApiConfigurationMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyP
                             else {
                                 setCall(call + 1);
                                 setShowAlert(false);
-                                // message.success(createResponse?.message_details?.msg);
-                                message.success("Created Successfully");
+                                message.success(createResponse?.message_details?.msg);
                                 onClose();
                             }
                         }
@@ -150,15 +150,14 @@ const ApiConfigurationMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyP
 
                     if (flagToSave) {
                         try {
-                            const updateResponse = await updateApiConfiguration(updatedRequest);
+                            const updateResponse = await updateWorkFlowStatesMaster(updatedRequest);
                             if (updateResponse) {
                                 if (updateResponse?.errorCode) {
                                     message.error(updateResponse?.message);
                                 }
                                 else {
                                     setShowAlert(false);
-                                    // message.success(updateResponse?.message_details?.msg);
-                                    message.success("Updated Successfully");
+                                    message.success(updateResponse?.message_details?.msg);
                                     setCall(call + 1);
                                 }
                             }
@@ -220,12 +219,14 @@ const ApiConfigurationMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyP
             try {
                 const cookies = parseCookies();
                 const site = cookies?.site;
-                const id = payloadData?.id;
+                const request = {
+                    site: site,
+                    name: payloadData?.name,
+                  }
                 try {
-                    const response = await deleteApiConfiguration(id); // Assuming retrieveItem is an API call or a data fetch function
+                    const response = await deleteWorkFlowStatesMaster(request); // Assuming retrieveItem is an API call or a data fetch function
                     if (!response.errorCode) {
-                        // message.success(response?.message_details?.msg);
-                        message.success("Deleted Successfully");
+                        message.success(response?.message_details?.msg);
                         setCall(call + 1);
                         onClose();
                         setShowAlert(false);
@@ -252,15 +253,13 @@ const ApiConfigurationMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyP
         // Optionally reset form fields
         form.resetFields();
         form.setFieldsValue({
-            apiName: selectedRowData?.apiName + "_COPY" || '',
-            storedProcedure: '',
-            httpMethod: 'POST'
+            name: selectedRowData?.name + "_COPY" || '',
+            description: '',
         });
         setPayloadData((prev) => ({
             ...prev,
-            apiName: selectedRowData?.apiName + "_COPY" || '',
-            storedProcedure: '',
-            httpMethod: 'POST'
+            name: selectedRowData?.name + "_COPY" || '',
+            description: '',
         }))
     };
 
@@ -293,15 +292,15 @@ const ApiConfigurationMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyP
 
                 let flagToSave = true, flagToEncode = true;
 
-                if (payloadData?.apiName == "" || payloadData?.apiName == null || payloadData?.apiName == undefined) {
+                if (payloadData?.name == "" || payloadData?.name == null || payloadData?.name == undefined) {
                     flagToEncode = false;
-                    message.error("Api Name cannot be empty");
+                    message.error("Name cannot be empty");
                     return;
                 }
 
-                if (payloadData?.storedProcedure == "" || payloadData?.storedProcedure == null || payloadData?.storedProcedure == undefined) {
+                if (payloadData?.appliesTo?.length == 0 || payloadData?.appliesTo == "" || payloadData?.appliesTo == null || payloadData?.appliesTo == undefined) {
                     flagToEncode = false;
-                    message.error("Stored Procedure cannot be empty");
+                    message.error("AppliesTo cannot be empty");
                     return;
                 }
 
@@ -312,24 +311,24 @@ const ApiConfigurationMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyP
                     const user = cookies?.rl_user_id
                     try {
                         updatedRequest = {
-                            // site: site,
-                            apiName: payloadData?.apiName,
-                            storedProcedure: payloadData?.storedProcedure,
-                            httpMethod: payloadData?.httpMethod,
-                            inputParameters: payloadData?.inputParameters,
-                            outputStructure: payloadData?.outputStructure,
-                            // userId: user
+                            site: site,
+                            name: form.getFieldsValue()?.name,
+                            description: form.getFieldsValue()?.description,
+                            appliesTo: payloadData?.appliesTo,
+                            editableFields: payloadData?.editableFields,
+                            isEnd: payloadData?.isEnd,
+                            isActive: payloadData?.isActive,
+                            userId: user
                         }
 
                         try {
-                            const copyResponse = await createApiConfiguration(updatedRequest);
+                            const copyResponse = await createWorkFlowStatesMaster(updatedRequest);
                             if (copyResponse?.errorCode) {
                                 message.error(copyResponse?.message);
                             }
                             else {
                                 setCall(call + 1);
-                                // message.success(copyResponse?.message_details?.msg);
-                                message.success("Created Successfully");
+                                message.success(copyResponse?.message_details?.msg);
                                 setShowAlert(false);
                                 onClose();
                             }
@@ -397,7 +396,7 @@ const ApiConfigurationMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyP
                         <div className={styles.split}>
                             <div>
                                 <p className={styles.headingtext}>
-                                    {selectedRowData ? selectedRowData?.apiName : t('createConfiguration')}
+                                    {selectedRowData ? selectedRowData?.name : t('createState')}
                                 </p>
                                 {selectedRowData && (
                                     <>
@@ -496,8 +495,8 @@ const ApiConfigurationMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyP
                 cancelText={t("cancel")}
                 centered
             >
-                <p>{t("Do you want to delete this state?")}
-                    {/* : <strong>{selectedRowData?.apiName}</strong>? */}
+                <p>{t("Do you want to delete this state")}
+                    : <strong>{selectedRowData?.name}</strong>?
                 </p>
             </Modal>
             <Modal
@@ -528,7 +527,7 @@ const ApiConfigurationMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyP
                     <Form.Item
                         name="description"
                         label={t("description")}
-                    > 
+                    >
                         <Input placeholder="" value={payloadData?.description} onChange={(e) => handleFieldChange(e, 'description')} />
                     </Form.Item>
 
