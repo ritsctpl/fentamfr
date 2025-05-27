@@ -1105,4 +1105,13 @@ export const kannadaLanguage = {
   "noOfColumns": "ಸ್ತಂಭಗಳ ಸಂಖ್ಯೆ",
   "noOfRows": "ಸಾಲುಗಳ ಸಂಖ್ಯೆ",
   "resourceDetails": "ಸಂಸ್ಥಾನ ವಿವರಣೆ",
+
+  "workflowStates": "ಕಾರ್ಯಪ್ರವಾಹ ಸ್ಥಿತಿಗಳು",
+  "states": "ಸ್ಥಿತಿಗಳು",
+  "editableFields": "ಸಂಪಾದಿಸಬಹುದಾದ ಕ್ಷೇತ್ರಗಳು",
+  "appliesTo": "ಅನ್ವಯಿಸಲಾಗುವುದು",
+  "isActive": "ಸಕ್ರಿಯ ಆಗಿದೆ",
+  "isEnd": "ಅಂತಿಮ ಸ್ಥಿತಿ",
+  "createState": "ಸ್ಥಿತಿ ರಚಿಸಿ",
+  "workflowStatesMaster": "ಕಾರ್ಯಪ್ರವಾಹ ಸ್ಥಿತಿಗಳ ಮಾಸ್ಟರ್",
 }

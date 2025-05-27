@@ -1,26 +1,23 @@
+
+
 .dataField {
   width: 100%;
   background-color: #ffffff;
-  display: flex;
-  justify-content: space-between;
-  height: fit-content;
-  align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
 .datafieldNav {
   display: flex;
   padding: 20px 0px;
   justify-content: space-between;
   align-items: center;
   width: 100%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
 }
 
-.modals {
-  height: 500px;
-  overflow: auto;
-}
 
 .searchInput {
+  /* font-style: italic; */
   width: 60px;
   border-radius: 5px;
   height: 20px;
@@ -34,16 +31,24 @@
   width: 250px;
   border-radius: 5px;
   height: 32px;
-  box-shadow: 0px 1px 2px rgba(28, 28, 29, 0.3),
-    -1px 1px 2px rgba(25, 25, 26, 0.3), 0px -1px 2px rgba(17, 17, 19, 0.3);
+  box-shadow:
+    0px 1px 2px rgba(28, 28, 29, 0.3),
+    -1px 1px 2px rgba(25, 25, 26, 0.3),
+    0px -1px 2px rgba(17, 17, 19, 0.3);
 }
+
 
 .floatingButtonContainer {
   position: static;
+
   bottom: 20px;
+  /* Space from the bottom of the viewport */
   right: 20px;
+  /* Space from the right of the viewport */
   display: flex;
+  /* Align buttons horizontally */
   gap: 10px;
+  /* Space between buttons */
 }
 
 .floatingButton {
@@ -57,33 +62,49 @@
 
 .saveButton {
   background-color: #1976d2;
+  /* Blue */
   padding: 0.4rem 0.8rem;
+  /* Adjust padding for smaller size */
   font-size: 0.875rem;
+  /* Smaller font size */
   border-radius: 4px;
+  /* Adjust border radius if needed */
   color: #fff;
+  /* Button text color */
   border: none;
+  /* Remove border if not needed */
   cursor: pointer;
+  /* Add cursor pointer on hover */
   transition: background-color 0.3s ease;
 }
 
 .saveButton:hover {
   background-color: #155fa0;
+  /* Darken on hover */
 }
 
 .cancelButton {
   background-color: #fff;
+  /* White */
   color: #1976d2;
+  /* Blue text */
   border: 1px solid #1976d2;
+  /* Blue border */
   padding: 0.4rem 0.8rem;
+  /* Adjust padding for smaller size */
   font-size: 0.875rem;
+  /* Smaller font size */
   border-radius: 4px;
+  /* Adjust border radius if needed */
   cursor: pointer;
+  /* Add cursor pointer on hover */
   transition: background-color 0.3s ease;
 }
 
 .cancelButton:hover {
   background-color: #f0f0f0;
 }
+
 
 .searchIcon {
   color: #007bff;
@@ -117,14 +138,17 @@
   background-color: #1976d2;
   color: white;
   border: none;
+  /* padding: 8px 10px; */
   text-transform: uppercase;
   cursor: pointer;
+
 }
 
 .goButton {
   margin-right: 20px;
   display: flex;
   gap: 10px;
+
 }
 
 .outlinedButton {
@@ -139,18 +163,22 @@
   width: 100%;
 }
 
+
+
 .dataFieldBody {
   width: 100%;
 }
 
-.dataFieldBodyContents {
-  margin: 10px 20px;
-}
+/* .dataFieldBodyContents{
+   margin: 10px 20px; 
+   display: flex;
+  justify-content: center; 
+} */
 
 .heading {
-  background: #ffffff;
+  background: #FFFFFF;
   font-size: medium;
-  /* padding: 5px 10px; */
+  padding: 5px 20px;
 }
 
 .headings {
@@ -158,8 +186,7 @@
 }
 
 .headingtext {
-  font-size: medium;
-  margin-bottom: 5px;
+  font-size: larger;
 }
 
 .split {
@@ -175,7 +202,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* padding: 10px 0px; */
+  padding: 10px 0px;
 }
 
 .dataLength {
@@ -186,14 +213,13 @@
   color: #124561;
   cursor: pointer;
   font-size: 20px;
-  margin-right: 0px;
+  margin-right: 20px;
 }
 
 .dataFieldBodyContentsBottom {
   display: flex;
   transition-duration: 0.3s;
   position: relative;
-  /* height: 88vh; */
 }
 
 .commonTableContainer {
@@ -207,53 +233,29 @@
   overflow: auto;
 }
 
-.mainContainer {
-  display: flex;
-  width: 100%;
-  height: 100vh;
-  transition: all 0.3s ease-in-out;
-}
-
-.mainContent {
-  width: 100%;
-  height: 100%;
-  transition: width 0.3s ease-in-out;
-}
-
-.mainContentShrink {
-  width: 45%;
-}
-
 .formContainer {
-  position: fixed;
-  top: 20;
-  right: -100%;
-  width: 55%;
-  height: 100vh;
-  background-color: white;
-  border-left: solid 1px #eee4e4;
-  transition: right 0.3s ease-in-out, width 0.3s ease-in-out;
-  z-index: 1000;
-  overflow-y: auto;
+  width: 0%;
+  transform: translateX(100%);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 0;
+  position: relative;
 }
 
-.show {
-  right: 0;
+.formContainer.show {
+  width: 80%;
+  transform: translateX(0);
+  opacity: 1;
+  height: 92vh;
+  overflow: auto;
+  margin-top: 10px;
 }
 
-.showFullScreen {
-  width: 100%;
-}
-
-@media (max-width: 768px) {
-  .mainContent {
-    width: 0;
-    display: none;
-  }
-
-  .formContainer {
-    width: 100%;
-  }
+.formContainer.showFullScreen {
+  width: 12000%;
+  transform: translateX(0);
+  opacity: 1;
+  height: 92vh;
+  overflow: auto;
 }
 
 /* ===================================== */
@@ -261,7 +263,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  max-height: 100vh;
   transition: all 0.3s ease;
   overflow: hidden;
 }
@@ -305,21 +307,38 @@
 
 .splitScreen .footer {
   display: none;
+  /* Hide footer in split screen mode if needed */
 }
+
+/* YourStyles.module.css */
+/* YourStyles.module.css */
 
 .headingtext {
   font-weight: bold;
-  font-size: 1.1em;
-  margin: 0px;
+  font-size: 1.2em;
 }
 
 .dateText {
   color: #555;
-  margin: 2px 0;
+  margin: 0;
+  /* Remove default margin */
   line-height: 1.2;
-  font-size: small;
+  /* Adjust line height to control spacing */
 }
 
 .fadedText {
   color: rgba(0, 0, 0, 0.6);
+  /* Faded black color */
+}
+
+.actionButton {
+  border: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.75;
+  letter-spacing: 0.02857em;
+  text-transform: uppercase;
+  min-width: 64px;
+  padding: 6px 8px;
+  border-radius: 4px;
 }

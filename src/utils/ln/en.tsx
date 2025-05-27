@@ -1170,5 +1170,14 @@ export const englishLanguage = {
   "validation": "Validation",
   "componentBuilderMaintenance": "Componenet Builder",
   "noOfColumns": "No. of columns",
+
+  "workflowStates": "Workflow States",
+  "states": "States",
+  "editableFields": "Editable Fields",
+  "appliesTo": "Applies To",
+  "isActive": "Is Active",
+  "isEnd": "Is End",
   "resourceDetails": "Resource Details",
+  "createState": "Create State",
+  "workflowStatesMaster": "Workflow States Master",
 }
