@@ -3,7 +3,24 @@ import { Table } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { HolderOutlined, ClearOutlined } from "@ant-design/icons";
 import { MdDeleteOutline } from "react-icons/md";
-import { GroupId } from "../types/TemplateTypes";
+
+// Define local GroupId interface with uniqueId
+interface GroupId {
+  handle: string;
+  label: string;
+  uniqueId: string;
+  groupLabel?: string;
+  sectionLabel?: string;
+  componentLabel?: string;
+  config?: {
+    type: 'header' | 'body' | 'footer';
+    logo: string;
+    pageOccurrence: 'all' | null;
+    margin: number;
+    height: number;
+    alignment: 'left' | 'center' | 'right';
+  };
+}
 
 interface DragableTableProps {
   dataSource: GroupId[];
@@ -137,12 +154,13 @@ export function DragableTable({
       columns={columns || defaultColumns}
       rowKey={rowKey}
       pagination={false}
-      scroll={scroll}
+      // scroll={scroll}
+      scroll={{ y: 'calc(100vh - 360px)' }}
       onRow={(record) => ({
         onClick: () => onRowClick?.(record),
         style: {
           cursor: 'pointer',
-          // backgroundColor: selectedRow?.[rowKey] === record[rowKey] ? '#e6f7ff' : undefined
+          backgroundColor: selectedRow?.uniqueId === record.uniqueId ? '#e6f7ff' : undefined
         }
       })}
       tableLayout="fixed"
