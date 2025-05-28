@@ -2,7 +2,7 @@
 import CommonTable from '@components/CommonTable';
 import { Button, Input, List, Form, Tree, Tooltip, message, Modal, Tabs } from 'antd';
 import React, { CSSProperties, useEffect, useState } from 'react';
-import { PlusOutlined, PullRequestOutlined, SearchOutlined } from '@ant-design/icons';
+import { PlusOutlined, PullRequestOutlined, SearchOutlined, ArrowLeftOutlined, EyeFilled } from '@ant-design/icons';
 import CloseIcon from '@mui/icons-material/Close';
 import CopyIcon from "@mui/icons-material/FileCopy";
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -16,6 +16,9 @@ import { AiOutlineClear } from "react-icons/ai";
 import { createGroup, deleteGroup, getSections, getTop50Groups, updateGroup } from '@services/groupBuilderService';
 import '../styles/group.css';
 import Preview from './Preview';
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import SectionPreview from './sectionPreview';
 
 // Define our types
 type Section = {
@@ -51,10 +54,13 @@ type Group = {
 
 const GroupBuilder = () => {
     // Core states
-    const [isFullScreen, setIsFullScreen] = useState(false);
-    const [addGroup, setAddGroup] = useState(false);
+    const [isFullScreen, setIsFullScreen] = useState(true);
+    const [addGroup, setAddGroup] = useState(true);
     const [isEdit, setIsEdit] = useState(false);
     const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
+    const [showSections, setShowSections] = useState(false);
+    const [previewSections, setPreviewSections] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
 
     // Form
     const [form] = Form.useForm();
@@ -68,7 +74,6 @@ const GroupBuilder = () => {
     const [treeData, setTreeData] = useState<DataNode[]>([]);
     const [expandedKeys, setExpandedKeys] = useState<string[]>(['0']);
     const [activeTab, setActiveTab] = useState<string>('1');
-    const [previewSections, setPreviewSections] = useState(false);
 
     // Derived states (computed values) with null checks and type checking
     const filteredGroups = Array.isArray(groups) ? groups.filter(group =>
@@ -169,6 +174,7 @@ const GroupBuilder = () => {
             if (response) {
                 const updatedGroups = await getTop50Groups();
                 setGroups(updatedGroups || []);
+                setIsCreating(false);
                 resetForm();
                 message.success(response.message_details.msg);
             }
@@ -230,9 +236,12 @@ const GroupBuilder = () => {
         form.resetFields();
         setOrderedSections([]);
         setIsEdit(false);
-        setAddGroup(false);
-        setIsFullScreen(false);
+        setIsCreating(false);
+        setAddGroup(true);
+        setIsFullScreen(true);
         setSelectedGroup(null);
+        setShowSections(false);
+        setPreviewSections(false);
     };
 
     const handleSelectGroup = (row: any) => {
@@ -243,6 +252,7 @@ const GroupBuilder = () => {
             if (selectedGroupItem) {
                 setSelectedGroup(selectedGroupItem);
                 setIsEdit(true);
+                setShowSections(true);
                 form.setFieldsValue({
                     groupLabel: selectedGroupItem.groupLabel,
                 });
@@ -250,14 +260,9 @@ const GroupBuilder = () => {
                 // Map sections with their original handles and find matching section data
                 const mappedSections = Array.isArray(selectedGroupItem.sectionIds) ?
                     selectedGroupItem.sectionIds.map(sectionId => {
-                        // Find the original section data that matches the handle pattern
                         const originalSection = Array.isArray(sections) ?
-                            sections.find(s => {
-                                const sectionName = sectionId.sectionLabel;
-                                return s.sectionLabel === sectionName;
-                            }) : null;
+                            sections.find(s => s.sectionLabel === sectionId.sectionLabel) : null;
 
-                        // Generate a unique instanceId for each section
                         const uniqueId = `${sectionId.handle}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
                         return {
@@ -278,80 +283,56 @@ const GroupBuilder = () => {
         }
     };
 
-    const handleCancel = () => {
-        form.resetFields();
-        setOrderedSections([]);
-        setAddGroup(false);
+    const handleBackToGroups = () => {
+        setShowSections(false);
+        setSelectedGroup(null);
+        setPreviewSections(false);
+        setIsCreating(false);
         setIsEdit(false);
-        setIsFullScreen(false);
+        setOrderedSections([]);
+        form.resetFields();
+    };
+
+    const handleNewGroup = () => {
+        setAddGroup(true);
+        setIsFullScreen(true);
+        setIsEdit(false);
+        setIsCreating(true);
+        setSelectedGroup(null);
+        setShowSections(true);
+        setPreviewSections(false);
+        setOrderedSections([]);
+        form.resetFields();
+    };
+
+    const handlePreviewToggle = () => {
+        setPreviewSections(!previewSections);
+    };
+
+    const handleCopyGroup = () => {
+        if (!selectedGroup) return;
+
+        // Create a copy of the selected group with a new name
+        const newGroupLabel = `${selectedGroup.groupLabel} (Copy)`;
+        form.setFieldsValue({
+            groupLabel: newGroupLabel,
+        });
+
+        // Keep the same sections but with new instance IDs
+        const copiedSections = orderedSections.map(section => ({
+            ...section,
+            instanceId: `${section.handle}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        }));
+
+        setOrderedSections(copiedSections);
+        setIsEdit(false);
+        setSelectedGroup(null);
     };
 
     return (
         <>
             <CommonAppBar appTitle='Group Builder' />
             <div style={{ width: '100%', height: 'calc(100vh - 50px)', display: 'flex', }}>
-                {/* Left side - Groups List */}
-                <div style={{
-                    width: addGroup || isEdit ? isFullScreen ? '0%' : '50%' : '100%',
-                    height: '100%',
-                    visibility: isFullScreen ? 'hidden' : 'visible',
-                    opacity: isFullScreen ? 0 : 1,
-                    transform: isFullScreen ? 'translateX(-100%)' : 'translateX(0)',
-                    transition: 'all 0.3s ease-in-out',
-                    overflow: 'hidden',
-                }}>
-                    <div style={{
-                        height: '8%',
-                        width: '100%',
-                        display: 'flex',
-                        padding: '20px',
-                        boxSizing: 'border-box',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)',
-                        transition: 'all 0.3s ease-in-out',
-                        transform: isFullScreen ? 'translateX(-20px)' : 'translateX(0)',
-                    }}>
-                        <Input
-                            placeholder='Search templates...'
-                            style={{ width: 250 }}
-                            suffix={<SearchOutlined />}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            value={searchTerm}
-                        />
-                        <Button type='primary' onClick={() => setSearchTerm('')}>Go</Button>
-                    </div>
-                    <div style={{
-                        height: '8%',
-                        width: '100%',
-                        display: 'flex',
-                        padding: '20px',
-                        boxSizing: 'border-box',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                    }}>
-                        Groups ({filteredGroups.length})
-                        <Button
-                            onClick={() => {
-                                setAddGroup(true);
-                                setIsFullScreen(true);
-                            }}
-                            type='text'
-                            shape='circle'
-                        >
-                            <PlusOutlined style={{ fontSize: '20px', color: '#000' }} />
-                        </Button>
-                    </div>
-                    <CommonTable
-                        data={filteredGroups.map(item => ({
-                            groupLabel: item.groupLabel,
-                            handle: item.handle
-                        }))}
-                        onRowSelect={handleSelectGroup}
-                    />
-                </div>
-
-                {/* Right side - Group Editor */}
                 <div style={{
                     width: addGroup || isEdit ? isFullScreen ? '100%' : '50%' : '0%',
                     height: '100%',
@@ -366,104 +347,155 @@ const GroupBuilder = () => {
                         borderBottom: '1px solid #efefef',
                         display: 'flex',
                         boxSizing: 'border-box',
-                        height: '15%',
+                        height: '5%',
                         justifyContent: 'space-between',
                         alignItems: 'center'
                     }}>
-                        <div>
-                            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}>
-                                {isEdit ? selectedGroup?.groupLabel : 'Create Group'}
+                        <div style={{ display: 'flex', flexDirection: 'row', gap: '5px', alignItems: 'center' }}>
+                            <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 500 }}>
+                                Group Builder
                             </h2>
-                            {isEdit && selectedGroup && (
-                                <div style={{ color: '#666', marginTop: '8px', fontSize: '14px' }}>
-                                    {/* <div>Description: {selectedGroup.description}</div> */}
-                                    <div>Created On: {new Date(selectedGroup.createdDateTime).toLocaleString()}</div>
-                                    <div>Modified On: {new Date(selectedGroup.modifiedDateTime).toLocaleString()}</div>
-                                </div>
-                            )}
+                            <div style={{ fontSize: '12px', color: '#666', fontWeight: '500' }}>
+                                {isEdit ? ' — ' + selectedGroup?.groupLabel : ''}
+                            </div>
                         </div>
 
                         <div style={{ display: 'flex', gap: '20px' }}>
-                            {/* <Button type="text" icon={isFullScreen ? <CloseFullscreenIcon /> : <OpenInFullIcon />} onClick={() => setIsFullScreen(!isFullScreen)} /> */}
-                            {isEdit && (
+                            {orderedSections.length > 0 && (
+                            <Tooltip title={orderedSections.length === 0 ? "Select at least one section to preview" : "Preview"}>
+                                <Button
+                                    type="text"
+                                    icon={previewSections ? <VisibilityOffIcon /> : <RemoveRedEyeIcon />}
+                                    onClick={handlePreviewToggle}
+                                    style={{ color: previewSections ? '#1890ff' : 'inherit' }}
+                                    disabled={orderedSections.length === 0}
+                                />
+                            </Tooltip>
+                            )}
+                            {(isEdit || isCreating) && (
                                 <>
-                                    <Tooltip title="Copy">
-                                        <Button type="text" icon={<CopyIcon />} />
-                                    </Tooltip>
-                                    <Tooltip title="Delete">
-                                        <Button type="text" icon={<DeleteIcon />} onClick={handleDeleteGroup} />
-                                    </Tooltip>
+                                    {isEdit && (
+                                        <>
+                                            <Tooltip title="Copy">
+                                                <Button
+                                                    type="text"
+                                                    icon={<CopyIcon />}
+                                                    onClick={handleCopyGroup}
+                                                />
+                                            </Tooltip>
+                                            <Tooltip title="Delete">
+                                                <Button
+                                                    type="text"
+                                                    icon={<DeleteIcon />}
+                                                    onClick={handleDeleteGroup}
+                                                />
+                                            </Tooltip>
+                                        </>
+                                    )}
                                 </>
                             )}
-                            <Tooltip title="Close">
-                                <Button type="text" icon={<CloseIcon />} onClick={() => {
-                                    setAddGroup(false);
-                                    setIsEdit(false);
-                                    setIsFullScreen(false);
-                                    form.resetFields();
-                                    setOrderedSections([]);
-                                }} />
-                            </Tooltip>
                         </div>
                     </div>
 
                     {/* Main content area */}
                     <div style={{
-                        height: '78%',
+                        height: '87%',
                         width: '100%',
                         padding: '5px',
                         boxSizing: 'border-box',
                         display: 'flex',
                         gap: '5px',
                     }}>
-                        {/* Sections list */}
+                        {/* Groups/Sections list */}
                         <div style={{
                             height: '100%',
-                            width: '300px',
-                            minWidth: '300px',
+                            width: '350px',
+                            minWidth: '350px',
                             backgroundColor: '#f5f5f5',
                             padding: '16px',
                             boxSizing: 'border-box',
                             overflowY: 'auto'
                         }}>
-                            <div style={{ fontWeight: 500, marginBottom: '16px' }}>Sections</div>
-                            <Input.Search
-                                placeholder="Search sections..."
-                                style={{ marginBottom: '16px' }}
-                                onChange={(e) => setSectionSearchTerm(e.target.value)}
-                                value={sectionSearchTerm}
-                            />
-                            <List
-                                dataSource={filteredSections}
-                                renderItem={(section) => (
-                                    <List.Item
-                                        key={section.id}
-                                        style={{
-                                            padding: '8px',
-                                            backgroundColor: '#fff',
-                                            marginBottom: '8px',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer'
-                                        }}
-                                        onClick={() => handleAddSection(section)}
-                                    >
-                                        <div>
-                                            <div style={{ fontWeight: 400 }}>{section.sectionLabel}</div>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <FiPlus />
-                                        </div>
-                                    </List.Item>
-                                )}
-                            />
+                            {!showSections ? (
+                                <>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                                        <div style={{ fontWeight: 500, }}>Groups ({filteredGroups.length})</div>
+                                        <Button
+                                            type='text'
+                                            icon={<PlusOutlined />}
+                                            onClick={handleNewGroup}
+                                        >
+                                        </Button>
+                                    </div>
+                                    <Input.Search
+                                        placeholder="Search groups..."
+                                        style={{ marginBottom: '16px' }}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        value={searchTerm}
+                                    />
+                                    <List
+                                        dataSource={filteredGroups}
+                                        renderItem={(item) => (
+                                            <List.Item
+                                                key={item.handle}
+                                                style={{
+                                                    padding: '8px',
+                                                    backgroundColor: '#fff',
+                                                    marginBottom: '8px',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer',
+                                                    border: selectedGroup?.handle === item.handle ? '1px solid #1890ff' : 'none'
+                                                }}
+                                                onClick={() => handleSelectGroup(item)}
+                                            >
+                                                <div>
+                                                    <div style={{ fontWeight: 400 }}>{item.groupLabel}</div>
+                                                </div>
+                                            </List.Item>
+                                        )}
+                                    />
+                                </>
+                            ) : (
+                                <>
+                                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px', gap: '10px' }}>
+                                        <Button type='text' icon={<ArrowLeftOutlined />} onClick={handleBackToGroups} />
+                                        <div style={{ fontWeight: 500, }}>Sections ({filteredSections.length})</div>
+                                    </div>
+                                    <Input.Search
+                                        placeholder="Search sections..."
+                                        style={{ marginBottom: '16px' }}
+                                        onChange={(e) => setSectionSearchTerm(e.target.value)}
+                                        value={sectionSearchTerm}
+                                    />
+                                    <List
+                                        dataSource={filteredSections}
+                                        renderItem={(section) => (
+                                            <List.Item
+                                                key={section.id}
+                                                style={{
+                                                    padding: '8px',
+                                                    backgroundColor: '#fff',
+                                                    marginBottom: '8px',
+                                                    borderRadius: '4px',
+                                                    cursor: 'pointer'
+                                                }}
+                                                onClick={() => handleAddSection(section)}
+                                            >
+                                                <div>
+                                                    <div style={{ fontWeight: 400 }}>{section.sectionLabel}</div>
+                                                </div>
+                                            </List.Item>
+                                        )}
+                                    />
+                                </>
+                            )}
                         </div>
 
                         {/* Form and Table */}
-
                         <div style={{
                             height: '100%',
-                            width: activeTab === '2' ? 'calc(100% - 900px)' : 'calc(100% - 600px)',
-                            minWidth: activeTab === '2' ? 'calc(100% - 900px)' : 'calc(100% - 600px)',
+                            width: activeTab === '2' ? 'calc(100% - 900px)' : 'calc(100% - 650px)',
+                            minWidth: activeTab === '2' ? 'calc(100% - 900px)' : 'calc(100% - 650px)',
                             borderLeft: '1px solid #e8e8e8',
                             borderRight: '1px solid #e8e8e8',
                             backgroundColor: '#fff',
@@ -473,96 +505,136 @@ const GroupBuilder = () => {
                             transform: activeTab === '2' ? 'translateX(0)' : 'translateX(0)',
                             opacity: 1,
                         }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 500, justifyContent: 'space-between', marginBottom: '10px' }}>
-                                <span style={{ fontSize: '16px', fontWeight: 600 }}>Group Builder</span>
-                                <Button onClick={() => setPreviewSections(!previewSections)} type='text' style={{ display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 500, }}>
-                                    <AiOutlineEye size={18} />
-                                    Preview
-                                </Button>
-                            </div>
-                            {!previewSections && <Form
-                                form={form}
-                                layout="vertical"
-                                wrapperCol={{ flex: 1 }}
-                                style={{ width: '60%' }}
-                            >
+                            {!selectedGroup && !isCreating && !showSections ? (
                                 <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: `repeat(${2}, 1fr)`,
-                                    gap: '16px',
-                                    width: '100%'
+                                    height: '100%',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    color: '#666',
+                                    gap: '16px'
                                 }}>
-                                    <Form.Item
-                                        label="Group Name :"
-                                        name="groupLabel"
-                                        required={true}
-                                        rules={[{ required: true, message: 'Group name is required' }]}
-                                    >
-                                        <Input disabled={isEdit} placeholder='Enter group name' />
-                                    </Form.Item>
-                                </div>
-                            </Form>}
-                            {!previewSections && <div style={{ marginTop: '20px' }}>
-                                <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <div style={{ fontWeight: 500 }}>Selected Sections</div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0px' }}>
-                                        <Button title='Clear' type='text'
-                                            onClick={() => setOrderedSections([])}
-                                        >
-                                            <span style={{ fontSize: '12px', color: '#666', fontWeight: '500' }}>Clear</span>
-                                            <AiOutlineClear size={18} />
-                                        </Button>
+                                    <div style={{ fontSize: '16px', fontWeight: 500 }}>
+                                        Please select a group or create a new one
                                     </div>
                                 </div>
-                                <DndTable
-                                    data={orderedSections}
-                                    onOrderChange={handleSectionOrderChange}
-                                    onDelete={handleDeleteSection}
-                                />
-                            </div>}
-                            {previewSections && <div>
-                                <Preview sections={orderedSections} />
-                            </div>}
+                            ) : !previewSections ? (
+                                <>
+                                    <Form
+                                        form={form}
+                                        layout="vertical"
+                                        wrapperCol={{ flex: 1 }}
+                                        style={{ width: '60%' }}
+                                    >
+                                        <div style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: `repeat(${2}, 1fr)`,
+                                            gap: '16px',
+                                            width: '100%'
+                                        }}>
+                                            <Form.Item
+                                                label="Group Name :"
+                                                name="groupLabel"
+                                                required={true}
+                                                rules={[{ required: true, message: 'Group name is required' }]}
+                                            >
+                                                <Input
+                                                    disabled={isEdit && !isCreating}
+                                                    placeholder='Enter group name'
+                                                />
+                                            </Form.Item>
+                                        </div>
+                                    </Form>
+                                    {showSections && (
+                                        <div style={{ marginTop: '20px' }}>
+                                            <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                <div style={{ fontWeight: 500 }}>Selected Sections</div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0px' }}>
+                                                    <Button
+                                                        title='Clear'
+                                                        type='text'
+                                                        onClick={() => setOrderedSections([])}
+                                                    >
+                                                        <span style={{ fontSize: '12px', color: '#666', fontWeight: '500' }}>Clear</span>
+                                                        <AiOutlineClear size={18} />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                            <DndTable
+                                                data={orderedSections}
+                                                onOrderChange={handleSectionOrderChange}
+                                                onDelete={handleDeleteSection}
+                                            />
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div style={{ display: 'flex', justifyContent: 'center',height: '100%' }}>
+                                    {/* <Preview sections={orderedSections} /> */}
+                                    <SectionPreview sections={orderedSections} />
+                                </div>
+                            )}
                         </div>
 
                         {/* Tree View */}
-                        <div style={{
-                            height: '100%',
-                            width: activeTab === '2' ? '600px' : '300px',
-                            minWidth: activeTab === '2' ? '600px' : '300px',
-                            padding: '12px',
-                            boxSizing: 'border-box',
-                            transition: 'all 0.3s ease-in-out',
-                            transform: activeTab === '2' ? 'translateX(0)' : 'translateX(0)',
-                            opacity: 1,
-                        }}>
-                            <div style={{ fontWeight: 500, }}>
-                                <PullRequestOutlined style={{ marginRight: '8px' }} />
-                                Group Structure
+                        {showSections && (
+                            <div style={{
+                                height: '100%',
+                                width: activeTab === '2' ? '600px' : '300px',
+                                minWidth: activeTab === '2' ? '600px' : '300px',
+                                padding: '12px',
+                                boxSizing: 'border-box',
+                                transition: 'all 0.3s ease-in-out',
+                                transform: activeTab === '2' ? 'translateX(0)' : 'translateX(0)',
+                                opacity: 1,
+                            }}>
+                                <div style={{ fontWeight: 500, }}>
+                                    <PullRequestOutlined style={{ marginRight: '8px' }} />
+                                    Group Structure
+                                </div>
+                                <Tree
+                                    treeData={treeData}
+                                    defaultExpandAll
+                                    expandedKeys={expandedKeys}
+                                    onExpand={(keys) => setExpandedKeys(keys as string[])}
+                                    selectable={false}
+                                    showIcon
+                                    showLine
+                                    style={{
+                                        padding: '10px',
+                                        boxSizing: 'border-box',
+                                        borderRadius: '4px',
+                                        transition: 'all 0.3s ease-in-out',
+                                    }}
+                                />
                             </div>
-                            <Tree
-                                treeData={treeData}
-                                defaultExpandAll
-                                expandedKeys={expandedKeys}
-                                onExpand={(keys) => setExpandedKeys(keys as string[])}
-                                selectable={false}
-                                showIcon
-                                showLine
-                                style={{
-                                    padding: '10px',
-                                    boxSizing: 'border-box',
-                                    borderRadius: '4px',
-                                    transition: 'all 0.3s ease-in-out',
-                                }}
-                            />
-                        </div>
-
-                    </div>
-                    <div style={{ height: '10%', width: '10%', display: 'flex', gap: '10px', float: 'right', padding: '10px' }}>
-                        {isEdit ? <Button type='primary' style={{ width: '100%' }} onClick={handleUpdateGroup}>Save</Button> : <Button type='primary' style={{ width: '100%' }} onClick={handleSaveGroup}>Create</Button>}
-                        <Button type='default' style={{ width: '100%' }} onClick={handleCancel}>Cancel</Button>
+                        )}
                     </div>
 
+                    {/* Action Buttons */}
+                    <div style={{
+                        height: '7%',
+                        width: '100%',
+                        display: 'flex',
+                        gap: '10px',
+                        justifyContent: 'flex-end',
+                        alignItems: 'center',
+                        padding: '10px',
+                        boxSizing: 'border-box',
+                        borderTop: '1px solid #efefef'
+                    }}>
+                        {showSections && (
+                            <>
+                                {isCreating ? (
+                                    <Button type='primary' onClick={handleSaveGroup}>Create Group</Button>
+                                ) : isEdit ? (
+                                    <Button type='primary' onClick={handleUpdateGroup}>Save Changes</Button>
+                                ) : null}
+                                <Button onClick={resetForm}>Cancel</Button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </>

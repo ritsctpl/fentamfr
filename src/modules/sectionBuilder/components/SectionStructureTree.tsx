@@ -1,44 +1,147 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Tree } from "antd";
 import { Key } from "react";
 import { LuListTree } from "react-icons/lu";
 import { PlusSquareOutlined } from "@ant-design/icons";
-import { ComponentIds } from "../types/SectionBuilderTypes";
-import { useSectionBuilderContext } from "../hooks/sectionBuilderContex";
+import ConfigFile from "./configFile";
+import { useSectionForm } from "../context/SectionFormContext";
+
+// Update the interface to be more specific
+interface ComponentData {
+  site: string;
+  handle: string;
+  componentLabel: string;
+  dataType: string;
+  unit?: string;
+  defaultValue?: string | null;
+  required?: boolean;
+  tableConfig?: {
+    columnNames?: Array<{
+      title: string;
+      type: string;
+      dataIndex?: string | null;
+      required?: boolean;
+    }>;
+  } | null;
+}
 
 interface SectionStructureTreeProps {
-  selectedComponents: ComponentIds[];
+  selectedComponents: ComponentData[];
+  label?: string;
+  isPreview: boolean;
 }
 
 export const SectionStructureTree: React.FC<SectionStructureTreeProps> = ({
   selectedComponents,
+  label,
+  isPreview,
 }) => {
-  const { formValues } = useSectionBuilderContext();
-  const [expandedKeys, setExpandedKeys] = useState<string[]>([
-    formValues?.sectionLabel || "N/A",
-  ]);
+  const { sectionFormValues } = useSectionForm();
+  // Initialize expandedKeys with all possible keys when components change
+  const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+
+  // Effect to automatically expand all keys when components change
+  useEffect(() => {
+    if (selectedComponents && selectedComponents.length > 0) {
+      const allKeys = [
+        "root",
+        ...selectedComponents.map((c) => c.handle),
+        ...selectedComponents.flatMap((component) => {
+          const componentKeys = [
+            `${component.handle}-dataType`,
+            `${component.handle}-unit`,
+            `${component.handle}-defaultValue`,
+            `${component.handle}-required`,
+          ];
+
+          // Add table configuration keys if exists
+          if (component.tableConfig?.columnNames) {
+            const tableConfigKeys = [
+              `${component.handle}-tableConfig`,
+              ...component.tableConfig.columnNames.map(
+                (_, index) => `${component.handle}-column-${index}`
+              ),
+            ];
+            componentKeys.push(...tableConfigKeys);
+          }
+
+          return componentKeys;
+        }),
+      ];
+
+      setExpandedKeys(allKeys);
+    } else {
+      setExpandedKeys([]);
+    }
+  }, [selectedComponents]);
 
   // Generate tree data for section structure
   const generateSectionStructure = () => {
     return [
       {
-        key: formValues?.sectionLabel || "N/A",
-        title: formValues?.sectionLabel || "N/A",
-        children: selectedComponents.map((component, index) => {
-          // Find the corresponding component from formValues to get its dataType
-          const componentDetails = formValues.componentIds.find(
-            (c) => c.label === component.label
-          );
+        key: "root",
+        title: "Components",
+        children: selectedComponents.map((component) => {
+          // Create children to show detailed component information
+          const componentChildren: any[] = [];
+
+          // Add data type
+          if (component.dataType) {
+            componentChildren.push({
+              key: `${component.handle}-dataType`,
+              title: `Data Type: ${component.dataType}`,
+            });
+          }
+
+          // Add unit if exists
+          if (component.unit) {
+            componentChildren.push({
+              key: `${component.handle}-unit`,
+              title: `Unit: ${component.unit}`,
+            });
+          }
+
+          // Add default value if exists
+          if (
+            component.defaultValue !== undefined &&
+            component.defaultValue !== null
+          ) {
+            componentChildren.push({
+              key: `${component.handle}-defaultValue`,
+              title: `Default Value: ${component.defaultValue}`,
+            });
+          }
+
+          // Add required status
+          if (component.required !== undefined) {
+            componentChildren.push({
+              key: `${component.handle}-required`,
+              title: `Required: ${component.required ? "Yes" : "No"}`,
+            });
+          }
+
+          // Add table configuration if exists
+          if (component.tableConfig?.columnNames) {
+            const tableConfigChild = {
+              key: `${component.handle}-tableConfig`,
+              title: "Table Configuration",
+              children: component.tableConfig.columnNames.map(
+                (column, index) => ({
+                  key: `${component.handle}-column-${index}`,
+                  title: `Column: ${column.title} (Type: ${column.type})${
+                    column.required ? " (Required)" : ""
+                  }`,
+                })
+              ),
+            };
+            componentChildren.push(tableConfigChild);
+          }
 
           return {
-            key: `${component.label}-${component.id}`, // Use unique ID to differentiate duplicates
-            title: component.label,
-            children: [
-              {
-                key: `${component.label}-${component.id}-type`,
-                title: `Type: ${componentDetails?.dataType || "Unknown"}`,
-              },
-            ],
+            key: component.handle,
+            title: component.componentLabel,
+            children:
+              componentChildren.length > 0 ? componentChildren : undefined,
           };
         }),
       },
@@ -50,13 +153,15 @@ export const SectionStructureTree: React.FC<SectionStructureTreeProps> = ({
     if (expandedKeys.length > 0) {
       setExpandedKeys([]);
     } else {
-      const allKeys = [
-        formValues?.sectionLabel || "N/A",
-        ...selectedComponents.map((c) => c.label),
-      ];
+      const allKeys = ["root", ...selectedComponents.map((c) => c.handle)];
       setExpandedKeys(allKeys);
     }
   };
+
+  // Preview mode rendering
+  if (isPreview && sectionFormValues?.structureType === "structured") {
+    return <ConfigFile />;
+  }
 
   return (
     <div>
@@ -91,11 +196,8 @@ export const SectionStructureTree: React.FC<SectionStructureTreeProps> = ({
           treeData={generateSectionStructure()}
           style={{
             padding: "12px",
-            // borderRadius: "4px",
-            // border: "1px solid #e8e8e8",
-            maxHeight: "calc(100vh - 250px)",
+            maxHeight: "calc(100vh - 150px)",
             overflowY: "auto",
-            // backgroundColor: "#f5f5f5"
           }}
           switcherIcon={<PlusSquareOutlined />}
         />

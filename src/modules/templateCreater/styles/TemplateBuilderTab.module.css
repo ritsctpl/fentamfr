@@ -15,8 +15,8 @@
 .main-section,
 .right-section {
   padding: 12px;
-  height: calc(100vh - 50px);
-  overflow: hidden;
+  height: calc(100vh - 90px);
+  overflow: scroll;
 }
 
 .left-section {
