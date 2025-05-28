@@ -1116,4 +1116,6 @@ export const hindiLanguage = {
   "isEnd": "अंतिम है",
   "createState": "अवस्था बनाएं",
   "workflowStatesMaster": "कार्यप्रवाह अवस्था मास्टर",
+  "workflowStatusMaster": "कार्यप्रवाह स्थिति मास्टर",
+  "createWorkflowStatusMaster": "कार्यप्रवाह स्थिति मास्टर बनाएं",
 }

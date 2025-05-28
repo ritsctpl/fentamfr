@@ -1114,4 +1114,6 @@ export const kannadaLanguage = {
   "isEnd": "ಅಂತಿಮ ಸ್ಥಿತಿ",
   "createState": "ಸ್ಥಿತಿ ರಚಿಸಿ",
   "workflowStatesMaster": "ಕಾರ್ಯಪ್ರವಾಹ ಸ್ಥಿತಿಗಳ ಮಾಸ್ಟರ್",
+  "workflowStatusMaster": "ಕಾರ್ಯಪ್ರವಾಹ ಸ್ಥಿತಿ ಮಾಸ್ಟರ್",
+  "createWorkflowStatusMaster": "ಕಾರ್ಯಪ್ರವಾಹ ಸ್ಥಿತಿ ಮಾಸ್ಟರ್ ರಚಿಸಿ",
 }

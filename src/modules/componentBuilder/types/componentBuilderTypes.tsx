@@ -8,18 +8,16 @@ export interface ComponentBuilderFormData {
   required: boolean;
   validation: string;
   apiUrl: string;
-  minValue: string;
-  maxValue: string;
+  bulletPointText: string;
 }
 
 export const defaultFormData: ComponentBuilderFormData = {
   componentLabel: '',
   dataType: 'Input',
   unit: 'kg',
-  defaultValue: 'NA',
+  defaultValue: '',
   required: false,
   validation: '',
   apiUrl: '',
-  minValue: '0',
-  maxValue: '100'
+  bulletPointText: '• ',
 };

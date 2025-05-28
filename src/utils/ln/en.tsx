@@ -1180,4 +1180,6 @@ export const englishLanguage = {
   "resourceDetails": "Resource Details",
   "createState": "Create State",
   "workflowStatesMaster": "Workflow States Master",
+  "workflowStatusMaster": "Workflow Status Master",
+  "createWorkflowStatusMaster": "Create Workflow Status Master",
 }
