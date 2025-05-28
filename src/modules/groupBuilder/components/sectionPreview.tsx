@@ -44,8 +44,7 @@ function SectionPreview({ sections }: { sections: any[] }) {
   return (
     <div
       style={{
-        width: `calc(100vw * 0.412)`,
-        // height: `calc(100vh * 0.85)`,
+        width: `calc(100vw * 0.40)`,
         margin: "0 auto",
         padding: "5mm",
         boxSizing: "border-box",

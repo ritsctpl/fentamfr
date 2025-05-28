@@ -15,19 +15,27 @@ import {
   Switch,
   Table,
   Tabs,
+  Empty,
+  Breadcrumb,
 } from "antd";
 import {
   PlusOutlined,
   EyeOutlined,
   EyeInvisibleOutlined,
   ArrowLeftOutlined,
+  SettingOutlined,
+  SaveOutlined,
+  CloseOutlined
 } from "@ant-design/icons";
 import { GrChapterAdd } from "react-icons/gr";
 import { parseCookies } from "nookies";
 import moment from "moment";
 import CopyIcon from "@mui/icons-material/FileCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
-import PreviewContent from './PreviewContent';
+import { FaLayerGroup } from "react-icons/fa";
+import { CiBoxList } from 'react-icons/ci';
+import { LuComponent, LuLayoutTemplate } from 'react-icons/lu';
+import { VscSymbolStructure } from 'react-icons/vsc';
 
 // Types
 import type {
@@ -47,6 +55,7 @@ import { DragableTable } from "./DragableTable";
 import { TemplateStructureTree } from "./TemplateStructureTree";
 import { fetchTemplateBuilderData } from "@services/templateBuilderService";
 import { ConfigureTab } from "./ConfigureTab";
+import TemplatePreview from "./TemplatePreview";
 
 // Type guard to check if item is a TemplateListItem
 function isTemplateListItem(item: any): item is ImportedTemplateListItem {
@@ -248,7 +257,7 @@ function TemplateBuilderTab() {
         setSelectedRow(null);
 
         // Add unique IDs to groupIds
-        const normalizedResponse : any = {
+        const normalizedResponse: any = {
           ...response,
           currentVersion: response.currentVersion,
           groupIds: response.groupIds.map(group => ({
@@ -331,7 +340,7 @@ function TemplateBuilderTab() {
         // setTemplateDetails(null);
         setSelectedComponents([]);
         setPreviewGroup([]);
-        message.error("Failed to load template details");
+        // message.error("Failed to load template details");
       } finally {
         setIsLeftTemplateLoading(false);
         setLeftTemplateLoadingMessage("");
@@ -437,7 +446,7 @@ function TemplateBuilderTab() {
           setSelectedComponents([]);
           // setTemplateDetails(null);
           setPreviewGroup([]); // Reset preview component
-
+          setSelectedBuilderType("Group");
           // Reset form values
           setTemplateFormValues({
             templateLabel: "",
@@ -461,6 +470,7 @@ function TemplateBuilderTab() {
       setSearchTerm("");
       setSelectedComponents([]);
       // setTemplateDetails(null);
+      setSelectedBuilderType("Group");
       setPreviewGroup([]); // Reset preview component
       setIsPreviewMode(false);
       fetchData();
@@ -543,12 +553,12 @@ function TemplateBuilderTab() {
     async (group: any) => {
       setSelectedRow(null);
       // Generate a unique ID based on the type of item
-      const itemType = group.groupLabel ? 'group' : 
-                      group.sectionLabel ? 'section' : 
-                      group.componentLabel ? 'component' : 'item';
-      
+      const itemType = group.groupLabel ? 'group' :
+        group.sectionLabel ? 'section' :
+          group.componentLabel ? 'component' : 'item';
+
       const uniqueId = `${group.handle}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       // Add a new instance of the group with a unique id, proper label, and default config
       const newGroup = {
         ...group,
@@ -669,53 +679,105 @@ function TemplateBuilderTab() {
         "preview"
       ) as any;
 
+      if (!Array.isArray(previewResponse)) {
+        throw new Error("Invalid preview response format");
+      }
+
       // Transform the preview response to match the expected format
       const transformedData = previewResponse.map((item: any) => {
+        // Case 1: Group with sections
         if (item._id?.startsWith('GroupBO:')) {
           return {
             _id: item._id,
-            sectionLabel: item.groupLabel, // Use groupLabel as section label for groups
-            components: item.sectionIds?.flatMap((section: any) => 
+            groupLabel: item.groupLabel,
+            sectionLabel: item.groupLabel,
+            instructions: item.instructions || "",
+            style: {
+              marginsEnabled: false,
+              textAlignment: "left",
+              tableAlignment: "left",
+              splitColumns: 1
+            },
+            sectionIds: item.sectionIds?.map((section: any) => ({
+              _id: section._id,
+              sectionLabel: section.sectionLabel,
+              style: section.style || {
+                marginsEnabled: false,
+                textAlignment: "left",
+                tableAlignment: "left",
+                splitColumns: 1
+              },
+              components: section.components?.map((comp: any) => ({
+                ...comp,
+                _id: comp._id,
+                componentLabel: comp.componentLabel,
+                dataType: comp.dataType,
+                unit: comp.unit,
+                defaultValue: comp.defaultValue || "",
+                required: comp.required || false,
+                validation: comp.validation,
+                tableConfig: comp.tableConfig
+              })) || []
+            })) || [],
+            components: item.sectionIds?.flatMap((section: any) =>
               section.components?.map((comp: any) => ({
                 ...comp,
                 _id: comp._id,
                 componentLabel: comp.componentLabel,
                 dataType: comp.dataType,
                 unit: comp.unit,
-                defaultValue: comp.defaultValue,
-                required: comp.required,
+                defaultValue: comp.defaultValue || "",
+                required: comp.required || false,
                 validation: comp.validation,
                 tableConfig: comp.tableConfig
               })) || []
             ) || []
           };
-        } else if (item._id?.startsWith('SectionBO:')) {
+        }
+        // Case 2: Section with components
+        else if (item._id?.startsWith('SectionBO:')) {
           return {
             _id: item._id,
             sectionLabel: item.sectionLabel,
+            instructions: item.instructions || "",
+            style: item.style || {
+              marginsEnabled: false,
+              textAlignment: "left",
+              tableAlignment: "left",
+              splitColumns: 1
+            },
             components: item.components?.map((comp: any) => ({
               ...comp,
               _id: comp._id,
               componentLabel: comp.componentLabel,
               dataType: comp.dataType,
-              unit: comp.unit,
-              defaultValue: comp.defaultValue,
-              required: comp.required,
+              unit: comp.unit || "",
+              defaultValue: comp.defaultValue || "",
+              required: comp.required || false,
               validation: comp.validation,
               tableConfig: comp.tableConfig
             })) || []
           };
-        } else if (item._id?.startsWith('ComponentBO:')) {
+        }
+        // Case 3: Single component
+        else if (item._id?.startsWith('ComponentBO:')) {
           return {
             _id: item._id,
-            sectionLabel: item.componentLabel, // Use component label as section label for single components
+            sectionLabel: item.componentLabel,
+            instructions: item.instructions || "",
+            style: {
+              marginsEnabled: false,
+              textAlignment: "left",
+              tableAlignment: "left",
+              splitColumns: 1
+            },
             components: [{
               _id: item._id,
               componentLabel: item.componentLabel,
               dataType: item.dataType,
-              unit: item.unit,
-              defaultValue: item.defaultValue,
-              required: item.required,
+              unit: item.unit || "",
+              defaultValue: item.defaultValue || "",
+              required: item.required || false,
               validation: item.validation,
               tableConfig: item.tableConfig
             }]
@@ -724,12 +786,14 @@ function TemplateBuilderTab() {
         return null;
       }).filter(Boolean);
 
+      console.log("Preview data:", transformedData);
       setPreviewContent(transformedData);
       setIsPreviewMode(true);
     } catch (error) {
-      message.error(
-        `Something went wrong while previewing: ${error instanceof Error ? error.message : error}`
-      );
+      message.info('Please add at least one table row to preview')
+      // message.error(
+      //   `Something went wrong while previewing: ${error instanceof Error ? error.message : error}`
+      // );
     }
   };
 
@@ -937,17 +1001,30 @@ function TemplateBuilderTab() {
           style={{
             padding: "8px 12px",
             backgroundColor: "#fff",
+            border: "1px solid rgba(0, 0, 0, 0.16)",
             marginBottom: "8px",
             borderRadius: "4px",
             cursor: "pointer",
             transition: "all 0.3s ease",
-            border: "1px solid transparent",
             boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#f0f7ff";
+            e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
+            e.currentTarget.style.boxShadow = "0 2px 8px rgba(24,144,255,0.15)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "#fff";
+            e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
+            e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.05)";
           }}
           onClick={() => handleTemplateClick(item)}
         >
           <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-            <span>{item.templateLabel}</span>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <span><LuLayoutTemplate /></span>
+              <span>{item.templateLabel}</span>
+            </div>
             <span style={{ color: "#666" }}>{item.templateVersion}</span>
           </div>
         </List.Item>
@@ -976,18 +1053,34 @@ function TemplateBuilderTab() {
         style={{
           padding: "8px 12px",
           backgroundColor: "#fff",
+          border: "1px solid rgba(0, 0, 0, 0.16)",
           marginBottom: "8px",
           borderRadius: "4px",
           cursor: "pointer",
           transition: "all 0.3s ease",
-          border: "1px solid transparent",
           boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = "#f0f7ff";
+          e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
+          e.currentTarget.style.boxShadow = "0 2px 8px rgba(24,144,255,0.15)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = "#fff";
+          e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
+          e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.05)";
         }}
         onClick={() => handleAddGroup(item)}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-          <span>{itemLabel}</span>
-          <span style={{ color: "#666" }}>{itemHandle}</span>
+        <div style={{ display: "flex", width: "100%", height: "100%", alignItems: "center", gap: "10px" }}>
+          <span>
+            {
+              selectedBuilderType === "Group" ? <FaLayerGroup /> :
+                selectedBuilderType === "Section" ? <CiBoxList /> :
+                  <LuComponent />
+            }
+          </span>
+          <span style={{ paddingBottom: "4px" }}>{itemLabel}</span>
         </div>
       </List.Item>
     );
@@ -1003,9 +1096,13 @@ function TemplateBuilderTab() {
       return;
     }
 
-    // Validate effective date time for new templates
-    if (isNewTemplate && !templateFormValues.currentVersion) {
-      message.error("Please fill all required fields - Current Version");
+    if (!templateFormValues.templateVersion) {
+      message.error("Please fill all required fields - Template Version");
+      return;
+    }
+
+    if (!templateFormValues.templateType) {
+      message.error("Please fill all required fields - Template Type");
       return;
     }
 
@@ -1128,7 +1225,11 @@ function TemplateBuilderTab() {
       });
       setSelectedComponents([]);
       setPreviewGroup([]);
-
+      setSelectedBuilderType("Group");
+      setPreviewGroup([]);
+      setIsPreviewMode(false);
+      setIsMainFormLoading(false);
+      setMainFormLoadingMessage("");
       // Refresh the template list
       fetchData();
     }
@@ -1310,10 +1411,11 @@ function TemplateBuilderTab() {
 
       setPreviewGroup(transformedData);
     } catch (error) {
-      message.error(
-        `Something went wrong while previewing: ${error instanceof Error ? error.message : error
-        }`
-      );
+      message.info('Please add at least one table row to preview')
+      // message.error(
+      //   `Something went wrong while previewing: ${error instanceof Error ? error.message : error
+      //   }`
+      // );
       setPreviewGroup([]);
     }
   };
@@ -1332,7 +1434,7 @@ function TemplateBuilderTab() {
         alignment: "center"
       }
     };
-    
+
     setSelectedRow(recordWithConfig);
     setActiveTab("configure"); // Switch to configure tab when row is clicked
   }, []);
@@ -1356,6 +1458,10 @@ function TemplateBuilderTab() {
       ),
     }));
   };
+
+  // Add helper functions for visibility
+  const shouldShowFooter = selectedTemplate || isCreateMode;
+  const shouldShowRightSection = selectedTemplate || isCreateMode;
 
   return (
     <>
@@ -1386,12 +1492,20 @@ function TemplateBuilderTab() {
             gap: "8px",
           }}
         >
-          <span style={{ fontWeight: 500 }}>Template Builder</span>
-          {selectedTemplate && (
-            <span style={{ color: "#666", marginLeft: "0px" }}>
-              - {selectedTemplate.templateLabel}
-            </span>
-          )}
+          <Breadcrumb>
+            <Breadcrumb.Item>
+              <div style={{ color: '#666', fontWeight: '400' }}>
+                Template Builder
+              </div>
+            </Breadcrumb.Item>
+            {selectedTemplate && (
+              <Breadcrumb.Item>
+                <div style={{ color: '#666', fontWeight: '500' }}>
+                  {selectedTemplate.templateLabel}
+                </div>
+              </Breadcrumb.Item>
+            )}
+          </Breadcrumb>
         </span>
         <div
           style={{
@@ -1428,31 +1542,39 @@ function TemplateBuilderTab() {
                   </Tooltip>
                 )
               }
+              {
+                selectedTemplate.handle && (
+                  <Tooltip title="Copy Template">
+                    <CopyIcon
+                      style={{
+                        color: selectedTemplate.handle ? "#1890ff" : "#d9d9d9",
+                        cursor: selectedTemplate.handle ? "pointer" : "not-allowed",
+                        fontSize: "22px",
+                      }}
+                      onClick={
+                        selectedTemplate.handle ? handleCopyTemplate : undefined
+                      }
+                    />
+                  </Tooltip>
+                )
+              }
+              {
+                selectedTemplate.handle && (
+                  <Tooltip title="Delete Template">
+                    <DeleteIcon
+                      style={{
+                        color: selectedTemplate.handle ? "#ff4d4f" : "#d9d9d9",
+                        cursor: selectedTemplate.handle ? "pointer" : "not-allowed",
+                        fontSize: "22px",
+                      }}
+                      onClick={
+                        selectedTemplate.handle ? handleDeleteTemplate : undefined
+                      }
+                    />
+                  </Tooltip>
+                )
+              }
 
-              <Tooltip title="Copy Template">
-                <CopyIcon
-                  style={{
-                    color: selectedTemplate.handle ? "#1890ff" : "#d9d9d9",
-                    cursor: selectedTemplate.handle ? "pointer" : "not-allowed",
-                    fontSize: "22px",
-                  }}
-                  onClick={
-                    selectedTemplate.handle ? handleCopyTemplate : undefined
-                  }
-                />
-              </Tooltip>
-              <Tooltip title="Delete Template">
-                <DeleteIcon
-                  style={{
-                    color: selectedTemplate.handle ? "#ff4d4f" : "#d9d9d9",
-                    cursor: selectedTemplate.handle ? "pointer" : "not-allowed",
-                    fontSize: "22px",
-                  }}
-                  onClick={
-                    selectedTemplate.handle ? handleDeleteTemplate : undefined
-                  }
-                />
-              </Tooltip>
             </>
           )}
         </div>
@@ -1462,20 +1584,20 @@ function TemplateBuilderTab() {
       <Row
         className={styles["template-builder-container"]}
         style={{
-          marginTop: "40px", // Match header height
-          height: "calc(100vh - 40px)", // Adjust total height
-          position: "relative", // Add positioning for absolute footer
+          marginTop: "40px",
+          height: "calc(100vh - 40px)",
+          position: "relative",
         }}
       >
         {/* Left Section - Available Templates */}
         <Col
-          span={5}
+          span={shouldShowRightSection ? 5 : 6}
           className={styles["left-section"]}
           style={{
-            height: "calc(100vh - 90px)", // Adjust height to account for header and footer
+            height: shouldShowFooter ? "calc(100vh - 90px)" : "calc(100vh - 40px)",
             display: "flex",
             flexDirection: "column",
-            position: "relative", // Add positioning for loading overlay
+            position: "relative",
           }}
         >
           {/* Left Section Loading Overlay */}
@@ -1516,7 +1638,7 @@ function TemplateBuilderTab() {
             <div
               style={{
                 fontWeight: 500,
-                marginBottom: "16px",
+                padding: "10px 8px 15px 0",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -1542,7 +1664,7 @@ function TemplateBuilderTab() {
                   />
                 )}
                 {selectedTemplate
-                  ? `Template Builder`
+                  ? `List of ${selectedBuilderType}`
                   : `Template Builder (${templateData?.length || 0})`}
               </span>
               <div
@@ -1621,8 +1743,8 @@ function TemplateBuilderTab() {
               style={{
                 flex: 1,
                 overflowY: "auto",
-                maxHeight: "calc(100vh - 200px)", // Adjust based on other elements
-                paddingRight: "8px", // Add some padding for scrollbar
+                maxHeight: "calc(100vh - 200px)",
+                paddingRight: "8px",
               }}
             >
               <List
@@ -1638,9 +1760,12 @@ function TemplateBuilderTab() {
 
         {/* Main Section - Selected Groups */}
         <Col
-          span={13}
+          span={shouldShowRightSection ? 13 : 18}
           className={styles["main-section"]}
-          style={{ position: "relative" }} // Add positioning for loading overlay
+          style={{ 
+            position: "relative", 
+            height: shouldShowFooter ? "calc(100vh - 90px)" : "calc(100vh - 40px)"
+          }}
         >
           {isMainFormLoading && (
             <div
@@ -1669,8 +1794,8 @@ function TemplateBuilderTab() {
           )}
 
           {isPreviewMode ? (
-            <div style={{ position: 'relative', padding: '20px' }}>
-              <PreviewContent previewData={previewContent} getGroupIds={selectedComponents}/>
+            <div style={{ position: 'relative', padding: '20px', height: 'calc(100vh - 90px)', overflowY: 'auto' }}>
+              <TemplatePreview templateId={previewContent} selectedTemplate={selectedTemplate} />
             </div>
           ) : (
             <div>
@@ -1689,7 +1814,12 @@ function TemplateBuilderTab() {
                     textAlign: "center",
                   }}
                 >
-                  Please select a template or create a new one to get started
+                  <div style={{ fontSize: '16px', fontWeight: 500, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+                    <Empty style={{ fontSize: '14px', color: '#888' }} description="Please select a template or create a new one from the list of templates" />
+                    <Button type='default' icon={<PlusOutlined />} onClick={handleAddTemplate} style={{ marginTop: '10px' }}>
+                      Create New Template
+                    </Button>
+                  </div>
                 </span>
               ) : (
                 <>
@@ -1717,14 +1847,14 @@ function TemplateBuilderTab() {
                                 ...prev,
                                 templateLabel: value,
                               }));
-                              setSelectedTemplate((prev) =>
-                                prev
-                                  ? {
-                                    ...prev,
-                                    templateLabel: value,
-                                  }
-                                  : null
-                              );
+                              // setSelectedTemplate((prev) =>
+                              //   prev
+                              //     ? {
+                              //       ...prev,
+                              //       templateLabel: value,
+                              //     }
+                              //     : null
+                              // );
                             }}
                           />
                         </Form.Item>
@@ -1733,7 +1863,7 @@ function TemplateBuilderTab() {
                         <Form.Item
                           name="templateVersion"
                           label="Version"
-                          initialValue="A"
+                          rules={[{ required: true, message: 'Please enter template version' }]}
                         >
                           <Input
                             disabled={selectedTemplate?.handle ? true : false}
@@ -1751,6 +1881,7 @@ function TemplateBuilderTab() {
                         <Form.Item
                           name="templateType"
                           label="Template Type"
+                          rules={[{ required: true, message: 'Please select template type' }]}
                         >
                           <Select
                             options={[
@@ -1833,7 +1964,6 @@ function TemplateBuilderTab() {
                     </Row>
                   </Form>
 
-                  {/* Add Modal for Product Group selection */}
                   <Modal
                     title="Select Item Group"
                     open={ItemGroupVisible}
@@ -1874,42 +2004,29 @@ function TemplateBuilderTab() {
         </Col>
 
         {/* Right Section */}
-        <Col
-          span={6}
-          className={styles["right-section"]}
-          style={{
-            height: "calc(100vh - 90px)",
-            display: "flex",
-            flexDirection: "column",
-            position: "relative",
-            // backgroundColor: "#f5f5f5",
-          }}
-        >
-          {!selectedTemplate && !isCreateMode ? (
-            <span
-              style={{
-                color: "#999",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "100%",
-                width: "100%",
-                padding: "20px",
-                boxSizing: "border-box",
-                textAlign: "center",
-              }}
-            >
-              Select a template or create a new one to view structure
-            </span>
-          ) : (
+        {shouldShowRightSection && (
+          <Col
+            span={6}
+            className={styles["right-section"]}
+            style={{
+              height: shouldShowFooter ? "calc(100vh - 90px)" : "calc(100vh - 40px)",
+              display: "flex",
+              flexDirection: "column",
+              position: "relative",
+            }}
+          >
             <Tabs
               activeKey={activeTab}
               onChange={(key) => setActiveTab(key)}
               items={[
                 {
                   key: "structure",
-                  label: "Template Structure",
+                  label: (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <VscSymbolStructure />
+                      Template Structure
+                    </span>
+                  ),
                   children: (
                     <TemplateStructureTree
                       selectedGroups={previewGroup}
@@ -1918,22 +2035,26 @@ function TemplateBuilderTab() {
                 },
                 {
                   key: "configure",
-                  label: "Configure",
+                  label: (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <SettingOutlined />
+                      Configure
+                    </span>
+                  ),
                   children: (
                     <ConfigureTab
                       selectedRow={selectedRow}
-                      // templateDetails={templateDetails}
                       onConfigChange={handleConfigChange}
                     />
                   ),
                 },
               ]}
             />
-          )}
-        </Col>
+          </Col>
+        )}
 
         {/* Footer */}
-        {(selectedTemplate || isCreateMode) && (
+        {shouldShowFooter && (
           <div
             style={{
               position: "absolute",
@@ -1947,16 +2068,21 @@ function TemplateBuilderTab() {
               padding: "0 16px",
               borderTop: "1px solid #f0f0f0",
               backgroundColor: "#fff",
+              zIndex: 100,
             }}
           >
-            <Button
-              onClick={handleCancelTemplate}
+            <Button 
+              icon={selectedTemplate?.handle ? <SaveOutlined /> : <PlusOutlined />} 
+              onClick={handleSaveOrCreate} 
               style={{ marginRight: "12px" }}
             >
-              Cancel
+              {selectedTemplate?.handle ? "Save" : "Create"}
             </Button>
-            <Button type="primary" onClick={handleSaveOrCreate}>
-              {selectedTemplate?.handle ? "Update" : "Create"}
+            <Button 
+              icon={<CloseOutlined />} 
+              onClick={handleCancelTemplate}
+            >
+              Cancel
             </Button>
           </div>
         )}

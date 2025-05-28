@@ -100,34 +100,35 @@ export function DragableTable({
         }
       },
     },
+    // {
+    //   title: "Handle",
+    //   dataIndex: "handle",
+    //   key: "handle",
+    //   width: 200,
+    // },
     {
-      title: "Handle",
-      dataIndex: "handle",
-      key: "handle",
-      width: 200,
-    },
-    {
-      title: () => (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          Actions
-          {onClearComponents && dataSource.length > 0 && (
-            <ClearOutlined
-              onClick={onClearComponents}
-              style={{
-                color: "red",
-                cursor: "pointer",
-                marginLeft: "8px",
-              }}
-            />
-          )}
-        </div>
-      ),
+      // title: () => (
+      //   <div
+      //     style={{
+      //       display: "flex",
+      //       justifyContent: "space-between",
+      //       alignItems: "center",
+      //     }}
+      //   >
+      //     Actions
+      //     {onClearComponents && dataSource.length > 0 && (
+      //       <ClearOutlined
+      //         onClick={onClearComponents}
+      //         style={{
+      //           color: "red",
+      //           cursor: "pointer",
+      //           marginLeft: "8px",
+      //         }}
+      //       />
+      //     )}
+      //   </div>
+      // ),
+      title: "Actions",
       key: "actions",
       width: 50,
       align: "center",

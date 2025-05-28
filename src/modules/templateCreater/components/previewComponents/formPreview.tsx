@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { useEffect, type CSSProperties } from "react";
 
 interface FormPreviewProps {
   component: any[];
@@ -18,13 +18,15 @@ function FormPreview({
   title = "",
   instruction = "",
 }: FormPreviewProps) {
-  console.log(styleData);
+
+  // Define standard font size to use everywhere
+  const standardFontSize = "12px";
 
   // Mode 3: Simple form layout (marginsEnabled = false)
   if (styleData.marginsEnabled === false) {
     const formStyle: CSSProperties = {
       fontFamily: "Arial, sans-serif",
-      fontSize: "12px",
+      fontSize: standardFontSize,
       padding: "20px",
       textAlign:
         (styleData.textAlignment as CSSProperties["textAlign"]) || "left",
@@ -32,14 +34,14 @@ function FormPreview({
 
     const titleStyle: CSSProperties = {
       fontWeight: "bold",
+      fontSize: standardFontSize,
       marginBottom: "15px",
       textAlign: "center",
     };
 
     const instructionStyle: CSSProperties = {
-      fontSize: "12px",
+      fontSize: standardFontSize,
       color: "#000",
-      // marginTop: "10px",
       marginLeft: "5px",
     };
 
@@ -47,16 +49,19 @@ function FormPreview({
       marginBottom: "8px",
       display: "flex",
       alignItems: "center",
+      fontSize: standardFontSize,
     };
 
     const labelStyle: CSSProperties = {
       fontWeight: "bold",
       marginRight: "10px",
       minWidth: "200px",
+      fontSize: standardFontSize,
     };
 
     const valueStyle: CSSProperties = {
       marginLeft: "10px",
+      fontSize: standardFontSize,
     };
 
     return (
@@ -81,10 +86,11 @@ function FormPreview({
   if (styleData.splitColumns && styleData.splitColumns > 1) {
     const containerStyle: CSSProperties = {
       width: "100%",
+      maxWidth: "100%",
       overflowX: "auto",
       border: "1px solid black",
       fontFamily: "Arial, sans-serif",
-      fontSize: "12px",
+      fontSize: standardFontSize,
       textAlign:
         (styleData.textAlignment as CSSProperties["textAlign"]) || "left",
       ...(styleData.marginsEnabled ? { margin: "0px" } : {}),
@@ -93,15 +99,15 @@ function FormPreview({
     const titleStyle: CSSProperties = {
       textAlign: "center",
       fontWeight: "bold",
+      fontSize: standardFontSize,
       borderBottom: "1px solid black",
       padding: "10px",
       backgroundColor: "#f5f5f5",
     };
 
     const instructionStyle: CSSProperties = {
-      fontSize: "12px",
+      fontSize: standardFontSize,
       color: "#000",
-      // marginTop: "10px",
       marginLeft: "10px",
     };
 
@@ -126,7 +132,7 @@ function FormPreview({
       width: "50%",
       padding: "5px",
       fontWeight: "bold",
-      fontSize: "10px",
+      fontSize: standardFontSize,
       backgroundColor: "#f9f9f9",
       borderRight: "1px solid black",
       textAlign:
@@ -136,6 +142,7 @@ function FormPreview({
     const valueCellStyle: CSSProperties = {
       width: "50%",
       padding: "5px",
+      fontSize: standardFontSize,
       textAlign:
         (styleData.tableAlignment as CSSProperties["textAlign"]) || "left",
     };
@@ -189,7 +196,7 @@ function FormPreview({
     overflowX: "auto",
     border: "1px solid black",
     fontFamily: "Arial, sans-serif",
-    fontSize: "12px",
+    fontSize: standardFontSize,
     textAlign:
       (styleData.textAlignment as CSSProperties["textAlign"]) || "left",
     ...(styleData.marginsEnabled ? { margin: "0px" } : {}),
@@ -198,15 +205,15 @@ function FormPreview({
   const titleStyle: CSSProperties = {
     textAlign: "center",
     fontWeight: "bold",
+    fontSize: standardFontSize,
     borderBottom: "1px solid black",
     padding: "10px",
     backgroundColor: "#f5f5f5",
   };
 
   const instructionStyle: CSSProperties = {
-    fontSize: "12px",
+    fontSize: standardFontSize,
     color: "#000",
-    // marginTop: "10px",
     marginLeft: "10px",
   };
 
@@ -220,7 +227,7 @@ function FormPreview({
     borderRight: "1px solid black",
     padding: "5px",
     fontWeight: "bold",
-    fontSize: "10px",
+    fontSize: standardFontSize,
     backgroundColor: "#f9f9f9",
     textAlign:
       (styleData.tableAlignment as CSSProperties["textAlign"]) || "left",
@@ -229,6 +236,7 @@ function FormPreview({
   const valueCellStyle: CSSProperties = {
     width: "60%",
     padding: "5px",
+    fontSize: standardFontSize,
     textAlign:
       (styleData.tableAlignment as CSSProperties["textAlign"]) || "left",
   };

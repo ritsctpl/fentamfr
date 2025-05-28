@@ -1,4 +1,4 @@
-import React, { CSSProperties } from "react";
+import React from "react";
 import { Typography } from "antd";
 
 const { Text } = Typography;
@@ -9,17 +9,14 @@ interface TablePreviewProps {
   instruction?: string;
 }
 
-const instructionStyle: CSSProperties = {
-  fontSize: "12px",
-  color: "#000",
-  marginTop: "5px",
-};
-
 function TablePreview({
   component,
   title = "",
   instruction = "",
 }: TablePreviewProps) {
+  // Define standard font size to use everywhere
+  const standardFontSize = "12px";
+  
   const renderTable = (tableComp: any) => {
     const { tableConfig, componentLabel } = tableComp;
 
@@ -47,7 +44,7 @@ function TablePreview({
             width: "100%",
             borderCollapse: "collapse",
             border: "1px solid #000",
-            fontSize: "11px",
+            fontSize: standardFontSize,
             fontFamily: "Arial, sans-serif",
           }}
         >
@@ -63,7 +60,7 @@ function TablePreview({
                     textAlign: "center",
                     fontWeight: "bold",
                     backgroundColor: "#f5f5f5",
-                    fontSize: "10px",
+                    fontSize: standardFontSize,
                     lineHeight: "1.2",
                   }}
                 >
@@ -84,7 +81,7 @@ function TablePreview({
                       border: "1px solid #000",
                       padding: "4px 6px",
                       textAlign: "center",
-                      fontSize: "10px",
+                      fontSize: standardFontSize,
                       lineHeight: "1.2",
                     }}
                   >
@@ -117,8 +114,7 @@ function TablePreview({
         style={{
           display: "flex",
           alignItems: "center",
-          fontSize: "11px",
-          marginBottom: "5px",
+          fontSize: standardFontSize,
           fontFamily: "Arial, sans-serif",
         }}
       >
@@ -126,7 +122,7 @@ function TablePreview({
           strong
           style={{
             color: "#000",
-            fontSize: "11px",
+            fontSize: standardFontSize,
             marginRight: "8px",
           }}
         >
@@ -134,7 +130,7 @@ function TablePreview({
         </Text>
         <Text
           style={{
-            fontSize: "11px",
+            fontSize: standardFontSize,
           }}
         >
           {formatValue()}
@@ -157,7 +153,7 @@ function TablePreview({
         style={{
           textAlign: "center",
           marginBottom: "12px",
-          fontSize: "12px",
+          fontSize: standardFontSize,
           fontWeight: "bold",
           fontFamily: "Arial, sans-serif",
         }}
@@ -177,7 +173,6 @@ function TablePreview({
           return renderFormField(comp);
         }
       })}
-      {instruction && <div style={instructionStyle}>{instruction}</div>}
     </div>
   );
 }
