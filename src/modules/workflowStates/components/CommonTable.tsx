@@ -92,33 +92,17 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect }) => {
     render: (value) => {
       // Special rendering for arrays (like appliesTo)
       if (Array.isArray(value)) {
-        return value.map(item => (
-          <Tag key={item} color="processing" style={{ margin: '2px' }}>
-            {item}
-          </Tag>
-        ));
+        return value.join(', ');
       }
       
       // Special rendering for boolean values (like isEnd)
       if (typeof value === 'boolean') {
-        return value ? (
-          <Tag icon={<CheckCircleOutlined />} color="success">
-            Yes
-          </Tag>
-        ) : (
-          <Tag icon={<CloseCircleOutlined />} color="default">
-            No
-          </Tag>
-        );
+        return value ? 'Yes' : 'No';
       }
       
       // Handle undefined or null values
       if (value === undefined || value === null) {
-        return (
-          <Tag icon={<MinusCircleOutlined />} color="warning">
-            Not Set
-          </Tag>
-        );
+        return 'Not Set';
       }
       
       return value;
@@ -129,7 +113,7 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect }) => {
 
   const columns: ColumnsType<any> = [
     // Specify the columns to show, including new columns
-    ...(['name', 'description', 'appliesTo', 'editableFields', 'isEnd', 'isActive'  ]
+    ...(['name', 'description', 'appliesTo', 'editableFields', 'isEnd'  ]
       .filter(column => data?.[0] && data[0].hasOwnProperty(column))
       .map((column) => ({
         title: t(column),

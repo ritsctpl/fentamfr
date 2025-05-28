@@ -1129,4 +1129,7 @@ export const tamilLanguage = {
   "isEnd": "இறுதி நிலை",
   "createState": "நிலை உருவாக்கு",
   "workflowStatesMaster": "பணிப்ரவாக நிலைகள் தலைமை",
+
+  "workflowStatusMaster": "பணிப்ரவாக நிலை தலைமை",
+  "createWorkflowStatusMaster": "பணிப்ரவாக நிலை தலைமை உருவாக்கு",
 }

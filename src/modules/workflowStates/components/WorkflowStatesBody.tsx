@@ -396,7 +396,7 @@ const ApiConfigurationMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyP
                         <div className={styles.split}>
                             <div>
                                 <p className={styles.headingtext}>
-                                    {selectedRowData ? selectedRowData?.name : t('createState')}
+                                    {selectedRowData ? selectedRowData?.name : t('createWorkflowStatusMaster')}
                                 </p>
                                 {selectedRowData && (
                                     <>
@@ -495,7 +495,7 @@ const ApiConfigurationMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyP
                 cancelText={t("cancel")}
                 centered
             >
-                <p>{t("Do you want to delete this state")}
+                <p>{t("Do you want to delete")}
                     : <strong>{selectedRowData?.name}</strong>?
                 </p>
             </Modal>

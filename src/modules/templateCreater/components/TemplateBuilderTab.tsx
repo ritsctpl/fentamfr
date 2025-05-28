@@ -103,7 +103,7 @@ function TemplateBuilderTab() {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateDetails | null>(null);
   const [selectedComponents, setSelectedComponents] = useState<GroupId[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [templateDetails, setTemplateDetails] = useState<TemplateDetails | null>(null);
+  // const [templateDetails, setTemplateDetails] = useState<TemplateDetails | null>(null);
   const [templateFormValues, setTemplateFormValues] = useState<{
     templateLabel: string;
     templateVersion: string;
@@ -244,23 +244,28 @@ function TemplateBuilderTab() {
           "getTemplate"
         ) as TemplateDetailsResponse;
 
+        // Reset selected row when loading new template
+        setSelectedRow(null);
+
+        // Add unique IDs to groupIds
         const normalizedResponse : any = {
           ...response,
           currentVersion: response.currentVersion,
           groupIds: response.groupIds.map(group => ({
             ...group,
+            uniqueId: `${group.handle}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             config: group.config || {
               type: "body",
               logo: "",
               pageOccurrence: "all",
-              margin: "10",
-              height: "10",
+              margin: 10,
+              height: 10,
               alignment: "center"
             }
           }))
         };
 
-        setTemplateDetails(normalizedResponse);
+        // setTemplateDetails(normalizedResponse);
         setSelectedTemplate(normalizedResponse);
         setSelectedComponents(normalizedResponse.groupIds);
         setTemplateFormValues({
@@ -323,7 +328,7 @@ function TemplateBuilderTab() {
 
       } catch (error) {
         console.error("Failed to fetch Template details:", error);
-        setTemplateDetails(null);
+        // setTemplateDetails(null);
         setSelectedComponents([]);
         setPreviewGroup([]);
         message.error("Failed to load template details");
@@ -430,7 +435,7 @@ function TemplateBuilderTab() {
           setSelectedTemplate(null);
           setSearchTerm("");
           setSelectedComponents([]);
-          setTemplateDetails(null);
+          // setTemplateDetails(null);
           setPreviewGroup([]); // Reset preview component
 
           // Reset form values
@@ -455,7 +460,7 @@ function TemplateBuilderTab() {
       setSelectedTemplate(null);
       setSearchTerm("");
       setSelectedComponents([]);
-      setTemplateDetails(null);
+      // setTemplateDetails(null);
       setPreviewGroup([]); // Reset preview component
       setIsPreviewMode(false);
       fetchData();
@@ -542,11 +547,12 @@ function TemplateBuilderTab() {
                       group.sectionLabel ? 'section' : 
                       group.componentLabel ? 'component' : 'item';
       
+      const uniqueId = `${group.handle}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
       // Add a new instance of the group with a unique id, proper label, and default config
       const newGroup = {
         ...group,
-        id: generateUniqueId(itemType), // Generate unique ID
-        uniqueId: generateUniqueId(itemType), // Additional unique ID for internal tracking
+        uniqueId: uniqueId, // Use the generated uniqueId
         label: group.groupLabel || group.sectionLabel || group.componentLabel || group.label,
         config: {
           type: 'body',
@@ -569,7 +575,7 @@ function TemplateBuilderTab() {
           {
             handle: group.handle,
             label: group.groupLabel || group.sectionLabel || group.componentLabel || group.label,
-            uniqueId: newGroup.uniqueId, // Add unique ID to groupIds
+            uniqueId: uniqueId, // Add the same uniqueId to groupIds
             config: newGroup.config,
             groupLabel: group.groupLabel,
             sectionLabel: group.sectionLabel,
@@ -648,6 +654,7 @@ function TemplateBuilderTab() {
     const groupIds = selectedComponents.map((group) => ({
       handle: group.handle,
       label: group.groupLabel || group.sectionLabel || group.componentLabel || group.label,
+      config: group.config
     }));
 
     const payload = {
@@ -662,12 +669,66 @@ function TemplateBuilderTab() {
         "preview"
       ) as any;
 
-      setPreviewContent(previewResponse);
+      // Transform the preview response to match the expected format
+      const transformedData = previewResponse.map((item: any) => {
+        if (item._id?.startsWith('GroupBO:')) {
+          return {
+            _id: item._id,
+            sectionLabel: item.groupLabel, // Use groupLabel as section label for groups
+            components: item.sectionIds?.flatMap((section: any) => 
+              section.components?.map((comp: any) => ({
+                ...comp,
+                _id: comp._id,
+                componentLabel: comp.componentLabel,
+                dataType: comp.dataType,
+                unit: comp.unit,
+                defaultValue: comp.defaultValue,
+                required: comp.required,
+                validation: comp.validation,
+                tableConfig: comp.tableConfig
+              })) || []
+            ) || []
+          };
+        } else if (item._id?.startsWith('SectionBO:')) {
+          return {
+            _id: item._id,
+            sectionLabel: item.sectionLabel,
+            components: item.components?.map((comp: any) => ({
+              ...comp,
+              _id: comp._id,
+              componentLabel: comp.componentLabel,
+              dataType: comp.dataType,
+              unit: comp.unit,
+              defaultValue: comp.defaultValue,
+              required: comp.required,
+              validation: comp.validation,
+              tableConfig: comp.tableConfig
+            })) || []
+          };
+        } else if (item._id?.startsWith('ComponentBO:')) {
+          return {
+            _id: item._id,
+            sectionLabel: item.componentLabel, // Use component label as section label for single components
+            components: [{
+              _id: item._id,
+              componentLabel: item.componentLabel,
+              dataType: item.dataType,
+              unit: item.unit,
+              defaultValue: item.defaultValue,
+              required: item.required,
+              validation: item.validation,
+              tableConfig: item.tableConfig
+            }]
+          };
+        }
+        return null;
+      }).filter(Boolean);
+
+      setPreviewContent(transformedData);
       setIsPreviewMode(true);
     } catch (error) {
       message.error(
-        `Something went wrong while previewing: ${error instanceof Error ? error.message : error
-        }`
+        `Something went wrong while previewing: ${error instanceof Error ? error.message : error}`
       );
     }
   };
@@ -863,21 +924,7 @@ function TemplateBuilderTab() {
 
     // Use the existing template click handler
     handleTemplateClick(newTemplate);
-  };
-
-  const handleCancelCreateMode = () => {
-    setIsCreateMode(false);
-    setNewTemplateLabel("");
-    setTemplateFormValues({
-      templateLabel: "",
-      templateVersion: "",
-      templateType: "",
-      productGroup: "",
-      currentVersion: false,
-      groupIds: [],
-    });
-    setSelectedComponents([]);
-    fetchData(); // Refresh the template list
+    setSelectedRow(null);
   };
 
   // Modify existing renderListItem to handle create mode
@@ -1273,7 +1320,20 @@ function TemplateBuilderTab() {
 
   // Add handleRowClick function
   const handleRowClick = useCallback((record: GroupId) => {
-    setSelectedRow(record);
+    // Ensure the record has a config object with default values if not present
+    const recordWithConfig = {
+      ...record,
+      config: record.config || {
+        type: "body",
+        logo: "",
+        pageOccurrence: "all",
+        margin: 10,
+        height: 10,
+        alignment: "center"
+      }
+    };
+    
+    setSelectedRow(recordWithConfig);
     setActiveTab("configure"); // Switch to configure tab when row is clicked
   }, []);
 
@@ -1609,8 +1669,8 @@ function TemplateBuilderTab() {
           )}
 
           {isPreviewMode ? (
-            <div style={{ position: 'relative' }}>
-              <PreviewContent previewData={previewContent} />
+            <div style={{ position: 'relative', padding: '20px' }}>
+              <PreviewContent previewData={previewContent} getGroupIds={selectedComponents}/>
             </div>
           ) : (
             <div>
@@ -1822,7 +1882,7 @@ function TemplateBuilderTab() {
             display: "flex",
             flexDirection: "column",
             position: "relative",
-            backgroundColor: "#f5f5f5",
+            // backgroundColor: "#f5f5f5",
           }}
         >
           {!selectedTemplate && !isCreateMode ? (
@@ -1862,7 +1922,7 @@ function TemplateBuilderTab() {
                   children: (
                     <ConfigureTab
                       selectedRow={selectedRow}
-                      templateDetails={templateDetails}
+                      // templateDetails={templateDetails}
                       onConfigChange={handleConfigChange}
                     />
                   ),

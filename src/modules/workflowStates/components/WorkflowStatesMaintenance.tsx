@@ -223,7 +223,7 @@ const WorkflowStatesMain: React.FC = () => {
           allActivities={[]}
           username={username}
           site={null}
-          appTitle={t("workflowStatesMaster")} onSiteChange={function (newSite: string): void {
+          appTitle={t("workflowStatusMaster")} onSiteChange={function (newSite: string): void {
             setCall(call + 1);
           }} />
       </div>
@@ -244,7 +244,7 @@ const WorkflowStatesMain: React.FC = () => {
             />
             <div className={styles.dataFieldBodyContentsTop}>
               <Typography className={styles.dataLength}>
-                {t("states")} ({filteredData ? filteredData.length : 0})
+                {t("count")} ({filteredData ? filteredData?.length : 0})
               </Typography>
 
               <IconButton

@@ -4,7 +4,6 @@ import { UploadOutlined } from '@ant-design/icons';
 
 interface ConfigureTabProps {
   selectedRow: any;
-  templateDetails?: any;
   onConfigChange?: (handle: string, config: ConfigureFormData) => void;
 }
 
@@ -19,15 +18,19 @@ interface ConfigureFormData {
 
 export const ConfigureTab: React.FC<ConfigureTabProps> = ({
   selectedRow,
-  templateDetails,
   onConfigChange
 }) => {
+  console.log(selectedRow, 'selectedRow');
+  
   const [form] = Form.useForm<ConfigureFormData>();
   const [imageUrl, setImageUrl] = useState<string>('');
 
-  // Effect to set form values when selected row changes
+  // Reset form and update values when selected row changes
   useEffect(() => {
     if (selectedRow) {
+      // Reset form first
+      form.resetFields();
+
       const config = selectedRow.config || {
         type: 'body',
         logo: '',
@@ -37,16 +40,21 @@ export const ConfigureTab: React.FC<ConfigureTabProps> = ({
         alignment: 'center'
       };
 
+      // Set new values
       form.setFieldsValue({
         type: config.type || 'body',
         logo: config.logo || '',
         pageOccurrence: config.pageOccurrence || 'all',
-        margin: config.margin || 10,
-        height: config.height || 10,
+        margin: Number(config.margin) || 10,
+        height: Number(config.height) || 10,
         alignment: config.alignment || 'center'
       });
 
       setImageUrl(config.logo || '');
+    } else {
+      // Reset form when no row is selected
+      form.resetFields();
+      setImageUrl('');
     }
   }, [selectedRow, form]);
 
@@ -56,8 +64,8 @@ export const ConfigureTab: React.FC<ConfigureTabProps> = ({
       // Convert margin and height to numbers
       const updatedValues = {
         ...allValues,
-        margin: Number(allValues.margin),
-        height: Number(allValues.height)
+        margin: Number(allValues.margin) || 10,
+        height: Number(allValues.height) || 10
       };
       onConfigChange(selectedRow.handle, updatedValues);
     }
@@ -126,9 +134,8 @@ export const ConfigureTab: React.FC<ConfigureTabProps> = ({
                     const currentValues = form.getFieldsValue();
                     onConfigChange(selectedRow.handle, {
                       ...currentValues,
-                      logo: newValue,
-                      margin: Number(currentValues.margin),
-                      height: Number(currentValues.height)
+                      margin: Number(currentValues.margin) || 10,
+                      height: Number(currentValues.height) || 10
                     });
                   }
                 }}
@@ -147,9 +154,8 @@ export const ConfigureTab: React.FC<ConfigureTabProps> = ({
                         const currentValues = form.getFieldsValue();
                         onConfigChange(selectedRow.handle, {
                           ...currentValues,
-                          logo: url,
-                          margin: Number(currentValues.margin),
-                          height: Number(currentValues.height)
+                          margin: Number(currentValues.margin) || 10,
+                          height: Number(currentValues.height) || 10
                         });
                       }
                       onSuccess?.(reader.result);
@@ -182,6 +188,7 @@ export const ConfigureTab: React.FC<ConfigureTabProps> = ({
               placeholder="Enter Margin"
               type="number"
               min={0}
+              defaultValue={10}
             />
           </Form.Item>
 
@@ -194,6 +201,7 @@ export const ConfigureTab: React.FC<ConfigureTabProps> = ({
               placeholder="Enter Height"
               type="number"
               min={0}
+              defaultValue={10}
             />
           </Form.Item>
 
