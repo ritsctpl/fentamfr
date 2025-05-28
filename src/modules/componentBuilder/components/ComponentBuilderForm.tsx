@@ -731,6 +731,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                             >
                                 <Select
                                     value={payloadData?.unit}
+                                    allowClear={true}
                                     onChange={(value) => handleInputChange("unit", value)}
                                     disabled={disableUnitField}
                                 >
@@ -866,6 +867,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                 >
                     <Select
                         value={payloadData?.unit}
+                        allowClear={true}
                         onChange={(value) => handleInputChange("unit", value)}
                         disabled={disableUnitField}
                     >
