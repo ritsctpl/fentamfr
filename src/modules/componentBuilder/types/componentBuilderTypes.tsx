@@ -8,8 +8,7 @@ export interface ComponentBuilderFormData {
   required: boolean;
   validation: string;
   apiUrl: string;
-  minValue: string;
-  maxValue: string;
+  bulletPointText: string;
 }
 
 export const defaultFormData: ComponentBuilderFormData = {
@@ -20,6 +19,5 @@ export const defaultFormData: ComponentBuilderFormData = {
   required: false,
   validation: '',
   apiUrl: '',
-  minValue: '0',
-  maxValue: '100'
+  bulletPointText: '• ',
 };

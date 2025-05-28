@@ -269,6 +269,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                                 setCall(call + 1);
                                 setShowAlert(false);
                                 message.success(createResponse?.message_details?.msg);
+                                setSelectedRowData(createResponse?.response)
                                 onClose();
                             }
                         }
@@ -418,7 +419,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
             }
         };
 
-        if (showAlert == true && isAdding == true) {
+        if (showAlert == true) {
             Modal.confirm({
                 title: t('confirm'),
                 content: t('rowSelectionMsg'),
