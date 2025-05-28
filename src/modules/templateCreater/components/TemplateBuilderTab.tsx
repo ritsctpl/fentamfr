@@ -1470,16 +1470,12 @@ function TemplateBuilderTab() {
       {/* Full-width header */}
       <div
         style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
           zIndex: 10,
           fontWeight: 500,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          height: "40px",
+          height: "6%",
           padding: "0 16px",
           backgroundColor: "#fff",
           borderBottom: "1px solid #f0f0f0",
@@ -1586,8 +1582,7 @@ function TemplateBuilderTab() {
       <Row
         className={styles["template-builder-container"]}
         style={{
-          marginTop: "40px",
-          height: "calc(100vh - 40px)",
+          height: "87%",
           position: "relative",
         }}
       >
@@ -1596,7 +1591,7 @@ function TemplateBuilderTab() {
           span={shouldShowRightSection ? 5 : 6}
           className={styles["left-section"]}
           style={{
-            height: shouldShowFooter ? "calc(100vh - 90px)" : "calc(100vh - 40px)",
+            height: shouldShowFooter ? "calc(100vh - 120px)" : "calc(100vh - 70px)",
             display: "flex",
             flexDirection: "column",
             position: "relative",
@@ -1766,7 +1761,7 @@ function TemplateBuilderTab() {
           className={styles["main-section"]}
           style={{ 
             position: "relative", 
-            height: shouldShowFooter ? "calc(100vh - 90px)" : "calc(100vh - 40px)"
+            height: shouldShowFooter ? "calc(100vh - 120px)" : "calc(100vh - 70px)"
           }}
         >
           {isMainFormLoading && (
@@ -2059,11 +2054,7 @@ function TemplateBuilderTab() {
         {shouldShowFooter && (
           <div
             style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: "50px",
+              height: "7%",
               display: "flex",
               justifyContent: "flex-end",
               alignItems: "center",

@@ -1,6 +1,6 @@
 .section-builder-container {
-  margin-top: 40px;
-  height: calc(100vh - 40px);
+  /* margin-top: 40px; */
+  height: 87%;
   position: relative;
   width: 100%;
   display: flex;
@@ -18,7 +18,7 @@
 .main-section,
 .right-section {
   padding: 12px;
-  height: calc(100vh - 50px);
+  height: 100%;
   overflow: hidden;
 }
 
@@ -81,16 +81,12 @@
 
 /* New styles for header */
 .header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
   z-index: 10;
   font-weight: 500;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 40px;
+  height: 6%;
   padding: 0 16px;
   background-color: #fff;
   border-bottom: 1px solid #f0f0f0;
@@ -192,11 +188,7 @@
 
 /* Footer styles */
 .footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 50px;
+  height: 7%;
   display: flex;
   justify-content: flex-end;
   align-items: center;
