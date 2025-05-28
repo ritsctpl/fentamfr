@@ -123,14 +123,6 @@ const ComponentBuilderMaintenance: React.FC = () => {
   return (
     <div className={styles.container}>
       <div className={styles.dataFieldNav}>
-        <CommonAppBar
-          onSearchChange={() => { }}
-          allActivities={[]}
-          username={username}
-          site={null}
-          appTitle={t("componentBuilderMaintenance")} onSiteChange={function (newSite: string): void {
-            setCall(call + 1);
-          }} />
         {/* <div >
           <Typography
             variant="h6"
