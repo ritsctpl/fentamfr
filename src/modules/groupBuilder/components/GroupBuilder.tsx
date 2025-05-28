@@ -410,7 +410,6 @@ const GroupBuilder = () => {
                             height: '100%',
                             width: '330px',
                             minWidth: '330px',
-                            backgroundColor: '#fff',
                             padding: '10px',
                             boxSizing: 'border-box',
                             overflowY: 'auto'
@@ -523,7 +522,6 @@ const GroupBuilder = () => {
                             minWidth: isEdit || isCreating ? 'calc(100% - 630px)' : 'calc(100% - 330px)',
                             borderLeft: '1px solid #e8e8e8',
                             borderRight: '1px solid #e8e8e8',
-                            backgroundColor: '#fff',
                             padding: '16px',
                             boxSizing: 'border-box',
                             transition: 'all 0.3s ease-in-out',

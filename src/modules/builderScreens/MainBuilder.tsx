@@ -22,7 +22,7 @@ export default function MainBuilder() {
                 appTitle={"Builder Screen"} onSiteChange={function (newSite: string): void {
                     setCall(call + 1);
                 }} />
-            <div style={{ height: 'calc(100vh - 55px)', width: '100%', padding:5 }}>
+            <div style={{ height: 'calc(100vh - 44px)', width: '100%', padding:5, boxSizing: 'border-box' }}>
                 <Tabs
                     defaultActiveKey="1"
                     style={{ height: '100%' }}
