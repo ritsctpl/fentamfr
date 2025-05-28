@@ -1,4 +1,4 @@
-import React from "react";
+import React, { CSSProperties } from "react";
 import { Typography } from "antd";
 
 const { Text } = Typography;
@@ -8,6 +8,12 @@ interface TablePreviewProps {
   title?: string;
   instruction?: string;
 }
+
+const instructionStyle: CSSProperties = {
+  fontSize: "12px",
+  color: "#000",
+  marginTop: "5px",
+};
 
 function TablePreview({
   component,
@@ -112,6 +118,7 @@ function TablePreview({
           display: "flex",
           alignItems: "center",
           fontSize: "11px",
+          marginBottom: "5px",
           fontFamily: "Arial, sans-serif",
         }}
       >
@@ -170,6 +177,7 @@ function TablePreview({
           return renderFormField(comp);
         }
       })}
+      {instruction && <div style={instructionStyle}>{instruction}</div>}
     </div>
   );
 }

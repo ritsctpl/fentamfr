@@ -208,7 +208,7 @@ const DndTable: React.FC<DndTableProps> = ({ data, onOrderChange, onDelete }) =>
                         columns={columns}
                         dataSource={dataSource}
                         pagination={false}
-                        scroll={{ y: 'calc(100vh - 500px)' }}
+                        scroll={{ y: 'calc(100vh - 400px)' }}
                         style={{ 
                             position: 'relative',
                             background: '#ffffff',

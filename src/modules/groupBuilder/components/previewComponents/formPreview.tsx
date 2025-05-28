@@ -80,15 +80,14 @@ function FormPreview({
   // Mode 2: Split columns layout
   if (styleData.splitColumns && styleData.splitColumns > 1) {
     const containerStyle: CSSProperties = {
-      width: "38vw",
-      maxWidth: "38vw",
+      width: "100%",
       overflowX: "auto",
       border: "1px solid black",
       fontFamily: "Arial, sans-serif",
       fontSize: "12px",
       textAlign:
         (styleData.textAlignment as CSSProperties["textAlign"]) || "left",
-      ...(styleData.marginsEnabled ? { margin: "10px" } : {}),
+      ...(styleData.marginsEnabled ? { margin: "0px" } : {}),
     };
 
     const titleStyle: CSSProperties = {
@@ -186,15 +185,14 @@ function FormPreview({
 
   // Mode 1: Default table layout
   const containerStyle: CSSProperties = {
-    width: "38vw",
-    maxWidth: "38vw",
+    width: "100%",
     overflowX: "auto",
     border: "1px solid black",
     fontFamily: "Arial, sans-serif",
     fontSize: "12px",
     textAlign:
       (styleData.textAlignment as CSSProperties["textAlign"]) || "left",
-    ...(styleData.marginsEnabled ? { margin: "10px" } : {}),
+    ...(styleData.marginsEnabled ? { margin: "0px" } : {}),
   };
 
   const titleStyle: CSSProperties = {

@@ -1,8 +1,8 @@
 'use client'
 import CommonTable from '@components/CommonTable';
-import { Button, Input, List, Form, Tree, Tooltip, message, Modal, Tabs } from 'antd';
+import { Button, Input, List, Form, Tree, Tooltip, message, Modal, Tabs, Breadcrumb, Empty } from 'antd';
 import React, { CSSProperties, useEffect, useState } from 'react';
-import { PlusOutlined, PullRequestOutlined, SearchOutlined, ArrowLeftOutlined, EyeFilled } from '@ant-design/icons';
+import { PlusOutlined, PullRequestOutlined, SearchOutlined, ArrowLeftOutlined, EyeFilled, GroupOutlined, CloseOutlined, SaveOutlined } from '@ant-design/icons';
 import CloseIcon from '@mui/icons-material/Close';
 import CopyIcon from "@mui/icons-material/FileCopy";
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -19,6 +19,8 @@ import Preview from './Preview';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import SectionPreview from './sectionPreview';
+import { FaLayerGroup } from "react-icons/fa";
+import { CiBoxList } from 'react-icons/ci';
 
 // Define our types
 type Section = {
@@ -345,6 +347,7 @@ const GroupBuilder = () => {
                     <div style={{
                         padding: '20px',
                         borderBottom: '1px solid #efefef',
+                        boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)',
                         display: 'flex',
                         boxSizing: 'border-box',
                         height: '5%',
@@ -352,25 +355,25 @@ const GroupBuilder = () => {
                         alignItems: 'center'
                     }}>
                         <div style={{ display: 'flex', flexDirection: 'row', gap: '5px', alignItems: 'center' }}>
-                            <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 500 }}>
-                                Group Builder
-                            </h2>
-                            <div style={{ fontSize: '12px', color: '#666', fontWeight: '500' }}>
-                                {isEdit ? ' — ' + selectedGroup?.groupLabel : ''}
-                            </div>
+                            <Breadcrumb>
+                                <Breadcrumb.Item><div style={{ color: '#666', fontWeight: isEdit ? '400' : '500' }}>Group Builder</div></Breadcrumb.Item>
+                                {isEdit && (
+                                    <Breadcrumb.Item><div style={{ color: '#666', fontWeight: '500' }}>{selectedGroup?.groupLabel}</div></Breadcrumb.Item>
+                                )}
+                            </Breadcrumb>
                         </div>
 
                         <div style={{ display: 'flex', gap: '20px' }}>
                             {orderedSections.length > 0 && (
-                            <Tooltip title={orderedSections.length === 0 ? "Select at least one section to preview" : "Preview"}>
-                                <Button
-                                    type="text"
-                                    icon={previewSections ? <VisibilityOffIcon /> : <RemoveRedEyeIcon />}
-                                    onClick={handlePreviewToggle}
-                                    style={{ color: previewSections ? '#1890ff' : 'inherit' }}
-                                    disabled={orderedSections.length === 0}
-                                />
-                            </Tooltip>
+                                <Tooltip title={orderedSections.length === 0 ? "Select at least one section to preview" : "Preview"}>
+                                    <Button
+                                        type="text"
+                                        icon={previewSections ? <VisibilityOffIcon /> : <RemoveRedEyeIcon />}
+                                        onClick={handlePreviewToggle}
+                                        style={{ color: previewSections ? '#1890ff' : 'inherit' }}
+                                        disabled={orderedSections.length === 0}
+                                    />
+                                </Tooltip>
                             )}
                             {(isEdit || isCreating) && (
                                 <>
@@ -399,7 +402,7 @@ const GroupBuilder = () => {
 
                     {/* Main content area */}
                     <div style={{
-                        height: '87%',
+                        height: isEdit || isCreating ? '87%' : '100%',
                         width: '100%',
                         padding: '5px',
                         boxSizing: 'border-box',
@@ -411,7 +414,7 @@ const GroupBuilder = () => {
                             height: '100%',
                             width: '350px',
                             minWidth: '350px',
-                            backgroundColor: '#f5f5f5',
+                            backgroundColor: '#fff',
                             padding: '16px',
                             boxSizing: 'border-box',
                             overflowY: 'auto'
@@ -419,7 +422,7 @@ const GroupBuilder = () => {
                             {!showSections ? (
                                 <>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                                        <div style={{ fontWeight: 500, }}>Groups ({filteredGroups.length})</div>
+                                        <div style={{ fontWeight: 500, fontSize: '14px' }}>List of Groups ({filteredGroups.length})</div>
                                         <Button
                                             type='text'
                                             icon={<PlusOutlined />}
@@ -439,17 +442,30 @@ const GroupBuilder = () => {
                                             <List.Item
                                                 key={item.handle}
                                                 style={{
-                                                    padding: '8px',
+                                                    padding: '8px 12px',
                                                     backgroundColor: '#fff',
                                                     marginBottom: '8px',
                                                     borderRadius: '4px',
                                                     cursor: 'pointer',
-                                                    border: selectedGroup?.handle === item.handle ? '1px solid #1890ff' : 'none'
+                                                    border: '1px solid rgba(0, 0, 0, 0.16)',
+                                                    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+                                                    transition: "all 0.3s ease",
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.backgroundColor = "#f0f7ff";
+                                                    e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
+                                                    e.currentTarget.style.boxShadow = "0 2px 8px rgba(24,144,255,0.15)";
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.backgroundColor = "#fff";
+                                                    e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
+                                                    e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.05)";
                                                 }}
                                                 onClick={() => handleSelectGroup(item)}
                                             >
-                                                <div>
-                                                    <div style={{ fontWeight: 400 }}>{item.groupLabel}</div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <FaLayerGroup style={{ fontSize: '14px', color: '#666' }} />
+                                                    <div style={{ fontWeight: '450', fontSize: item.groupLabel.length > 30 ? "0.8em" : "0.8em" }}>{item.groupLabel}</div>
                                                 </div>
                                             </List.Item>
                                         )}
@@ -459,7 +475,7 @@ const GroupBuilder = () => {
                                 <>
                                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px', gap: '10px' }}>
                                         <Button type='text' icon={<ArrowLeftOutlined />} onClick={handleBackToGroups} />
-                                        <div style={{ fontWeight: 500, }}>Sections ({filteredSections.length})</div>
+                                        <div style={{ fontWeight: 500, fontSize: '14px' }}>List of Sections ({filteredSections.length})</div>
                                     </div>
                                     <Input.Search
                                         placeholder="Search sections..."
@@ -473,16 +489,29 @@ const GroupBuilder = () => {
                                             <List.Item
                                                 key={section.id}
                                                 style={{
-                                                    padding: '8px',
+                                                    padding: '8px 12px',
                                                     backgroundColor: '#fff',
                                                     marginBottom: '8px',
                                                     borderRadius: '4px',
-                                                    cursor: 'pointer'
+                                                    cursor: 'pointer',
+                                                    transition: "all 0.3s ease",
+                                                    border: '1px solid rgba(0, 0, 0, 0.16)'
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.backgroundColor = "#f0f7ff";
+                                                    e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
+                                                    e.currentTarget.style.boxShadow = "0 2px 8px rgba(24,144,255,0.15)";
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.backgroundColor = "#fff";
+                                                    e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
+                                                    e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.05)";
                                                 }}
                                                 onClick={() => handleAddSection(section)}
                                             >
-                                                <div>
-                                                    <div style={{ fontWeight: 400 }}>{section.sectionLabel}</div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <CiBoxList style={{ fontSize: '16px', color: '#666' }} />
+                                                    <div style={{ fontWeight: '450', fontSize: section.sectionLabel.length > 30 ? "0.8em" : "0.8em" }}>{section.sectionLabel}</div>
                                                 </div>
                                             </List.Item>
                                         )}
@@ -494,20 +523,20 @@ const GroupBuilder = () => {
                         {/* Form and Table */}
                         <div style={{
                             height: '100%',
-                            width: activeTab === '2' ? 'calc(100% - 900px)' : 'calc(100% - 650px)',
-                            minWidth: activeTab === '2' ? 'calc(100% - 900px)' : 'calc(100% - 650px)',
+                            width: isEdit || isCreating ? 'calc(100% - 650px)' : 'calc(100% - 350px)',
+                            minWidth: isEdit || isCreating ? 'calc(100% - 650px)' : 'calc(100% - 350px)',
                             borderLeft: '1px solid #e8e8e8',
                             borderRight: '1px solid #e8e8e8',
                             backgroundColor: '#fff',
                             padding: '16px',
                             boxSizing: 'border-box',
                             transition: 'all 0.3s ease-in-out',
-                            transform: activeTab === '2' ? 'translateX(0)' : 'translateX(0)',
                             opacity: 1,
                         }}>
                             {!selectedGroup && !isCreating && !showSections ? (
                                 <div style={{
                                     height: '100%',
+                                    width: '100%',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     justifyContent: 'center',
@@ -515,8 +544,11 @@ const GroupBuilder = () => {
                                     color: '#666',
                                     gap: '16px'
                                 }}>
-                                    <div style={{ fontSize: '16px', fontWeight: 500 }}>
-                                        Please select a group or create a new one
+                                    <div style={{ fontSize: '16px', fontWeight: 500, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+                                        <Empty style={{ fontSize: '14px', color: '#888' }} description="Please select a group or create a new one from the list of groups" />
+                                        <Button type='default' icon={<PlusOutlined />} onClick={handleNewGroup} style={{ marginTop: '10px' }}>
+                                            Create New Group
+                                        </Button>
                                     </div>
                                 </div>
                             ) : !previewSections ? (
@@ -570,8 +602,7 @@ const GroupBuilder = () => {
                                     )}
                                 </>
                             ) : (
-                                <div style={{ display: 'flex', justifyContent: 'center',height: '100%' }}>
-                                    {/* <Preview sections={orderedSections} /> */}
+                                <div style={{ display: 'flex', justifyContent: 'center', height: '100%' }}>
                                     <SectionPreview sections={orderedSections} />
                                 </div>
                             )}
@@ -589,7 +620,7 @@ const GroupBuilder = () => {
                                 transform: activeTab === '2' ? 'translateX(0)' : 'translateX(0)',
                                 opacity: 1,
                             }}>
-                                <div style={{ fontWeight: 500, }}>
+                                <div style={{ fontWeight: 500, fontSize: '14px' }}>
                                     <PullRequestOutlined style={{ marginRight: '8px' }} />
                                     Group Structure
                                 </div>
@@ -613,28 +644,33 @@ const GroupBuilder = () => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div style={{
-                        height: '7%',
-                        width: '100%',
-                        display: 'flex',
-                        gap: '10px',
-                        justifyContent: 'flex-end',
-                        alignItems: 'center',
-                        padding: '10px',
-                        boxSizing: 'border-box',
-                        borderTop: '1px solid #efefef'
-                    }}>
-                        {showSections && (
-                            <>
-                                {isCreating ? (
-                                    <Button type='primary' onClick={handleSaveGroup}>Create Group</Button>
-                                ) : isEdit ? (
-                                    <Button type='primary' onClick={handleUpdateGroup}>Save Changes</Button>
-                                ) : null}
-                                <Button onClick={resetForm}>Cancel</Button>
-                            </>
-                        )}
-                    </div>
+                    {
+                        (isEdit || isCreating) && (
+                            <div style={{
+                                height: '7%',
+                                width: '100%',
+                                display: 'flex',
+                                gap: '10px',
+                                justifyContent: 'flex-end',
+                                alignItems: 'center',
+                                padding: '10px',
+                                boxSizing: 'border-box',
+                                borderTop: '1px solid #efefef'
+                            }}>
+                                {showSections && (
+                                    <>
+                                        {isCreating ? (
+                                            <Button type='default' icon={<PlusOutlined />} onClick={handleSaveGroup}>Create</Button>
+                                        ) : isEdit ? (
+                                            <Button type='default' icon={<SaveOutlined />} onClick={handleUpdateGroup}>Save</Button>
+                                        ) : null}
+                                        <Button type='default' onClick={resetForm} icon={<CloseOutlined />}>Cancel</Button>
+                                    </>
+                                )}
+                            </div>
+                        )
+                    }
+
                 </div>
             </div>
         </>
