@@ -116,7 +116,7 @@ const WorlFlowStatesForm = () => {
                     onChange={(checked) => handleSwitchChange("isEnd", checked)}
                 />
             </Form.Item>
-            <Form.Item
+            {/* <Form.Item
                 label={t('isActive')}
                 labelCol={{ span: 4 }}
                 wrapperCol={{ span: 10 }}
@@ -125,7 +125,7 @@ const WorlFlowStatesForm = () => {
                     checked={payloadData?.isActive}
                     onChange={(checked) => handleSwitchChange("isActive", checked)}
                 />
-            </Form.Item>
+            </Form.Item> */}
 
         </Form>
     );

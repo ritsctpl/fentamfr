@@ -11,7 +11,7 @@ import { decryptToken } from "@/utils/encryption";
 import jwtDecode from "jwt-decode";
 import { useTranslation } from 'react-i18next';
 
-import { Button, Form, Input, message, Modal, Switch, Tooltip, Table } from "antd";
+import { Button, Form, Input, message, Modal, Switch, Tooltip, Table, Divider } from "antd";
 
 import ApiConfigurationCommonBar from "./ComponentBuilderCommonBar";
 
@@ -106,148 +106,7 @@ const ComponentBuilderMaintenance: React.FC = () => {
 
 
 
-  const handleSearch = async (searchTerm: string) => {
-    try {
-      // Fetch the item list and wait for it to complete
-      const lowercasedTerm = searchTerm.toLowerCase();
-      const cookies = parseCookies();
-      const site = cookies?.site;
-      const request = {
-        site: site,
-        componentLabel: searchTerm
-      }
-      try {
-        let oAllItem = await retrieveAllComponents(request);
-
-        // Once the item list is fetched, filter the data
-        let filtered;
-        if (lowercasedTerm) {
-          if (!oAllItem?.errorCode)
-            filtered = oAllItem;
-        } else {
-          filtered = top50Data; // If no search term, show all items
-        }
-        // Update the filtered data state
-        setFilteredData(filtered);
-
-      }
-      catch (e) {
-        console.log("Error in retrieving all configuration", e);
-      }
-    } catch (error) {
-      console.error('Error fetching config on search:', error);
-    }
-  };
-
-  const handleAddClick = () => {
-    setAddClick(true);
-    setResetValue(true);
-    setSelectedRowData(null);
-    setIsAdding(true);
-    //setResetValueCall(resetValueCall + 1);
-    setFullScreen(false);
-    setAddClickCount(addClickCount + 1)
-    setPayloadData(defaultFormData);
-    setShowAlert(false);
-    setNavigateToNewScreen(true);
-    fieldType.current = defaultFormData?.dataType;
-    setSeeFullScreen(false);
-  };
-
-  const handleRowSelect = (row: DataRow) => {
-
-    setIsAdding(true);
-    setResetValue(false);
-    setFullScreen(false);
-    setAddClick(false);
-
-    const fetchConfig = async () => {
-      try {
-        let response;
-        const cookies = parseCookies();
-        const site = cookies?.site;
-        const request = {
-          site: site,
-          componentLabel: row.componentLabel
-        }
-        try {
-          response = await retrieveComponent(request);
-          if (!response?.errorCode) {
-            const dummyData =
-            {
-              "site": "1004",
-              "handle": "ComponentBO:1004,Active Composition",
-              "componentLabel": "Active Composition",
-              "dataType": "Reference Table",
-              "unit": "",
-              "defaultValue": null,
-              "required": false,
-              "validation": "",
-              "active": 1,
-              "userId": "rits_admin",
-              "createdDateTime": "2025-05-19T13:16:37.155",
-              "modifiedDateTime": null,
-              "tableConfig": {},
-              "referenceTableConfig": {
-                  "rows": "2",
-                  "rowData": {
-                      "row1-col0": "1",
-                      "row2-col0": "2"
-                  },
-                  "columns": "2",
-                  "columnNames": [
-                      "hi",
-                      "hello"
-                  ]
-              }
-          }
-            setPayloadData(response);
-            setSelectedRowData(response);
-            setNavigateToNewScreen(true);
-            fieldType.current = response?.dataType;
-            if(response?.dataType == "Table" || response?.dataType == "Reference Table"){
-              setFullScreen(true);
-            }
-            else{
-              setFullScreen(false);
-            }
-          }
-
-        }
-        catch (e) {
-          console.error("Error in retrieveing the component", e);
-        }
-      } catch (error) {
-        console.error("Error fetching component:", error);
-      }
-    };
-
-    if (showAlert == true && isAdding == true) {
-      Modal.confirm({
-        title: t('confirm'),
-        content: t('rowSelectionMsg'),
-        okText: t('ok'),
-        cancelText: t('cancel'),
-        onOk: async () => {
-          // Proceed with the API call if confirmed
-          try {
-            await fetchConfig();
-          }
-          catch (e) {
-            console.error("Error in retrieveing the component: ", e);
-          }
-          setShowAlert(false)
-        },
-        onCancel() {
-        },
-      });
-    } else {
-      // If no data to confirm, proceed with the API call
-      fetchConfig();
-    }
-    setIsAdding(true);
-
-  };
+ 
 
 
   const handleClose = () => {
@@ -272,7 +131,24 @@ const ComponentBuilderMaintenance: React.FC = () => {
           appTitle={t("componentBuilderMaintenance")} onSiteChange={function (newSite: string): void {
             setCall(call + 1);
           }} />
+        {/* <div >
+          <Typography
+            variant="h6"
+            className={styles.appTitle}
+          >
+            {t("componentBuilderMaintenance")}
+          </Typography>
+        </div> */}
       </div>
+
+      {/* Add a horizontal divider */}
+      {/* <Divider 
+        style={{ 
+          margin: '10px 0', 
+          backgroundColor: '#e0e0e0', 
+          height: '1px' 
+        }} 
+      /> */}
 
         <div className={styles.dataFieldBody}>
           <div className={styles.dataFieldBodyContentsBottom}>

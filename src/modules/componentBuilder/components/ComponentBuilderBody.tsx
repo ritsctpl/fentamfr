@@ -19,7 +19,8 @@ import { PlusOneOutlined } from '@mui/icons-material';
 import AddIcon from "@mui/icons-material/Add";
 import { defaultFormData } from '../types/componentBuilderTypes';
 const { Option } = Select
-
+import { LuComponent } from "react-icons/lu";
+import { PlusOutlined, PullRequestOutlined, SearchOutlined, ArrowLeftOutlined, EyeFilled, GroupOutlined, CloseOutlined, SaveOutlined } from '@ant-design/icons';
 
 
 
@@ -687,11 +688,11 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                                     </>
                                 )}
 
-                                <Tooltip title="Close">
+                                {/* <Tooltip title="Close">
                                     <Button onClick={handleClose} className={styles.actionButton}>
                                         <CloseIcon sx={{ color: '#1874CE' }} />
                                     </Button>
-                                </Tooltip>
+                                </Tooltip> */}
                             </div>
 
 
@@ -724,7 +725,9 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                                 }}>
                                     <span>Components ({componentList?.length || 0})</span>
                                     <Tooltip title="Add">
-                                        <AddIcon style={{ cursor: 'pointer' }} onClick={handleOnAdd} />
+                                        <Button onClick={handleOnAdd} className={styles.addButton}>
+                                            <AddIcon style={{ cursor: 'pointer' }} />
+                                        </Button>
                                     </Tooltip>
                                 </div>
                                 <Input.Search
@@ -753,27 +756,26 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                                                 <List.Item
                                                     key={index}
                                                     style={{
-                                                        padding: "8px",
+                                                        padding: "8px 12px",
                                                         backgroundColor: "#fff",
+                                                        border: "1px solid rgba(0, 0, 0, 0.16)",
                                                         marginBottom: "8px",
                                                         borderRadius: "4px",
                                                         cursor: "pointer",
                                                         transition: "all 0.3s ease",
-                                                        border: "1px solid transparent",
-                                                        boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-                                                    }}
-                                                    onMouseEnter={(e) => {
+                                                        // border: "1px solid transparent",
+                                                        boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                                                      }}
+                                                      onMouseEnter={(e) => {
                                                         e.currentTarget.style.backgroundColor = "#f0f7ff";
-                                                        e.currentTarget.style.borderColor = "#1890ff";
-                                                        e.currentTarget.style.boxShadow =
-                                                            "0 2px 8px rgba(24,144,255,0.15)";
-                                                    }}
-                                                    onMouseLeave={(e) => {
+                                                        e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
+                                                        e.currentTarget.style.boxShadow = "0 2px 8px rgba(24,144,255,0.15)";
+                                                      }}
+                                                      onMouseLeave={(e) => {
                                                         e.currentTarget.style.backgroundColor = "#fff";
-                                                        e.currentTarget.style.borderColor = "transparent";
-                                                        e.currentTarget.style.boxShadow =
-                                                            "0 2px 4px rgba(0,0,0,0.05)";
-                                                    }}
+                                                        e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
+                                                        e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.05)";
+                                                      }}
                                                     onClick={() => handleRowSelect(component)}
                                                 >
                                                     <div
@@ -783,14 +785,18 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                                                             width: "100%",
                                                         }}
                                                     >
-                                                            <span style={{ fontWeight: 400 }}>
-                                                                {component.componentLabel}
+                                                        
+                                                            <span style={{ fontWeight: "400",
+                                                            fontSize: component.componentLabel.length > 30 ? "12px" : "12px", 
+                                                            display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                                            <LuComponent /> {component.componentLabel}
                                                             </span>
                                                             
                                                         <Typography style={{
-                                                            fontSize: "12px",
-                                                            color: "#666",
-                                                            margin: 0,
+                                                           fontSize: "0.8em",
+                                                           color: "#666",
+                                                           margin: "0",
+                                                           fontWeight: "bold",
                                                         }}> {component.dataType} </Typography>
                                                     </div>
                                                 </List.Item>
@@ -816,16 +822,19 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                 <div className={styles.floatingButtonContainer}
                     style={{ position: 'fixed', bottom: '8px', right: '20px', display: 'flex', flexDirection: 'row', gap: '10px' }}
                 >
-                    <Button type='primary'
+                    <Button 
                         onClick={handleSave}
-                        style={{ width: 'auto', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        // style={{ width: 'auto', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        icon={selectedRowData ? <SaveOutlined /> : <PlusOutlined />}
                     >
                         {selectedRowData ? t("save") : t("create")}
                     </Button>
                     <Button
-                        className={` ${styles.cancelButton}`}
+                        // className={` ${styles.cancelButton}`}
                         onClick={handleCancel}
-                        style={{ width: 'auto', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        style={{ width: 'auto' }}
+                        // style={{ width: 'auto', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        icon={<CloseOutlined />}
                     >
                         {t("cancel")}
                     </Button>

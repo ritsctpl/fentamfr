@@ -24,6 +24,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
     // Add state for row selection
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [disableUnitField, setDisableUnitField] = useState<boolean>(false);
+    const [bulletPointText, setBulletPointText] = useState<string>('');
 
     useEffect(() => {
         form.setFieldsValue({
@@ -33,7 +34,8 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
             defaultValue: payloadData?.defaultValue,
             required: payloadData?.required,
             validation: payloadData?.validation,
-            apiUrl: payloadData?.apiUrl
+            apiUrl: payloadData?.apiUrl,
+            bulletPointText: payloadData?.bulletPointText || ''
         });
 
         // Initialize column names and row data based on payload
@@ -45,7 +47,31 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
             );
             setRowData(payloadData?.tableConfig?.rowData || {});
         }
+        if((payloadData?.dataType == 'Select' || payloadData?.dataType == 'DatePicker' || payloadData?.dataType == 'Table' || payloadData?.dataType == 'Switch') ){
+            setDisableUnitField(true);
+        }
+        else{
+            setDisableUnitField(false);
+        }
+        if (payloadData?.dataType === 'TextArea') {
+            setBulletPointText(payloadData?.bulletPointText || '');
+        }
     }, [payloadData]);
+
+    // Function to add a bullet point
+    const handleAddBulletPoint = () => {
+        const newText = bulletPointText.endsWith('\n') 
+            ? bulletPointText + '• ' 
+            : bulletPointText + '\n• ';
+        setBulletPointText(newText);
+        
+        // Update payload data
+        setPayloadData((prev) => ({
+            ...prev,
+            bulletPointText: newText
+        }));
+        setShowAlert(true);
+    };
 
     const handleInputChange = (fieldName: string, value: string) => {
         // if (fieldName == 'componentLabel') {
@@ -61,7 +87,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
 
     const handleSelectChange = (fieldName: string, value: string) => {
         // debugger
-        if (value == 'Input' || value == "TextArea" || value == "DatePicker" || value == "Select" || value == "Table") {
+        if (value == 'Input' || value == "TextArea" || value == "DatePicker" || value == "Select" || value == "Table" || value == "Footer Table") {
             setPayloadData((prev) => ({
                 ...prev,
                 defaultValue: null,
@@ -84,7 +110,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
             fieldType.current = value;
         }
 
-        if(value == 'Select' || value == 'DatePicker' || value == 'Table' || value == 'Switch' ){
+        if((value == 'Select' || value == 'DatePicker' || value == 'Table' || value == 'Switch') ){
             setDisableUnitField(true);
         }
         else{
@@ -765,10 +791,10 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                 key: 'DateTimePicker',
                 label: 'DateTimePicker',
             },
-            // {
-            //   key: 'Select',
-            //   label: 'Select',
-            // },
+            {
+              key: 'Select',
+              label: 'Select',
+            },
             {
                 key: 'Switch',
                 label: 'Switch',
@@ -901,18 +927,20 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                 placeholder='Select date time'
                             />
                         );
-                    // case 'Select':
-                    //     return (
-                    //         <Select
-                    //             value={rowData[`row${record.key}-col${index}`] || undefined}
-                    //             onChange={(value) => handleRowDataChange(`row${record.key}-col${index}`, index, value)}
-                    //             style={{ width: '100%' }}
-                    //         >
-                    //             {/* Add options as needed */}
-                    //             <Select.Option value="option1">Option 1</Select.Option>
-                    //             <Select.Option value="option2">Option 2</Select.Option>
-                    //         </Select>
-                    //     );
+                    case 'Select':
+                        return (
+                            <Select
+                                value={rowData[`row${record.key}-col${index}`] || undefined}
+                                onChange={(value) => handleRowDataChange(`row${record.key}-col${index}`, index, value)}
+                                style={{ width: '100%' }}
+                                allowClear
+                                showSearch
+                            >
+                                {/* Add options as needed */}
+                                <Select.Option value="Active">Active</Select.Option>
+                                <Select.Option value="Inactive">Inactive</Select.Option>
+                            </Select>
+                        );
                     case 'Switch':
                         return (
                             <Switch
@@ -1176,23 +1204,9 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
             <Row gutter={16}>
 
 
-                {payloadData?.dataType === "Table" && (
+                {(payloadData?.dataType === "Table" || payloadData?.dataType === "Footer Table") && (
                     <>
-                        {/* <Col span={8}>
-                            <Form.Item
-                                label={t('noOfRows')}
-                                labelCol={{ span: 8 }}
-                                wrapperCol={{ span: 12 }}
-                                style={{ marginBottom: '8px' }}
-                            >
-                                <Input
-                                    type="number"
-                                    value={payloadData?.tableConfig?.rows}
-                                    onChange={(e) => handleReferenceTableConfigChange("rows", e.target.value)}
-                                    min={1}
-                                />
-                            </Form.Item>
-                        </Col> */}
+                        
                         <Col span={8}>
                             <Form.Item
                                 label={t('noOfColumns')}
@@ -1216,12 +1230,10 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
     };
 
     const renderFormFields = () => {
-        // For Table  use two-column layout
-        if (payloadData?.dataType === "Table") {
+        // For Table or Footer Table, use two-column layout
+        if (payloadData?.dataType === "Table" || payloadData?.dataType === "Footer Table") {
             return (
-                <div 
-                style={{marginTop: '-1%',}}
-                >
+                <div style={{ marginTop: '-1%' }}>
                     <Row gutter={16}>
                         <Col span={8}>
                             <Form.Item
@@ -1236,7 +1248,6 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                     onChange={(e) => handleInputChange("componentLabel", e.target.value)}
                                 />
                             </Form.Item>
-
                         </Col>
                         <Col span={8}>
                             <Form.Item
@@ -1253,6 +1264,9 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                     <Option value="kg">kg</Option>
                                     <Option value="g">g</Option>
                                     <Option value="m">m</Option>
+                                    <Option value="ml">ml</Option>
+                                    <Option value="mg">mg</Option>
+                                    <Option value="mg/g">mg/g</Option>
                                     <Option value="cm">cm</Option>
                                     <Option value="mm">mm</Option>
                                     <Option value="%">%</Option>
@@ -1278,7 +1292,6 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                     <Option value="DatePicker">DatePicker</Option>
                                     <Option value="Integer">Integer</Option>
                                     <Option value="Decimal">Decimal</Option>
-                                    {/* <Option value="Checkbox">Checkbox</Option> */}
                                     <Option value="Switch">Switch</Option>
                                     <Option value="Table">Table</Option>
                                 </Select>
@@ -1300,7 +1313,6 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                     onChange={(e) => handleInputChange("defaultValue", e.target.value)}
                                 />
                             </Form.Item>
-
                         </Col>
                         <Col span={8}>
                             <Form.Item
@@ -1330,6 +1342,8 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                             </Form.Item>
                         </Col>
                     </Row>
+
+                    
                 </div>
             );
         }
@@ -1367,7 +1381,6 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                         <Option value="DatePicker">DatePicker</Option>
                         <Option value="Integer">Integer</Option>
                         <Option value="Decimal">Decimal</Option>
-                        {/* <Option value="Checkbox">Checkbox</Option> */}
                         <Option value="Switch">Switch</Option>
                         <Option value="Table">Table</Option>
                     </Select>
@@ -1386,13 +1399,16 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                         <Option value="kg">kg</Option>
                         <Option value="g">g</Option>
                         <Option value="m">m</Option>
+                        <Option value="ml">ml</Option>
+                        <Option value="mg">mg</Option>
+                        <Option value="mg/g">mg/g</Option>
                         <Option value="cm">cm</Option>
                         <Option value="mm">mm</Option>
                         <Option value="%">%</Option>
                     </Select>
                 </Form.Item>
 
-                {payloadData?.dataType == "Select" && (
+                {payloadData?.dataType === "Select" && (
                     <Form.Item
                         label={t('apiUrl')}
                         labelCol={{ span: 6 }}
@@ -1406,7 +1422,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                     </Form.Item>
                 )}
 
-                <Form.Item
+                {payloadData?.dataType != "TextArea" && <Form.Item
                     label={t('defaultValue')}
                     labelCol={{ span: 6 }}
                     wrapperCol={{ span: 10 }}
@@ -1418,6 +1434,8 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                         onChange={(e) => handleInputChange("defaultValue", e.target.value)}
                     />
                 </Form.Item>
+                }
+
                 <Form.Item
                     label={t('required')}
                     labelCol={{ span: 6 }}
@@ -1440,7 +1458,365 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                         onChange={(e) => handleInputChange("validation", e.target.value)}
                     />
                 </Form.Item>
+
+                {payloadData?.dataType === "TextArea" && (
+                    <Form.Item
+                        label={t('defaultValue')}
+                        labelCol={{ span: 6 }}
+                        wrapperCol={{ span: 10 }}
+                        style={{ marginBottom: '8px' }}
+                    >
+                        <Input.TextArea
+                            value={payloadData?.defaultValue || ''}
+                            onChange={(e) => {
+                                handleInputChange("defaultValue", e.target.value);
+                            }}
+                            onKeyDown={(e) => {
+                                // Add bullet point when Enter key is pressed
+                                if (e.key === 'Enter') {
+                                    e.preventDefault(); // Prevent default Enter key behavior
+                                    const currentValue = e.currentTarget.value;
+                                    const cursorPosition = e.currentTarget.selectionStart || currentValue.length;
+
+                                    // If the cursor is at the end or the last character is a newline, add a bullet
+                                    if (cursorPosition === currentValue.length ||
+                                        currentValue[cursorPosition - 1] === '\n') {
+                                        const newText = currentValue.endsWith('\n')
+                                            ? currentValue + '• '
+                                            : currentValue + '\n• ';
+
+                                        handleInputChange("defaultValue", newText);
+                                    }
+                                }
+                            }}
+                            placeholder="Enter text with bullet points"
+                            rows={4}
+                            style={{ fontFamily: 'monospace' }}
+                        />
+                    </Form.Item>
+                )}
+
             </>
+        );
+    };
+
+    // Add this new method for Footer Table preview
+    const renderFooterTablePreview = () => {
+        if (!payloadData?.tableConfig) return null;
+
+        const items: MenuProps['items'] = [
+            {
+                key: 'Integer',
+                label: 'Integer',
+            },
+            {
+                key: 'Decimal',
+                label: 'Decimal',
+            },
+            {
+                key: 'Text',
+                label: 'Text',
+            },
+            {
+                key: 'TextArea',
+                label: 'TextArea',
+            },
+            {
+                key: 'Select',
+                label: 'Select',
+            },
+            {
+                key: 'Switch',
+                label: 'Switch',
+            },
+        ];
+
+        const columns = Array.from({ length: Number(payloadData?.tableConfig?.columns) || 0 }).map((_, index) => ({
+            title: (
+                <div style={{ display: 'flex' }}>
+                    {columnNames[index]?.required && (
+                        <span style={{ color: 'red', marginRight: '5px' }}>*</span>
+                    )}
+                    <Input
+                        value={columnNames[index]?.title || ''}
+                        onChange={(e) => handleFooterColumnNameChange(index, e.target.value)}
+                        placeholder={`Column ${index + 1}`}
+                        style={{ width: '100%' }}
+                        
+                        suffix={
+                            <>
+                                <Checkbox
+                                    checked={columnNames[index]?.required || false}
+                                    onChange={(e) => {
+                                        const updatedColumnNames = [...columnNames];
+                                        updatedColumnNames[index] = {
+                                            ...updatedColumnNames[index],
+                                            required: e.target.checked
+                                        };
+                                        setColumnNames(updatedColumnNames);
+
+                                        const updatedPayloadData = {
+                                            ...payloadData,
+                                            tableConfig: {
+                                                ...payloadData?.tableConfig,
+                                                columnNames: updatedColumnNames
+                                            }
+                                        };
+                                        setPayloadData(updatedPayloadData);
+                                    }}
+                                />
+                            </>
+                        }
+                    />
+                    <Dropdown
+                        menu={{
+                            items,
+                            selectable: true,
+                            defaultSelectedKeys: ['Input'],
+                            onSelect: (info) => {
+                                const updatedColumnNames = [...columnNames];
+                                updatedColumnNames[index] = {
+                                    title: updatedColumnNames?.[index]?.title || '',
+                                    type: info.key as string,
+                                    required: updatedColumnNames?.[index]?.required || false,
+                                    fieldType: info.key === 'Datepicker' ? 'date' : 
+                                               info.key === 'DateTimePicker' ? 'datetime' : 
+                                               info.key === 'Switch' ? 'boolean' : 
+                                               info.key === 'Integer' ? 'number' : 
+                                               info.key === 'Decimal' ? 'decimal' : 
+                                               'text'
+                                };
+                                setColumnNames(updatedColumnNames);
+
+                                const updatedPayloadData = {
+                                    ...payloadData,
+                                    tableConfig: {
+                                        ...payloadData?.tableConfig,
+                                        columnNames: updatedColumnNames
+                                    }
+                                };
+                                setPayloadData(updatedPayloadData);
+                            }
+                        }}
+                    >
+                        <Typography.Link style={{
+                            marginLeft: '5px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>
+                            <Space align="center">
+                                <DownOutlined style={{ verticalAlign: 'middle' }} />
+                            </Space>
+                        </Typography.Link>
+                    </Dropdown>
+                </div>
+            ),
+            dataIndex: `col${index}`,
+            key: `col${index}`,
+            width: 300,
+            render: (_: any, record: any) => {
+                // For the last row, always use DatePicker
+                if (record.key === String(Number(payloadData?.tableConfig?.rows))) {
+                    return (
+                        <DatePicker
+                            value={rowData[`row${record.key}-col${index}`]
+                                ? dayjs(rowData[`row${record.key}-col${index}`])
+                                : null}
+                            onChange={(date) => handleFooterRowDataChange(
+                                `row${record.key}-col${index}`,
+                                index,
+                                date ? date.format('YYYY-MM-DD') : ''
+                            )}
+                            style={{ width: '100%' }}
+                        />
+                    );
+                }
+
+                const columnType = columnNames[index]?.type || 'Input';
+                const fieldType = columnNames[index]?.fieldType || 'text';
+
+                switch (columnType) {
+                    case 'TextArea':
+                        return (
+                            <Input.TextArea
+                                value={rowData[`row${record.key}-col${index}`] || ''}
+                                onChange={(e) => handleFooterRowDataChange(`row${record.key}-col${index}`, index, e.target.value)}
+                                style={{ width: '100%' }}
+                            />
+                        );
+                    case 'Switch':
+                        return (
+                            <Switch
+                                checked={rowData[`row${record.key}-col${index}`] === 'true'}
+                                onChange={(checked) => handleFooterRowDataChange(`row${record.key}-col${index}`, index, String(checked))}
+                            />
+                        );
+                    default:
+                        return (
+                            <Input
+                                value={rowData[`row${record.key}-col${index}`] || ''}
+                                onChange={(e) => handleFooterRowDataChange(`row${record.key}-col${index}`, index, e.target.value)}
+                                style={{ width: '100%' }}
+                                placeholder={`Enter ${fieldType}`}
+                            />
+                        );
+                }
+            }
+        }));
+
+        const previewData = Array.from({ 
+            length: Number(payloadData?.tableConfig?.rows) || 0 
+        }).map((_, rowIndex) => ({
+            key: String(rowIndex + 1),
+            ...Object.fromEntries(Array.from({ length: Number(payloadData?.tableConfig?.columns) || 0 }).map((_, colIndex) =>
+                [`col${colIndex}`, '']
+            ))
+        }));
+
+        const finalPreviewData = previewData.length > 0 ? previewData : [];
+
+        const rowSelection = {
+            selectedRowKeys,
+            onChange: (newSelectedRowKeys: React.Key[]) => {
+                setSelectedRowKeys(newSelectedRowKeys);
+            },
+            type: 'checkbox' as const
+        };
+
+        const handleFooterInsertAppend = () => {
+            const columns = Number(payloadData?.tableConfig?.columns || 0);
+            const currentRows = Number(payloadData?.tableConfig?.rows || 0);
+            const newRowIndex = currentRows + 1;
+
+            const newRowData = { ...rowData };
+            for (let colIndex = 0; colIndex < columns; colIndex++) {
+                const key = `row${newRowIndex}-col${colIndex}`;
+                newRowData[key] = '';
+            }
+
+            setRowData(newRowData);
+
+            setPayloadData((prev) => ({
+                ...prev,
+                tableConfig: {
+                    ...prev.tableConfig,
+                    rows: newRowIndex,
+                    rowData: newRowData
+                }
+            }));
+
+            setShowAlert(true);
+        };
+
+        const handleFooterRemoveRow = () => {
+            if (selectedRowKeys.length === 0) return;
+        
+            // Prevent removing the last row
+            if (selectedRowKeys.length === previewData.length) {
+                return;
+            }
+        
+            const newRowData = previewData.filter(row => !selectedRowKeys.includes(row.key));
+        
+            const reindexedRowData = newRowData.map((row, index) => ({
+                ...row,
+                key: String(index + 1)
+            }));
+        
+            setPayloadData(prev => ({
+                ...prev,
+                tableConfig: {
+                    ...prev.tableConfig,
+                    rows: reindexedRowData.length,
+                    rowData: reindexedRowData
+                }
+            }));
+        
+            setSelectedRowKeys([]);
+        };
+
+        const handleFooterColumnNameChange = (index: number, value: string) => {
+            const camelCaseKeyName = value
+                .toLowerCase()
+                .replace(/[^a-zA-Z0-9]+(.)/g, (m, chr) => chr.toUpperCase())
+                .replace(/^[A-Z]/, firstChar => firstChar.toLowerCase());
+
+            const newColumnNames = [...columnNames];
+            newColumnNames[index] = {
+                title: value,
+                type: newColumnNames[index]?.type || 'Input',
+                dataIndex: camelCaseKeyName,
+                required: newColumnNames[index]?.required || false,
+                fieldType: newColumnNames[index]?.fieldType || 'text'
+            };
+            setColumnNames(newColumnNames);
+
+            if (payloadData?.dataType === 'Footer Table') {
+                setPayloadData((prev) => ({
+                    ...prev,
+                    tableConfig: {
+                        ...prev.tableConfig,
+                        columnNames: newColumnNames
+                    }
+                }));
+            }
+
+            setShowAlert(true);
+        }
+
+        const handleFooterRowDataChange = (rowKey: string, columnIndex: number, value: string) => {
+            const newRowData = {
+                ...rowData,
+                [rowKey]: value
+            };
+
+            setRowData(newRowData);
+
+            if (payloadData?.dataType === 'Footer Table') {
+                setPayloadData((prev) => ({
+                    ...prev,
+                    tableConfig: {
+                        ...prev.tableConfig,
+                        rowData: newRowData
+                    }
+                }));
+            }
+
+            setShowAlert(true);
+        }
+
+        return (
+            <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <div style={{
+                    width: '99%',
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    marginBottom: 8
+                }}>
+                    <Space>
+                        <Button size="small" onClick={handleFooterInsertAppend}>Insert</Button>
+                        <Button
+                            size="small"
+                            onClick={handleFooterRemoveRow}
+                            disabled={selectedRowKeys.length === 0 || selectedRowKeys.length === previewData.length}
+                        >
+                            Remove Selected
+                        </Button>
+                    </Space>
+                </div>
+                <Table
+                    rowSelection={rowSelection}
+                    title={() => 'Footer Table Preview'}
+                    columns={columns}
+                    dataSource={finalPreviewData}
+                    pagination={false}
+                    bordered
+                    size="small"
+                    scroll={{ x: '1000', y: 'calc(100vh - 450px)' }}
+                    style={{ width: '99%', tableLayout: 'fixed' }}
+                />
+            </div>
         );
     };
 
@@ -1451,15 +1827,14 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
         >
             {renderFormFields()}
 
-            {(payloadData?.dataType === "Table") && (
+            {(payloadData?.dataType === "Table" || payloadData?.dataType === "Footer Table") && (
                 <>
                     {renderTableConfigFields()}
 
                     <Divider />
 
-                    {/* {payloadData?.dataType === "Table" && renderTablePreview()} */}
-
                     {payloadData?.dataType === "Table" && renderReferenceTablePreview()}
+                    {payloadData?.dataType === "Footer Table" && renderFooterTablePreview()}
                 </>
             )}
         </Form>
