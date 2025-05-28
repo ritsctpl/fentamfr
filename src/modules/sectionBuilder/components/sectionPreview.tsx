@@ -30,13 +30,13 @@ function SectionPreview({ previewComponent = [] }: SectionPreviewProps) {
         <FormPreview
           component={previewComponent}
           styleData={sectionFormValues.style}
-          title={sectionFormValues.sectionLabel}
+          title={ sectionFormValues?.style.showHeading? sectionFormValues?.sectionLabel:""}
           instruction={sectionFormValues.instructions}
         />
       ) : (
         <TablePreview
           component={previewComponent}
-          title={sectionFormValues.sectionLabel}
+          title={ sectionFormValues?.style.showHeading? sectionFormValues?.sectionLabel:""}
           instruction={sectionFormValues.instructions}
         />
       )}

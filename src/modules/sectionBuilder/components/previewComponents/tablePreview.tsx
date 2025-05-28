@@ -1,4 +1,4 @@
-import React from "react";
+import React, { CSSProperties } from "react";
 import { Typography } from "antd";
 
 const { Text } = Typography;
@@ -14,6 +14,12 @@ function TablePreview({
   title = "",
   instruction = "",
 }: TablePreviewProps) {
+  const instructionStyle: CSSProperties = {
+    fontSize: "12px",
+    color: "#000",
+    // marginTop: "10px",
+    marginLeft: "5px",
+  };
   const renderTable = (tableComp: any) => {
     const { tableConfig, componentLabel } = tableComp;
 
@@ -161,7 +167,7 @@ function TablePreview({
                   fontFamily: "Arial, sans-serif",
                 }}
               >
-                {comp.componentLabel}
+                {title}
               </div>
               {renderTable(comp)}
             </div>
@@ -170,6 +176,7 @@ function TablePreview({
           return renderFormField(comp);
         }
       })}
+      <span style={instructionStyle}>{instruction}</span>
     </div>
   );
 }

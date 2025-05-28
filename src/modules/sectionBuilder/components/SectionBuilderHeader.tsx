@@ -23,10 +23,10 @@ export const SectionBuilderHeader: React.FC<SectionBuilderHeaderProps> = ({
   return (
     <div className={styles.header}>
       <span className={styles["header-title"]}>
-        <span className={styles["header-title-text"]}>Section Builder</span>
+        {!selectedSection &&<span className={styles["header-title-text"]}>Section Builder</span>}
         {selectedSection && (
-          <span className={styles["header-title-section"]}>
-            - {selectedSection.sectionLabel}
+          <span className={styles["header-title-text"]}>
+            {selectedSection.sectionLabel}
           </span>
         )}
       </span>

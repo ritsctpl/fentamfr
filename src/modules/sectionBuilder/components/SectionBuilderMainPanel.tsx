@@ -1,12 +1,24 @@
 import React from "react";
-import { Form, Input, DatePicker, Spin, Select, Row, Col } from "antd";
+import {
+  Form,
+  Input,
+  DatePicker,
+  Spin,
+  Select,
+  Row,
+  Col,
+  Empty,
+  Button,
+} from "antd";
 import moment from "moment";
+import { PlusOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 
 import styles from "../styles/SectionBuilderTab.module.css";
 import { DragableTable } from "./DragableTable";
 import SectionPreview from "./sectionPreview";
 
 interface SectionBuilderMainPanelProps {
+  onAddSection: () => void;
   form: any;
   isLoading: boolean;
   loadingMessage: string;
@@ -54,6 +66,7 @@ export const SectionBuilderMainPanel: React.FC<
   onRemoveComponent,
   onClearComponents,
   previewComponent,
+  onAddSection
 }) => {
   return (
     <div
@@ -98,14 +111,25 @@ export const SectionBuilderMainPanel: React.FC<
             flexDirection: "column",
             justifyContent: "center",
             alignItems: "center",
-            height: "85vh",
+            height: "80vh",
             width: "100%",
             padding: "20px",
             boxSizing: "border-box",
             textAlign: "center",
           }}
         >
-          Please select a section or create a new one to get started
+          <Empty
+            style={{ fontSize: "14px", color: "#888" }}
+            description="Please select a Section or create a new one from the list of Section"
+          />
+          <Button
+            type="default"
+            icon={<PlusOutlined />}
+            onClick={onAddSection}
+            style={{ marginTop: "10px" }}
+          >
+            Create New Section
+          </Button>
         </span>
       ) : isPreview ? (
         <SectionPreview previewComponent={previewComponent} />
@@ -136,8 +160,7 @@ export const SectionBuilderMainPanel: React.FC<
                     value={sectionFormValues.sectionLabel}
                     onChange={(e) => {
                       const value = e.target.value
-                        .toUpperCase()
-                        .replace(/[^A-Z_]/g, " ");
+                        .toUpperCase();
                       onSectionLabelChange(value);
                     }}
                   />

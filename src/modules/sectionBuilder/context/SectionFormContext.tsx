@@ -17,6 +17,7 @@ export interface SectionFormValues {
     textAlignment: string;
     tableAlignment: string;
     splitColumns: number;
+    showHeading: boolean
   };
 }
 
@@ -49,6 +50,7 @@ export const SectionFormProvider: React.FC<{ children: ReactNode }> = ({
         textAlignment: "left",
         tableAlignment: "left",
         splitColumns: 1,
+        showHeading: true
       },
     }
   );
@@ -66,6 +68,7 @@ export const SectionFormProvider: React.FC<{ children: ReactNode }> = ({
         textAlignment: "left",
         tableAlignment: "left",
         splitColumns: 1,
+        showHeading: true
       },
     });
   };

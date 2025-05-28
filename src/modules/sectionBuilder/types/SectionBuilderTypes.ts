@@ -25,6 +25,7 @@ export interface SectionType {
     textAlignment: string;
     tableAlignment: string;
     splitColumns: number;
+    showHeading: boolean;
   };
 }
 

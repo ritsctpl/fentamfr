@@ -20,7 +20,7 @@ const { Text } = Typography;
 
 const ConfigFile: React.FC = () => {
   const { sectionFormValues, setSectionFormValues } = useSectionForm();
- console.log(sectionFormValues);
+  console.log(sectionFormValues);
   const handleApply = () => {
     try {
       // Log the applied configuration
@@ -80,7 +80,7 @@ const ConfigFile: React.FC = () => {
       </div>
 
       <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-        {/* Page Margins */}
+        {/*  showHeading */}
         <div>
           <Text
             strong
@@ -91,7 +91,7 @@ const ConfigFile: React.FC = () => {
               marginBottom: "8px",
             }}
           >
-            Border Margin
+            Show Heading
           </Text>
           <div
             style={{
@@ -105,16 +105,16 @@ const ConfigFile: React.FC = () => {
             }}
           >
             <Text style={{ fontSize: "12px", color: "#666" }}>
-              Enable Border Margin
+              Show Heading
             </Text>
             <Switch
-              checked={sectionFormValues.style.marginsEnabled}
+              checked={sectionFormValues.style.showHeading}
               onChange={(checked) =>
                 setSectionFormValues((prev) => ({
                   ...prev,
                   style: {
                     ...prev.style,
-                    marginsEnabled: checked,
+                    showHeading: checked,
                   },
                 }))
               }
@@ -122,149 +122,204 @@ const ConfigFile: React.FC = () => {
             />
           </div>
         </div>
+        {sectionFormValues.structureType === "structured" && (
+          <div>
+            <Text
+              strong
+              style={{
+                fontSize: "13px",
+                color: "#333",
+                display: "block",
+                marginBottom: "8px",
+              }}
+            >
+              Border
+            </Text>
+            <div
+              style={{
+                backgroundColor: "#f9f9f9",
+                padding: "12px",
+                borderRadius: "6px",
+                border: "1px solid #e0e0e0",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: "12px", color: "#666" }}>
+                Enable Border
+              </Text>
+              <Switch
+                checked={sectionFormValues.style.marginsEnabled}
+                onChange={(checked) =>
+                  setSectionFormValues((prev) => ({
+                    ...prev,
+                    style: {
+                      ...prev.style,
+                      marginsEnabled: checked,
+                    },
+                  }))
+                }
+                size="small"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Text Alignment */}
-        <div>
-          <Text
-            strong
-            style={{
-              fontSize: "13px",
-              color: "#333",
-              display: "block",
-              marginBottom: "8px",
-            }}
-          >
-            Text Alignment
-          </Text>
-          <Radio.Group
-            value={sectionFormValues.style.textAlignment}
-            onChange={(e) =>
-              setSectionFormValues((prev) => ({
-                ...prev,
-                style: {
-                  ...prev.style,
-                  textAlignment: e.target.value,
-                },
-              }))
-            }
-            style={{ width: "100%", display: "flex" }}
-            size="small"
-          >
-            <Radio.Button value="left" style={{ flex: 1, textAlign: "center" }}>
-              <AlignLeftOutlined />
-            </Radio.Button>
-            <Radio.Button
-              value="center"
-              style={{ flex: 1, textAlign: "center" }}
+        {sectionFormValues.structureType === "structured" && (
+          <div>
+            <Text
+              strong
+              style={{
+                fontSize: "13px",
+                color: "#333",
+                display: "block",
+                marginBottom: "8px",
+              }}
             >
-              <AlignCenterOutlined />
-            </Radio.Button>
-            <Radio.Button
-              value="right"
-              style={{ flex: 1, textAlign: "center" }}
+              Text Alignment
+            </Text>
+            <Radio.Group
+              value={sectionFormValues.style.textAlignment}
+              onChange={(e) =>
+                setSectionFormValues((prev) => ({
+                  ...prev,
+                  style: {
+                    ...prev.style,
+                    textAlignment: e.target.value,
+                  },
+                }))
+              }
+              style={{ width: "100%", display: "flex" }}
+              size="small"
             >
-              <AlignRightOutlined />
-            </Radio.Button>
-          </Radio.Group>
-        </div>
+              <Radio.Button
+                value="left"
+                style={{ flex: 1, textAlign: "center" }}
+              >
+                <AlignLeftOutlined />
+              </Radio.Button>
+              <Radio.Button
+                value="center"
+                style={{ flex: 1, textAlign: "center" }}
+              >
+                <AlignCenterOutlined />
+              </Radio.Button>
+              <Radio.Button
+                value="right"
+                style={{ flex: 1, textAlign: "center" }}
+              >
+                <AlignRightOutlined />
+              </Radio.Button>
+            </Radio.Group>
+          </div>
+        )}
 
         {/* Table Alignment */}
-        <div>
-          <Text
-            strong
-            style={{
-              fontSize: "13px",
-              color: "#333",
-              display: "block",
-              marginBottom: "8px",
-            }}
-          >
-            Table Alignment
-          </Text>
-          <Radio.Group
-            value={sectionFormValues.style.tableAlignment}
-            onChange={(e) =>
-              setSectionFormValues((prev) => ({
-                ...prev,
-                style: {
-                  ...prev.style,
-                  tableAlignment: e.target.value,
-                },
-              }))
-            }
-            style={{ width: "100%", display: "flex" }}
-            size="small"
-          >
-            <Radio.Button value="left" style={{ flex: 1, textAlign: "center" }}>
-              <AlignLeftOutlined />
-            </Radio.Button>
-            <Radio.Button
-              value="center"
-              style={{ flex: 1, textAlign: "center" }}
+        {sectionFormValues.structureType === "structured" && (
+          <div>
+            <Text
+              strong
+              style={{
+                fontSize: "13px",
+                color: "#333",
+                display: "block",
+                marginBottom: "8px",
+              }}
             >
-              <AlignCenterOutlined />
-            </Radio.Button>
-            <Radio.Button
-              value="right"
-              style={{ flex: 1, textAlign: "center" }}
+              Table Alignment
+            </Text>
+            <Radio.Group
+              value={sectionFormValues.style.tableAlignment}
+              onChange={(e) =>
+                setSectionFormValues((prev) => ({
+                  ...prev,
+                  style: {
+                    ...prev.style,
+                    tableAlignment: e.target.value,
+                  },
+                }))
+              }
+              style={{ width: "100%", display: "flex" }}
+              size="small"
             >
-              <AlignRightOutlined />
-            </Radio.Button>
-          </Radio.Group>
-        </div>
+              <Radio.Button
+                value="left"
+                style={{ flex: 1, textAlign: "center" }}
+              >
+                <AlignLeftOutlined />
+              </Radio.Button>
+              <Radio.Button
+                value="center"
+                style={{ flex: 1, textAlign: "center" }}
+              >
+                <AlignCenterOutlined />
+              </Radio.Button>
+              <Radio.Button
+                value="right"
+                style={{ flex: 1, textAlign: "center" }}
+              >
+                <AlignRightOutlined />
+              </Radio.Button>
+            </Radio.Group>
+          </div>
+        )}
 
         {/* Split Columns */}
-        <div>
-          <Text
-            strong
-            style={{
-              fontSize: "13px",
-              color: "#333",
-              display: "block",
-              marginBottom: "8px",
-            }}
-          >
-            Split Columns
-          </Text>
-          <InputNumber
-            min={1}
-            max={4}
-            value={sectionFormValues.style.splitColumns}
-            onChange={(value) => {
-              // Only allow values between 1 and 4
-              let newValue = Number(value);
-              if (isNaN(newValue) || newValue < 1) newValue = 1;
-              if (newValue > 4) newValue = 4;
-              setSectionFormValues((prev) => ({
-                ...prev,
-                style: {
-                  ...prev.style,
-                  splitColumns: newValue,
-                },
-              }));
-            }}
-            style={{ width: "100%" }}
-            size="small"
-            parser={value => {
-              // Remove non-numeric characters and restrict to 1-4
-              let num = parseInt(value?.replace(/[^\d]/g, ""), 10);
-              if (isNaN(num) || num < 1) return 1;
-              if (num > 4) return 4;
-              return num;
-            }}
-            maxLength={1}
-          />
-          <Text
-            style={{
-              fontSize: "11px",
-              color: "#666",
-              display: "block",
-              marginTop: "4px",
-            }}
-          >
-            Range: 1-4 columns
-          </Text>
-        </div>
+        {sectionFormValues.structureType === "structured" && (
+          <div>
+            <Text
+              strong
+              style={{
+                fontSize: "13px",
+                color: "#333",
+                display: "block",
+                marginBottom: "8px",
+              }}
+            >
+              Split Columns
+            </Text>
+            <InputNumber
+              min={1}
+              max={4}
+              value={sectionFormValues.style.splitColumns}
+              onChange={(value) => {
+                // Only allow values between 1 and 4
+                let newValue = Number(value);
+                if (isNaN(newValue) || newValue < 1) newValue = 1;
+                if (newValue > 4) newValue = 4;
+                setSectionFormValues((prev) => ({
+                  ...prev,
+                  style: {
+                    ...prev.style,
+                    splitColumns: newValue,
+                  },
+                }));
+              }}
+              style={{ width: "100%" }}
+              size="small"
+              parser={(value) => {
+                // Remove non-numeric characters and restrict to 1-4
+                let num = parseInt(value?.replace(/[^\d]/g, ""), 10);
+                if (isNaN(num) || num < 1) return 1;
+                if (num > 4) return 4;
+                return num;
+              }}
+              maxLength={1}
+            />
+            <Text
+              style={{
+                fontSize: "11px",
+                color: "#666",
+                display: "block",
+                marginTop: "4px",
+              }}
+            >
+              Range: 1-4 columns
+            </Text>
+          </div>
+        )}
 
         {/* Apply Button
         <Button

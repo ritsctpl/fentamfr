@@ -159,7 +159,7 @@ export const SectionStructureTree: React.FC<SectionStructureTreeProps> = ({
   };
 
   // Preview mode rendering
-  if (isPreview && sectionFormValues?.structureType === "structured") {
+  if (isPreview) {
     return <ConfigFile />;
   }
 

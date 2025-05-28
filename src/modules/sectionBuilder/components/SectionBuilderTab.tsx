@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useCallback, useEffect } from "react";
 import { Row, Col, List, Button, Form, Modal, message } from "antd";
 import { parseCookies } from "nookies";
@@ -24,6 +25,7 @@ import { fetchSectionBuilderData } from "@/services/sectionBuilderService";
 
 // Context
 import { useSectionForm } from "../context/SectionFormContext";
+import { PlusOutlined, PullRequestOutlined, SearchOutlined, ArrowLeftOutlined, EyeFilled, GroupOutlined, CloseOutlined, SaveOutlined } from '@ant-design/icons';
 
 // Type guard to check if item is a SectionDataType
 function isSectionDataType(item: any): item is SectionDataType {
@@ -216,6 +218,7 @@ function SectionBuilderTab() {
             textAlignment: "left",
             tableAlignment: "left",
             splitColumns: 1,
+            showHeading: false,
           },
         });
 
@@ -299,6 +302,7 @@ function SectionBuilderTab() {
           textAlignment: "left",
           tableAlignment: "left",
           splitColumns: 1,
+          showHeading: false,
         },
       });
     }
@@ -335,6 +339,7 @@ function SectionBuilderTab() {
               textAlignment: "left",
               tableAlignment: "left",
               splitColumns: 1,
+              showHeading: false,
             },
           });
 
@@ -683,90 +688,11 @@ function SectionBuilderTab() {
         textAlignment: "left",
         tableAlignment: "left",
         splitColumns: 1,
+        showHeading: false,
       },
     });
     setSelectedComponents([]);
     fetchData(); // Refresh the section list
-  };
-
-  // Modify existing renderListItem to handle create mode
-  const renderListItem = (
-    item: SectionDataType | ComponentDataType,
-    index: number
-  ) => {
-    let itemName = "";
-    let secondaryText = "";
-    let isSection = false;
-
-    if (!selectedSection && isSectionDataType(item)) {
-      // Section item
-      itemName = item.sectionLabel;
-      secondaryText = "";
-      isSection = true;
-    } else if (
-      (selectedSection && isComponentDataType(item)) ||
-      (isCreateMode && isComponentDataType(item))
-    ) {
-      // Component item
-      itemName = item.componentLabel;
-      secondaryText = item.dataType;
-
-      return (
-        <List.Item
-          key={index}
-          className={styles["list-item"]}
-          onClick={() => handleAddComponent(item)}
-        >
-          <div className={styles["list-item-content"]}>
-            <div className={styles["list-item-content"]}>
-              <span
-                className={styles["list-item-text"]}
-                style={{
-                  fontSize: itemName.length > 30 ? "0.7em" : "0.9em",
-                }}
-              >
-                {itemName}
-              </span>
-              {secondaryText && (
-                <span className={styles["list-item-secondary"]}>
-                  {secondaryText}
-                </span>
-              )}
-            </div>
-          </div>
-        </List.Item>
-      );
-    }
-
-    return (
-      <List.Item
-        key={index}
-        className={styles["list-item"]}
-        onClick={() =>
-          !selectedSection && isSectionDataType(item)
-            ? handleSectionClick(item)
-            : null
-        }
-      >
-        <div className={styles["list-item-content"]}>
-          <div className={styles["list-item-content"]}>
-            <span
-              className={styles["list-item-text"]}
-              style={{
-                fontSize: "0.9em",
-              }}
-            >
-              {itemName}
-            </span>
-            {secondaryText && (
-              <span className={styles["list-item-secondary"]}>
-                {secondaryText}
-              </span>
-            )}
-          </div>
-        </div>
-      </List.Item>
-    );
   };
 
   // Modify handleSaveOrCreate to add validation and use context values
@@ -940,8 +866,9 @@ function SectionBuilderTab() {
           />
         </Col>
 
-        <Col span={14}>
+        <Col span={selectedSection ? 14:19}>
           <SectionBuilderMainPanel
+            onAddSection={handleAddSection}
             form={form}
             isLoading={isMainFormLoading}
             loadingMessage={mainFormLoadingMessage}
@@ -983,14 +910,14 @@ function SectionBuilderTab() {
           />
         </Col>
 
-        <Col span={5}>
+        {selectedSection && <Col span={5}>
           <SectionBuilderRightPanel
             selectedSection={selectedSection}
             isCreateMode={isCreateMode}
             previewComponent={previewComponent}
             isPreview={isPreview}
           />
-        </Col>
+        </Col>}
       </Row>
 
       <CopySectionModal
@@ -1008,12 +935,14 @@ function SectionBuilderTab() {
       {(selectedSection || isCreateMode) && (
         <div className={styles.footer}>
           <Button
+            type="default"
             onClick={handleCancelSection}
             className={styles["footer-cancel-button"]}
+             icon={<CloseOutlined />}
           >
             Cancel
           </Button>
-          <Button type="primary" onClick={handleSaveOrCreate}>
+          <Button type="default" onClick={handleSaveOrCreate}  icon={selectedSection?.handle ? <SaveOutlined />:<PlusOutlined />}>
             {selectedSection?.handle ? "Update" : "Create"}
           </Button>
         </div>

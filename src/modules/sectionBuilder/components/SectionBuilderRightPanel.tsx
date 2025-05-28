@@ -25,10 +25,10 @@ export const SectionBuilderRightPanel: React.FC<
         display: "flex",
         flexDirection: "column",
         position: "relative",
-        backgroundColor: "#f5f5f5",
+        // backgroundColor: "#f5f5f5",
       }}
     >
-      {!selectedSection && !isCreateMode ? (
+      {selectedSection && isCreateMode ? (
         <span
           style={{
             color: "#999",

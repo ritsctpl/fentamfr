@@ -1,6 +1,8 @@
 import React, { useMemo } from "react";
 import { List, Form, Input, Spin } from "antd";
 import { PlusOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import { CiBoxList } from "react-icons/ci";
+import { LuComponent } from "react-icons/lu";
 
 import styles from "../styles/SectionBuilderTab.module.css";
 
@@ -54,21 +56,22 @@ export const SectionBuilderLeftPanel: React.FC<
         style={{
           padding: "8px 12px",
           backgroundColor: "#fff",
+          border: "1px solid rgba(0, 0, 0, 0.16)",
           marginBottom: "8px",
           borderRadius: "4px",
           cursor: "pointer",
           transition: "all 0.3s ease",
-          border: "1px solid transparent",
+          // border: "1px solid transparent",
           boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = "#f0f7ff";
-          e.currentTarget.style.borderColor = "#1890ff";
+          e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
           e.currentTarget.style.boxShadow = "0 2px 8px rgba(24,144,255,0.15)";
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = "#fff";
-          e.currentTarget.style.borderColor = "transparent";
+          e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
           e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.05)";
         }}
         onClick={() => onItemClick(item)}
@@ -88,14 +91,29 @@ export const SectionBuilderLeftPanel: React.FC<
               width: "100%",
             }}
           >
-            <span
+            {/* <span
               style={{
                 fontSize: itemName.length > 30 ? "0.7em" : "0.9em",
                 fontWeight: 400,
               }}
             >
               {itemName}
-            </span>
+            </span> */}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              {selectedSection ? (
+                <LuComponent style={{ fontSize: "16px", color: "#666" }} />
+              ) : (
+                <CiBoxList style={{ fontSize: "16px", color: "#666" }} />
+              )}
+              <div
+                style={{
+                  fontWeight: "400",
+                  fontSize: itemName.length > 30 ? "0.7em" : "0.8em",
+                }}
+              >
+                {itemName}
+              </div>
+            </div>
             {secondaryText && (
               <span
                 style={{
@@ -188,8 +206,8 @@ export const SectionBuilderLeftPanel: React.FC<
               />
             )}
             {selectedSection
-              ? `Components Builder (${filteredComponentsData?.length})`
-              : `Sections Builder (${sectionData?.length})`}
+              ? `List of Components (${filteredComponentsData?.length})`
+              : `List of Sections (${sectionData?.length})`}
           </span>
           <div
             style={{
