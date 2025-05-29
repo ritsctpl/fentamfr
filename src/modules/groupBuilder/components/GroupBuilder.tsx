@@ -75,7 +75,8 @@ const GroupBuilder = () => {
     const [sectionSearchTerm, setSectionSearchTerm] = useState('');
     const [treeData, setTreeData] = useState<DataNode[]>([]);
     const [expandedKeys, setExpandedKeys] = useState<string[]>(['0']);
-    const [activeTab, setActiveTab] = useState<string>('1');
+    const [activeTab, setActiveTab] = useState<string>('groups');
+    const [isSectionTabDisabled, setIsSectionTabDisabled] = useState(true);
 
     // Derived states (computed values) with null checks and type checking
     const filteredGroups = Array.isArray(groups) ? groups.filter(group =>
@@ -255,6 +256,8 @@ const GroupBuilder = () => {
                 setSelectedGroup(selectedGroupItem);
                 setIsEdit(true);
                 setShowSections(true);
+                setIsSectionTabDisabled(false);
+                setActiveTab('sections');
                 form.setFieldsValue({
                     groupLabel: selectedGroupItem.groupLabel,
                 });
@@ -292,6 +295,8 @@ const GroupBuilder = () => {
         setIsCreating(false);
         setIsEdit(false);
         setOrderedSections([]);
+        setActiveTab('groups');
+        setIsSectionTabDisabled(true);
         form.resetFields();
     };
 
@@ -304,6 +309,8 @@ const GroupBuilder = () => {
         setShowSections(true);
         setPreviewSections(false);
         setOrderedSections([]);
+        setIsSectionTabDisabled(false);
+        setActiveTab('sections');
         form.resetFields();
     };
 
@@ -332,341 +339,384 @@ const GroupBuilder = () => {
     };
 
     return (
-            <div style={{ width: '100%', height: '100%', display: 'flex', }}>
+        <div style={{ width: '100%', height: '100%', display: 'flex', }}>
+            <div style={{
+                width: addGroup || isEdit ? isFullScreen ? '100%' : '50%' : '0%',
+                height: '100%',
+                visibility: isEdit || addGroup ? 'visible' : 'hidden',
+                opacity: isEdit || addGroup ? 1 : 0,
+                transform: isEdit || addGroup ? 'translateX(0)' : 'translateX(20px)',
+                transition: 'all 0.3s ease-in-out',
+                overflow: 'hidden',
+            }}>
                 <div style={{
-                    width: addGroup || isEdit ? isFullScreen ? '100%' : '50%' : '0%',
-                    height: '100%',
-                    visibility: isEdit || addGroup ? 'visible' : 'hidden',
-                    opacity: isEdit || addGroup ? 1 : 0,
-                    transform: isEdit || addGroup ? 'translateX(0)' : 'translateX(20px)',
-                    transition: 'all 0.3s ease-in-out',
-                    overflow: 'hidden',
+                    padding: '10px',
+                    borderBottom: '1px solid #efefef',
+                    boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)',
+                    display: 'flex',
+                    boxSizing: 'border-box',
+                    height: '6%',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
                 }}>
-                    <div style={{
-                        padding: '10px',
-                        borderBottom: '1px solid #efefef',
-                        boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)',
-                        display: 'flex',
-                        boxSizing: 'border-box',
-                        height: '6%',
-                        justifyContent: 'space-between',
-                        alignItems: 'center'
-                    }}>
-                        <div style={{ display: 'flex', flexDirection: 'row', gap: '5px', alignItems: 'center' }}>
-                            <Breadcrumb>
-                                <Breadcrumb.Item><div style={{ color: '#666', fontWeight: isEdit ? '400' : '500' }}>Group Builder</div></Breadcrumb.Item>
-                                {isEdit && (
-                                    <Breadcrumb.Item><div style={{ color: '#666', fontWeight: '500' }}>{selectedGroup?.groupLabel}</div></Breadcrumb.Item>
-                                )}
-                            </Breadcrumb>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '20px' }}>
-                            {orderedSections.length > 0 && (
-                                <Tooltip title={orderedSections.length === 0 ? "Select at least one section to preview" : "Preview"}>
-                                    <Button
-                                        type="text"
-                                        icon={previewSections ? <VisibilityOffIcon /> : <RemoveRedEyeIcon />}
-                                        onClick={handlePreviewToggle}
-                                        style={{ color: previewSections ? '#1890ff' : 'inherit' }}
-                                        disabled={orderedSections.length === 0}
-                                    />
-                                </Tooltip>
+                    <div style={{ display: 'flex', flexDirection: 'row', gap: '5px', alignItems: 'center' }}>
+                        <Breadcrumb>
+                            <Breadcrumb.Item><div style={{ color: '#666', fontWeight: isEdit ? '400' : '500' }}>Group Builder</div></Breadcrumb.Item>
+                            {isEdit && (
+                                <Breadcrumb.Item><div style={{ color: '#666', fontWeight: '500' }}>{selectedGroup?.groupLabel}</div></Breadcrumb.Item>
                             )}
-                            {(isEdit || isCreating) && (
-                                <>
-                                    {isEdit && (
-                                        <>
-                                            <Tooltip title="Copy">
-                                                <Button
-                                                    type="text"
-                                                    icon={<CopyIcon />}
-                                                    onClick={handleCopyGroup}
-                                                />
-                                            </Tooltip>
-                                            <Tooltip title="Delete">
-                                                <Button
-                                                    type="text"
-                                                    icon={<DeleteIcon />}
-                                                    onClick={handleDeleteGroup}
-                                                />
-                                            </Tooltip>
-                                        </>
-                                    )}
-                                </>
-                            )}
-                        </div>
+                        </Breadcrumb>
                     </div>
 
-                    {/* Main content area */}
-                    <div style={{
-                        height: isEdit || isCreating ? '87%' : '100%',
-                        width: '100%',
-                        display: 'flex',
-                        gap: '5px',
-                    }}>
-                        {/* Groups/Sections list */}
-                        <div style={{
-                            height: '100%',
-                            width: '330px',
-                            minWidth: '330px',
-                            padding: '10px',
-                            boxSizing: 'border-box',
-                            overflowY: 'auto'
-                        }}>
-                            {!showSections ? (
-                                <>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                                        <div style={{ fontWeight: 500, fontSize: '14px' }}>List of Groups ({filteredGroups.length})</div>
-                                        <Button
-                                            type='text'
-                                            icon={<PlusOutlined />}
-                                            onClick={handleNewGroup}
-                                        >
-                                        </Button>
-                                    </div>
-                                    <Input.Search
-                                        placeholder="Search groups..."
-                                        style={{ marginBottom: '16px' }}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        value={searchTerm}
-                                    />
-                                    <List
-                                        dataSource={filteredGroups}
-                                        renderItem={(item) => (
-                                            <List.Item
-                                                key={item.handle}
-                                                style={{
-                                                    padding: '8px 12px',
-                                                    backgroundColor: '#fff',
-                                                    marginBottom: '8px',
-                                                    borderRadius: '4px',
-                                                    cursor: 'pointer',
-                                                    border: '1px solid rgba(0, 0, 0, 0.16)',
-                                                    boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-                                                    transition: "all 0.3s ease",
-                                                }}
-                                                onMouseEnter={(e) => {
-                                                    e.currentTarget.style.backgroundColor = "#f0f7ff";
-                                                    e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
-                                                    e.currentTarget.style.boxShadow = "0 2px 8px rgba(24,144,255,0.15)";
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.currentTarget.style.backgroundColor = "#fff";
-                                                    e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
-                                                    e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.05)";
-                                                }}
-                                                onClick={() => handleSelectGroup(item)}
-                                            >
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                    <FaLayerGroup style={{ fontSize: '14px', color: '#666' }} />
-                                                    <div style={{ fontWeight: '450', fontSize: item.groupLabel.length > 30 ? "0.8em" : "0.8em" }}>{item.groupLabel}</div>
-                                                </div>
-                                            </List.Item>
-                                        )}
-                                    />
-                                </>
-                            ) : (
-                                <>
-                                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px', gap: '10px' }}>
-                                        <Button type='text' icon={<ArrowLeftOutlined />} onClick={handleBackToGroups} />
-                                        <div style={{ fontWeight: 500, fontSize: '14px' }}>List of Sections ({filteredSections.length})</div>
-                                    </div>
-                                    <Input.Search
-                                        placeholder="Search sections..."
-                                        style={{ marginBottom: '16px' }}
-                                        onChange={(e) => setSectionSearchTerm(e.target.value)}
-                                        value={sectionSearchTerm}
-                                    />
-                                    <List
-                                        dataSource={filteredSections}
-                                        renderItem={(section) => (
-                                            <List.Item
-                                                key={section.id}
-                                                style={{
-                                                    padding: '8px 12px',
-                                                    backgroundColor: '#fff',
-                                                    marginBottom: '8px',
-                                                    borderRadius: '4px',
-                                                    cursor: 'pointer',
-                                                    transition: "all 0.3s ease",
-                                                    border: '1px solid rgba(0, 0, 0, 0.16)'
-                                                }}
-                                                onMouseEnter={(e) => {
-                                                    e.currentTarget.style.backgroundColor = "#f0f7ff";
-                                                    e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
-                                                    e.currentTarget.style.boxShadow = "0 2px 8px rgba(24,144,255,0.15)";
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    e.currentTarget.style.backgroundColor = "#fff";
-                                                    e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
-                                                    e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.05)";
-                                                }}
-                                                onClick={() => handleAddSection(section)}
-                                            >
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                    <CiBoxList style={{ fontSize: '16px', color: '#666' }} />
-                                                    <div style={{ fontWeight: '450', fontSize: section.sectionLabel.length > 30 ? "0.8em" : "0.8em" }}>{section.sectionLabel}</div>
-                                                </div>
-                                            </List.Item>
-                                        )}
-                                    />
-                                </>
-                            )}
-                        </div>
+                    <div style={{ display: 'flex', gap: '20px' }}>
+                        {orderedSections.length > 0 && (
+                            <Tooltip title={orderedSections.length === 0 ? "Select at least one section to preview" : "Preview"}>
+                                <Button
+                                    type="text"
+                                    icon={previewSections ? <VisibilityOffIcon /> : <RemoveRedEyeIcon />}
+                                    onClick={handlePreviewToggle}
+                                    style={{ color: previewSections ? '#1890ff' : 'inherit' }}
+                                    disabled={orderedSections.length === 0}
+                                />
+                            </Tooltip>
+                        )}
+                        {(isEdit || isCreating) && (
+                            <>
+                                {isEdit && (
+                                    <>
+                                        <Tooltip title="Copy">
+                                            <Button
+                                                type="text"
+                                                icon={<CopyIcon />}
+                                                onClick={handleCopyGroup}
+                                            />
+                                        </Tooltip>
+                                        <Tooltip title="Delete">
+                                            <Button
+                                                type="text"
+                                                icon={<DeleteIcon />}
+                                                onClick={handleDeleteGroup}
+                                            />
+                                        </Tooltip>
+                                    </>
+                                )}
+                            </>
+                        )}
+                    </div>
+                </div>
 
-                        {/* Form and Table */}
-                        <div style={{
-                            height: '100%',
-                            width: isEdit || isCreating ? 'calc(100% - 630px)' : 'calc(100% - 330px)',
-                            minWidth: isEdit || isCreating ? 'calc(100% - 630px)' : 'calc(100% - 330px)',
-                            borderLeft: '1px solid #e8e8e8',
-                            borderRight: '1px solid #e8e8e8',
-                            padding: '16px',
-                            boxSizing: 'border-box',
-                            transition: 'all 0.3s ease-in-out',
-                            opacity: 1,
-                        }}>
-                            {!selectedGroup && !isCreating && !showSections ? (
-                                <div style={{
-                                    height: '100%',
-                                    width: '100%',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    color: '#666',
-                                    gap: '16px'
-                                }}>
-                                    <div style={{ fontSize: '16px', fontWeight: 500, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
-                                        <Empty style={{ fontSize: '14px', color: '#888' }} description="Please select a group or create a new one from the list of groups" />
-                                        <Button type='default' icon={<PlusOutlined />} onClick={handleNewGroup} style={{ marginTop: '10px' }}>
-                                            Create New Group
-                                        </Button>
-                                    </div>
-                                </div>
-                            ) : !previewSections ? (
-                                <>
-                                    <Form
-                                        form={form}
-                                        layout="vertical"
-                                        wrapperCol={{ flex: 1 }}
-                                        style={{ width: '60%' }}
-                                    >
-                                        <div style={{
-                                            display: 'grid',
-                                            gridTemplateColumns: `repeat(${2}, 1fr)`,
-                                            gap: '16px',
-                                            width: '100%'
-                                        }}>
-                                            <Form.Item
-                                                label="Group Name :"
-                                                name="groupLabel"
-                                                required={true}
-                                                rules={[{ required: true, message: 'Group name is required' }]}
-                                            >
-                                                <Input
-                                                    disabled={isEdit && !isCreating}
-                                                    placeholder='Enter group name'
-                                                />
-                                            </Form.Item>
+                {/* Main content area */}
+                <div style={{
+                    height: isEdit || isCreating ? '87%' : '100%',
+                    width: '100%',
+                    display: 'flex',
+                    gap: '5px',
+                }}>
+                    {/* Groups/Sections list */}
+                    <div style={{
+                        height: '100%',
+                        width: '330px',
+                        minWidth: '330px',
+                        padding: '10px',
+                        boxSizing: 'border-box',
+                        overflowY: 'auto'
+                    }}>
+                        <Tabs
+                            style={{
+                                height: '100%',
+                            }}
+                            tabBarExtraContent={{
+                                right: (
+                                    // activeTab === 'groups' && (
+                                        <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Button type='text' icon={<PlusOutlined />} onClick={handleNewGroup} />
                                         </div>
-                                    </Form>
-                                    {showSections && (
-                                        <div style={{ marginTop: '20px' }}>
-                                            <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                <div style={{ fontWeight: 500 }}>Selected Sections</div>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '0px' }}>
-                                                    <Button
-                                                        title='Clear'
-                                                        type='text'
-                                                        onClick={() => setOrderedSections([])}
-                                                    >
-                                                        <span style={{ fontSize: '12px', color: '#666', fontWeight: '500' }}>Clear</span>
-                                                        <AiOutlineClear size={18} />
-                                                    </Button>
-                                                </div>
+                                    // )
+                                )
+                            }}
+                            tabBarStyle={{
+                                height: '40px',
+                            }}
+                            activeKey={activeTab}
+                            onChange={(key) => {
+                                if (key === 'groups' || !isSectionTabDisabled) {
+                                    setActiveTab(key);
+                                }
+                                if (key === 'groups') {
+                                    handleBackToGroups();
+                                }
+                            }}
+                            items={[
+                                {
+                                    key: 'groups',
+                                    label: 'Groups',
+                                    style: {
+                                        height: '100%'
+                                    },
+                                    children: (
+                                        <div style={{ height: '100%' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', marginTop: '10px' }}>
+                                                <div style={{ fontWeight: 500, fontSize: '14px' }}>List of Groups ({filteredGroups.length})</div>
+                                                {/* <Button
+                                                    type='text'
+                                                    icon={<PlusOutlined />}
+                                                    onClick={handleNewGroup}
+                                                >
+                                                </Button> */}
                                             </div>
-                                            <DndTable
-                                                data={orderedSections}
-                                                onOrderChange={handleSectionOrderChange}
-                                                onDelete={handleDeleteSection}
+                                            <Input.Search
+                                                placeholder="Search groups..."
+                                                style={{ marginBottom: '16px' }}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                                value={searchTerm}
+                                            />
+                                            <List
+                                                dataSource={filteredGroups}
+                                                renderItem={(item) => (
+                                                    <List.Item
+                                                        key={item.handle}
+                                                        style={{
+                                                            padding: '8px 12px',
+                                                            backgroundColor: '#fff',
+                                                            marginBottom: '8px',
+                                                            borderRadius: '4px',
+                                                            cursor: 'pointer',
+                                                            border: '1px solid rgba(0, 0, 0, 0.16)',
+                                                            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+                                                            transition: "all 0.3s ease",
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.backgroundColor = "#f0f7ff";
+                                                            e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
+                                                            e.currentTarget.style.boxShadow = "0 2px 8px rgba(24,144,255,0.15)";
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.backgroundColor = "#fff";
+                                                            e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
+                                                            e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.05)";
+                                                        }}
+                                                        onClick={() => handleSelectGroup(item)}
+                                                    >
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                            <FaLayerGroup style={{ fontSize: '14px', color: '#666' }} />
+                                                            <div style={{ fontWeight: '450', fontSize: item.groupLabel.length > 30 ? "0.8em" : "0.8em" }}>{item.groupLabel}</div>
+                                                        </div>
+                                                    </List.Item>
+                                                )}
                                             />
                                         </div>
-                                    )}
-                                </>
-                            ) : (
-                                <div style={{ display: 'flex', justifyContent: 'center', height: '100%' }}>
-                                    <SectionPreview sections={orderedSections} />
-                                </div>
-                            )}
-                        </div>
+                                    )
+                                },
+                                {
+                                    key: 'sections',
+                                    label: 'Sections',
+                                    style: {
+                                        height: '100%'
+                                    },
+                                    disabled: isSectionTabDisabled,
+                                    children: (
+                                        <div style={{ height: '100%' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px', gap: '10px', marginTop: '10px' }}>
+                                                <div style={{ fontWeight: 500, fontSize: '14px' }}>List of Sections ({filteredSections.length})</div>
+                                            </div>
+                                            <Input.Search
+                                                placeholder="Search sections..."
+                                                style={{ marginBottom: '16px' }}
+                                                onChange={(e) => setSectionSearchTerm(e.target.value)}
+                                                value={sectionSearchTerm}
+                                            />
+                                            <List
+                                                dataSource={filteredSections}
+                                                renderItem={(section) => (
+                                                    <List.Item
+                                                        key={section.id}
+                                                        style={{
+                                                            padding: '8px 12px',
+                                                            backgroundColor: '#fff',
+                                                            marginBottom: '8px',
+                                                            borderRadius: '4px',
+                                                            cursor: 'pointer',
+                                                            transition: "all 0.3s ease",
+                                                            border: '1px solid rgba(0, 0, 0, 0.16)'
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.backgroundColor = "#f0f7ff";
+                                                            e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
+                                                            e.currentTarget.style.boxShadow = "0 2px 8px rgba(24,144,255,0.15)";
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.backgroundColor = "#fff";
+                                                            e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
+                                                            e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.05)";
+                                                        }}
+                                                        onClick={() => handleAddSection(section)}
+                                                    >
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                            <CiBoxList style={{ fontSize: '16px', color: '#666' }} />
+                                                            <div style={{ fontWeight: '450', fontSize: section.sectionLabel.length > 30 ? "0.8em" : "0.8em" }}>{section.sectionLabel}</div>
+                                                        </div>
+                                                    </List.Item>
+                                                )}
+                                            />
+                                        </div>
+                                    )
+                                }
+                            ]}
+                        />
+                    </div>
 
-                        {/* Tree View */}
-                        {showSections && (
+                    {/* Form and Table */}
+                    <div style={{
+                        height: '100%',
+                        width: isEdit || isCreating ? 'calc(100% - 630px)' : 'calc(100% - 330px)',
+                        minWidth: isEdit || isCreating ? 'calc(100% - 630px)' : 'calc(100% - 330px)',
+                        borderLeft: '1px solid #e8e8e8',
+                        borderRight: '1px solid #e8e8e8',
+                        padding: '16px',
+                        boxSizing: 'border-box',
+                        transition: 'all 0.3s ease-in-out',
+                        opacity: 1,
+                    }}>
+                        {!selectedGroup && !isCreating && !showSections ? (
                             <div style={{
                                 height: '100%',
-                                width: activeTab === '2' ? '600px' : '300px',
-                                minWidth: activeTab === '2' ? '600px' : '300px',
-                                padding: '12px',
-                                boxSizing: 'border-box',
-                                transition: 'all 0.3s ease-in-out',
-                                transform: activeTab === '2' ? 'translateX(0)' : 'translateX(0)',
-                                opacity: 1,
+                                width: '100%',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                color: '#666',
+                                gap: '16px'
                             }}>
-                                <div style={{ fontWeight: 500, fontSize: '14px' }}>
-                                    <PullRequestOutlined style={{ marginRight: '8px' }} />
-                                    Group Structure
+                                <div style={{ fontSize: '16px', fontWeight: 500, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+                                    <Empty style={{ fontSize: '14px', color: '#888' }} description="Please select a group or create a new one from the list of groups" />
+                                    <Button type='default' icon={<PlusOutlined />} onClick={handleNewGroup} style={{ marginTop: '10px' }}>
+                                        Create New Group
+                                    </Button>
                                 </div>
-                                <Tree
-                                    treeData={treeData}
-                                    defaultExpandAll
-                                    expandedKeys={expandedKeys}
-                                    onExpand={(keys) => setExpandedKeys(keys as string[])}
-                                    selectable={false}
-                                    showIcon
-                                    showLine
-                                    style={{
-                                        padding: '10px',
-                                        boxSizing: 'border-box',
-                                        borderRadius: '4px',
-                                        transition: 'all 0.3s ease-in-out',
-                                    }}
-                                />
+                            </div>
+                        ) : !previewSections ? (
+                            <>
+                                <Form
+                                    form={form}
+                                    layout="vertical"
+                                    wrapperCol={{ flex: 1 }}
+                                    style={{ width: '60%' }}
+                                >
+                                    <div style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: `repeat(${2}, 1fr)`,
+                                        gap: '16px',
+                                        width: '100%'
+                                    }}>
+                                        <Form.Item
+                                            label="Group Name :"
+                                            name="groupLabel"
+                                            required={true}
+                                            rules={[{ required: true, message: 'Group name is required' }]}
+                                        >
+                                            <Input
+                                                disabled={isEdit && !isCreating}
+                                                placeholder='Enter group name'
+                                            />
+                                        </Form.Item>
+                                    </div>
+                                </Form>
+                                {showSections && (
+                                    <div style={{ marginTop: '20px' }}>
+                                        <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            <div style={{ fontWeight: 500 }}>Selected Sections</div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0px' }}>
+                                                <Button
+                                                    title='Clear'
+                                                    type='text'
+                                                    onClick={() => setOrderedSections([])}
+                                                >
+                                                    <span style={{ fontSize: '12px', color: '#666', fontWeight: '500' }}>Clear</span>
+                                                    <AiOutlineClear size={18} />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <DndTable
+                                            data={orderedSections}
+                                            onOrderChange={handleSectionOrderChange}
+                                            onDelete={handleDeleteSection}
+                                        />
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div style={{ display: 'flex', justifyContent: 'center', height: '100%' }}>
+                                <SectionPreview sections={orderedSections} />
                             </div>
                         )}
                     </div>
 
-                    {/* Action Buttons */}
-                    {
-                        (isEdit || isCreating) && (
-                            <div style={{
-                                height: '7%',
-                                width: '100%',
-                                display: 'flex',
-                                gap: '10px',
-                                justifyContent: 'flex-end',
-                                alignItems: 'center',
-                                padding: '10px',
-                                boxSizing: 'border-box',
-                                borderTop: '1px solid #efefef'
-                            }}>
-                                {showSections && (
-                                    <>
-                                        {isCreating ? (
-                                            <Button type='default' icon={<PlusOutlined />} onClick={handleSaveGroup}>Create</Button>
-                                        ) : isEdit ? (
-                                            <Button type='default' icon={<SaveOutlined />} onClick={handleUpdateGroup}>Save</Button>
-                                        ) : null}
-                                        <Button type='default' onClick={resetForm} icon={<CloseOutlined />}>Cancel</Button>
-                                    </>
-                                )}
+                    {/* Tree View */}
+                    {showSections && (
+                        <div style={{
+                            height: '100%',
+                            width: activeTab === '2' ? '600px' : '300px',
+                            minWidth: activeTab === '2' ? '600px' : '300px',
+                            padding: '12px',
+                            boxSizing: 'border-box',
+                            transition: 'all 0.3s ease-in-out',
+                            transform: activeTab === '2' ? 'translateX(0)' : 'translateX(0)',
+                            opacity: 1,
+                        }}>
+                            <div style={{ fontWeight: 500, fontSize: '14px' }}>
+                                <PullRequestOutlined style={{ marginRight: '8px' }} />
+                                Group Structure
                             </div>
-                        )
-                    }
-
+                            <Tree
+                                treeData={treeData}
+                                defaultExpandAll
+                                expandedKeys={expandedKeys}
+                                onExpand={(keys) => setExpandedKeys(keys as string[])}
+                                selectable={false}
+                                showIcon
+                                showLine
+                                style={{
+                                    padding: '10px',
+                                    boxSizing: 'border-box',
+                                    borderRadius: '4px',
+                                    transition: 'all 0.3s ease-in-out',
+                                }}
+                            />
+                        </div>
+                    )}
                 </div>
+
+                {/* Action Buttons */}
+                {
+                    (isEdit || isCreating) && (
+                        <div style={{
+                            height: '7%',
+                            width: '100%',
+                            display: 'flex',
+                            gap: '10px',
+                            justifyContent: 'flex-end',
+                            alignItems: 'center',
+                            padding: '10px',
+                            boxSizing: 'border-box',
+                            borderTop: '1px solid #efefef'
+                        }}>
+                            {showSections && (
+                                <>
+                                    {isCreating ? (
+                                        <Button type='default' icon={<PlusOutlined />} onClick={handleSaveGroup}>Create</Button>
+                                    ) : isEdit ? (
+                                        <Button type='default' icon={<SaveOutlined />} onClick={handleUpdateGroup}>Save</Button>
+                                    ) : null}
+                                    <Button type='default' onClick={resetForm} icon={<CloseOutlined />}>Cancel</Button>
+                                </>
+                            )}
+                        </div>
+                    )
+                }
+
             </div>
+        </div>
     );
 };
 

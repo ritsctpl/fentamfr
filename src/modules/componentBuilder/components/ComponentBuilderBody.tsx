@@ -607,18 +607,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
     const { t } = useTranslation();
 
 
-    const renderTabContent = () => {
-        switch (activeTab) {
-            case 0:
-                return (<div
-
-                    style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 270px', marginTop: '2%' }}
-                > <ApiConfigurationForm setFullScreen={setFullScreen}  /> </div>)
-
-            default:
-                return null;
-        }
-    };
+   
 
 
 
@@ -651,60 +640,40 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
 
     return (
         <div className={styles.pageContainer}>
-            <div className={styles.contentWrapper}>
-                <div className={styles.dataFieldBodyContents}>
+            <div >
                     <div >
                         <div className={styles.split} >
-                            <div >
                                 <p className={styles.headingtext} style={{ marginLeft: '10px' }}>
                                     {selectedRowData ? selectedRowData?.componentLabel : t('createComponent')}
                                 </p>
 
-                            </div>
 
                             <div className={styles.actionButtons}>
-                                {/* {(payloadData?.dataType != 'Table' && payloadData?.dataType != 'Reference Table') &&
-                                    <Tooltip title={fullScreen ? "Exit Full Screen" : "Enter Full Screen"}>
-                                        <Button
-                                            onClick={handleOpenChange}
-                                            className={styles.actionButton}
-                                        >
-                                            {fullScreen ? <CloseFullscreenIcon sx={{ color: '#1874CE' }} /> : <OpenInFullIcon sx={{ color: '#1874CE' }} />}
-                                        </Button>
-                                    </Tooltip>
-                                } */}
+                               
 
                                 {selectedRowData && (
                                     <>
                                         <Tooltip title="Copy">
                                             <Button onClick={handleOpenCopyModal} className={styles.actionButton}>
-                                                <CopyIcon sx={{ color: '#1874CE' }} />
+                                                <CopyIcon sx={{ color: '#1874CE', fontSize: '22px' }} />
                                             </Button>
                                         </Tooltip>
                                         <Tooltip title="Delete">
                                             <Button onClick={handleOpenModal} className={styles.actionButton}>
-                                                <DeleteIcon sx={{ color: '#1874CE' }} />
+                                                <DeleteIcon sx={{ color: '#1874CE', fontSize: '22px' }} />
                                             </Button>
                                         </Tooltip>
                                     </>
                                 )}
 
-                                {/* <Tooltip title="Close">
-                                    <Button onClick={handleClose} className={styles.actionButton}>
-                                        <CloseIcon sx={{ color: '#1874CE' }} />
-                                    </Button>
-                                </Tooltip> */}
+                               
                             </div>
 
 
                         </div>
                     </div>
 
-
-
                     <div style={{ borderTop: '1px solid #e0e0e0', marginTop: '0%' }}></div>
-
-
 
                     <Row className={styles["section-builder-container"]}>
                         {/* Left side: List of dummy components */}
@@ -812,13 +781,12 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                         <Col span={19} style={{ paddingLeft: '10px' }}>
                             {/* Existing content */}
                             {/* <div style={{ borderTop: '1px solid #e0e0e0', marginTop: '0%' }}></div> */}
-                            <ApiConfigurationForm setFullScreen={setFullScreen}  />
+                            <ApiConfigurationForm setFullScreen={setFullScreen} selectedRowData={selectedRowData} />
                         </Col>
                     </Row>
 
-
-                </div>
             </div>
+
             <footer className={styles.footer} style={{ marginTop: '-10%' }}>
                 <div className={styles.floatingButtonContainer}
                     style={{ position: 'fixed', bottom: '8px', right: '20px', display: 'flex', flexDirection: 'row', gap: '10px' }}
