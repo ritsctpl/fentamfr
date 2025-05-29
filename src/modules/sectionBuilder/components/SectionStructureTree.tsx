@@ -82,64 +82,45 @@ export const SectionStructureTree: React.FC<SectionStructureTreeProps> = ({
         key: "root",
         title: "Components",
         children: selectedComponents.map((component) => {
-          // Create children to show detailed component information
+          // Create children to show minimal component information
           const componentChildren: any[] = [];
 
-          // Add data type
-          if (component.dataType) {
-            componentChildren.push({
-              key: `${component.handle}-dataType`,
-              title: `Data Type: ${component.dataType}`,
-            });
-          }
-
-          // Add unit if exists
-          if (component.unit) {
-            componentChildren.push({
-              key: `${component.handle}-unit`,
-              title: `Unit: ${component.unit}`,
-            });
-          }
-
-          // Add default value if exists
-          if (
-            component.defaultValue !== undefined &&
-            component.defaultValue !== null
-          ) {
-            componentChildren.push({
-              key: `${component.handle}-defaultValue`,
-              title: `Default Value: ${component.defaultValue}`,
-            });
-          }
-
-          // Add required status
-          if (component.required !== undefined) {
-            componentChildren.push({
-              key: `${component.handle}-required`,
-              title: `Required: ${component.required ? "Yes" : "No"}`,
-            });
-          }
-
-          // Add table configuration if exists
+          // Add simplified table configuration if exists
           if (component.tableConfig?.columnNames) {
             const tableConfigChild = {
               key: `${component.handle}-tableConfig`,
-              title: "Table Configuration",
+              title: "Table",
               children: component.tableConfig.columnNames.map(
                 (column, index) => ({
                   key: `${component.handle}-column-${index}`,
-                  title: `Column: ${column.title} (Type: ${column.type})${
-                    column.required ? " (Required)" : ""
-                  }`,
+                  title: column.title,
                 })
               ),
             };
             componentChildren.push(tableConfigChild);
           }
 
+          // Construct data type string with unit if exists
+          const dataTypeDisplay = component.unit
+            ? `${component.dataType} - ${component.unit}`
+            : component.dataType;
+
           return {
             key: component.handle,
-            title: component.componentLabel,
+            title: (
+              <>
+                {component.componentLabel}
+                <span
+                  style={{
+                    color: "rgb(136, 136, 136)",
+                    marginLeft: "8px",
+                    fontSize: "12px",
+                  }}
+                >
+                  ({dataTypeDisplay})
+                </span>
+              </>
+            ),
             children:
               componentChildren.length > 0 ? componentChildren : undefined,
           };

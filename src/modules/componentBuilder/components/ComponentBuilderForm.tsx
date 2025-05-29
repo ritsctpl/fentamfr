@@ -47,7 +47,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
             );
             setRowData(payloadData?.tableConfig?.rowData || {});
         }
-        if((payloadData?.dataType == 'Select' || payloadData?.dataType == 'DatePicker' || payloadData?.dataType == 'Table' || payloadData?.dataType == 'Switch') ){
+        if((payloadData?.dataType == 'Select' || payloadData?.dataType == 'TextArea' || payloadData?.dataType == 'DatePicker' || payloadData?.dataType == 'Table' || payloadData?.dataType == 'Switch') ){
             setDisableUnitField(true);
         }
         else{
@@ -97,7 +97,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
             fieldType.current = value;
         }
 
-        if((value == 'Select' || value == 'DatePicker' || value == 'Table' || value == 'Switch') ){
+        if((value == 'Select' || value == 'TextArea' || value == 'DatePicker' || value == 'Table' || value == 'Switch') ){
             setDisableUnitField(true);
         }
         else{
@@ -722,6 +722,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                 />
                             </Form.Item>
                         </Col>
+                        {!disableUnitField && (
                         <Col span={8}>
                             <Form.Item
                                 label={t('unit')}
@@ -746,7 +747,24 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                     <Option value="%">%</Option>
                                 </Select>
                             </Form.Item>
+                        </Col> 
+                        )}
+                        {disableUnitField && (
+                        <Col span={8}>
+                            <Form.Item
+                                label={t('validation')}
+                                labelCol={{ span: 8 }}
+                                wrapperCol={{ span: 14 }}
+                                style={{ marginBottom: '8px' }}
+                            >
+                                <Input.TextArea
+                                    value={payloadData?.validation}
+                                    onChange={(e) => handleInputChange("validation", e.target.value)}
+                                    rows={1}
+                                />
+                            </Form.Item>
                         </Col>
+                        )}
                         <Col span={8}>
                             <Form.Item
                                 label={t('dataType')}
@@ -774,6 +792,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                     </Row>
 
                     <Row gutter={16}>
+                    {!disableUnitField && (
                         <Col span={8}>
                             <Form.Item
                                 label={t('defaultValue')}
@@ -788,6 +807,8 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                 />
                             </Form.Item>
                         </Col>
+                    )}
+                    {!disableUnitField && (
                         <Col span={8}>
                             <Form.Item
                                 label={t('validation')}
@@ -802,6 +823,8 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                 />
                             </Form.Item>
                         </Col>
+                        )}
+                        {!disableUnitField && (
                         <Col span={8}>
                             <Form.Item
                                 label={t('required')}
@@ -815,6 +838,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                 />
                             </Form.Item>
                         </Col>
+                        )}
                     </Row>
 
                     
@@ -859,7 +883,8 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                         <Option value="Table">Table</Option>
                     </Select>
                 </Form.Item>
-                <Form.Item
+
+                {!disableUnitField && (  <Form.Item
                     label={t('unit')}
                     labelCol={{ span: 6 }}
                     wrapperCol={{ span: 10 }}
@@ -882,6 +907,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                         <Option value="%">%</Option>
                     </Select>
                 </Form.Item>
+                )}
 
                 {payloadData?.dataType === "Select" && (
                     <Form.Item

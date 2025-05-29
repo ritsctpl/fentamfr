@@ -1156,6 +1156,8 @@ function TemplateBuilderTab() {
         // Reset form and state
         setIsCreateMode(false);
         setSelectedTemplate(null);
+        setSelectedBuilderType("Group");
+        setIsPreviewMode(false);
         setTemplateFormValues({
           templateLabel: "",
           templateVersion: "",
