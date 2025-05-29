@@ -10,10 +10,10 @@ interface ConfigureTabProps {
 interface ConfigureFormData {
   type: 'header' | 'body' | 'footer';
   logo: string;
-  pageOccurrence: 'all' | null;
-  margin: string | number;
-  height: string | number;
-  alignment: 'left' | 'center' | 'right';
+  pageOccurrence: string | null;
+  margin: number;
+  height: number;
+  alignment: string;
 }
 
 export const ConfigureTab: React.FC<ConfigureTabProps> = ({
@@ -34,20 +34,20 @@ export const ConfigureTab: React.FC<ConfigureTabProps> = ({
       const config = selectedRow.config || {
         type: 'body',
         logo: '',
-        pageOccurrence: 'all',
-        margin: 10,
-        height: 10,
-        alignment: 'center'
+        pageOccurrence: '',
+        margin: 0,
+        height: 0,
+        alignment: 'left'
       };
 
       // Set new values
       form.setFieldsValue({
         type: config.type || 'body',
         logo: config.logo || '',
-        pageOccurrence: config.pageOccurrence || 'all',
-        margin: Number(config.margin) || 10,
-        height: Number(config.height) || 10,
-        alignment: config.alignment || 'center'
+        pageOccurrence: config.pageOccurrence || '',
+        margin: Number(config.margin) || 0,
+        height: Number(config.height) || 0,
+        alignment: config.alignment || 'left'
       });
 
       setImageUrl(config.logo || '');
@@ -64,8 +64,8 @@ export const ConfigureTab: React.FC<ConfigureTabProps> = ({
       // Convert margin and height to numbers
       const updatedValues = {
         ...allValues,
-        margin: Number(allValues.margin) || 10,
-        height: Number(allValues.height) || 10
+        margin: Number(allValues.margin) || 0,
+        height: Number(allValues.height) || 0
       };
       onConfigChange(selectedRow.handle, updatedValues);
     }
@@ -98,10 +98,11 @@ export const ConfigureTab: React.FC<ConfigureTabProps> = ({
           onValuesChange={handleValuesChange}
           initialValues={{
             type: 'body',
-            pageOccurrence: 'all',
-            alignment: 'center',
-            margin: 10,
-            height: 10
+            logo: '',
+            pageOccurrence: '',
+            margin: 0,
+            height: 0,
+            alignment: 'left'
           }}
         >
           {/* Type Selection */}
@@ -134,8 +135,8 @@ export const ConfigureTab: React.FC<ConfigureTabProps> = ({
                     const currentValues = form.getFieldsValue();
                     onConfigChange(selectedRow.handle, {
                       ...currentValues,
-                      margin: Number(currentValues.margin) || 10,
-                      height: Number(currentValues.height) || 10
+                      margin: Number(currentValues.margin) || 0,
+                      height: Number(currentValues.height) || 0
                     });
                   }
                 }}
@@ -154,8 +155,8 @@ export const ConfigureTab: React.FC<ConfigureTabProps> = ({
                         const currentValues = form.getFieldsValue();
                         onConfigChange(selectedRow.handle, {
                           ...currentValues,
-                          margin: Number(currentValues.margin) || 10,
-                          height: Number(currentValues.height) || 10
+                          margin: Number(currentValues.margin) || 0,
+                          height: Number(currentValues.height) || 0
                         });
                       }
                       onSuccess?.(reader.result);
@@ -188,7 +189,7 @@ export const ConfigureTab: React.FC<ConfigureTabProps> = ({
               placeholder="Enter Margin"
               type="number"
               min={0}
-              defaultValue={10}
+              defaultValue={0}
             />
           </Form.Item>
 
@@ -201,7 +202,7 @@ export const ConfigureTab: React.FC<ConfigureTabProps> = ({
               placeholder="Enter Height"
               type="number"
               min={0}
-              defaultValue={10}
+              defaultValue={0}
             />
           </Form.Item>
 
