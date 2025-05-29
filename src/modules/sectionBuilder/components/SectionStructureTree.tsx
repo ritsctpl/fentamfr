@@ -177,7 +177,7 @@ export const SectionStructureTree: React.FC<SectionStructureTreeProps> = ({
           treeData={generateSectionStructure()}
           style={{
             padding: "12px",
-            maxHeight: "calc(100vh - 150px)",
+            maxHeight: "calc(100vh - 250px)",
             overflowY: "auto",
           }}
           switcherIcon={<PlusSquareOutlined />}
