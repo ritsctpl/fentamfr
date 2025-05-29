@@ -607,18 +607,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
     const { t } = useTranslation();
 
 
-    const renderTabContent = () => {
-        switch (activeTab) {
-            case 0:
-                return (<div
-
-                    style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 270px', marginTop: '2%' }}
-                > <ApiConfigurationForm setFullScreen={setFullScreen}  /> </div>)
-
-            default:
-                return null;
-        }
-    };
+   
 
 
 
@@ -792,7 +781,7 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                         <Col span={19} style={{ paddingLeft: '10px' }}>
                             {/* Existing content */}
                             {/* <div style={{ borderTop: '1px solid #e0e0e0', marginTop: '0%' }}></div> */}
-                            <ApiConfigurationForm setFullScreen={setFullScreen}  />
+                            <ApiConfigurationForm setFullScreen={setFullScreen} selectedRowData={selectedRowData} />
                         </Col>
                     </Row>
 

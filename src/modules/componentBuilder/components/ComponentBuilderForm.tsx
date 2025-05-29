@@ -9,7 +9,7 @@ import { title } from 'process';
 const { Option } = Select;
 
 
-const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }> = ({ setFullScreen }) => {
+const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void, selectedRowData: any }> = ({ setFullScreen, selectedRowData }) => {
     const { t } = useTranslation();
     const [form] = Form.useForm();
 
@@ -715,10 +715,12 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                                 wrapperCol={{ span: 14 }}
                                 required={true}
                                 style={{ marginBottom: '8px' }}
+                                
                             >
                                 <Input
                                     value={payloadData?.componentLabel}
                                     onChange={(e) => handleInputChange("componentLabel", e.target.value)}
+                                    disabled={selectedRowData ? true : false}
                                 />
                             </Form.Item>
                         </Col>
@@ -859,6 +861,7 @@ const ComponentBuilderForm: React.FC<{ setFullScreen: (value: boolean) => void }
                     <Input
                         value={payloadData?.componentLabel}
                         onChange={(e) => handleInputChange("componentLabel", e.target.value)}
+                        disabled={selectedRowData ? true : false}
                     />
                 </Form.Item>
                 <Form.Item
