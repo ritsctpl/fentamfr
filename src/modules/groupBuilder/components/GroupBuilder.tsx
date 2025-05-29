@@ -332,9 +332,7 @@ const GroupBuilder = () => {
     };
 
     return (
-        <>
-            <CommonAppBar appTitle='Group Builder' />
-            <div style={{ width: '100%', height: 'calc(100vh - 50px)', display: 'flex', }}>
+            <div style={{ width: '100%', height: '100%', display: 'flex', }}>
                 <div style={{
                     width: addGroup || isEdit ? isFullScreen ? '100%' : '50%' : '0%',
                     height: '100%',
@@ -345,12 +343,12 @@ const GroupBuilder = () => {
                     overflow: 'hidden',
                 }}>
                     <div style={{
-                        padding: '20px',
+                        padding: '10px',
                         borderBottom: '1px solid #efefef',
                         boxShadow: '0 0 10px 0 rgba(0, 0, 0, 0.1)',
                         display: 'flex',
                         boxSizing: 'border-box',
-                        height: '5%',
+                        height: '6%',
                         justifyContent: 'space-between',
                         alignItems: 'center'
                     }}>
@@ -404,18 +402,15 @@ const GroupBuilder = () => {
                     <div style={{
                         height: isEdit || isCreating ? '87%' : '100%',
                         width: '100%',
-                        padding: '5px',
-                        boxSizing: 'border-box',
                         display: 'flex',
                         gap: '5px',
                     }}>
                         {/* Groups/Sections list */}
                         <div style={{
                             height: '100%',
-                            width: '350px',
-                            minWidth: '350px',
-                            backgroundColor: '#fff',
-                            padding: '16px',
+                            width: '330px',
+                            minWidth: '330px',
+                            padding: '10px',
                             boxSizing: 'border-box',
                             overflowY: 'auto'
                         }}>
@@ -523,11 +518,10 @@ const GroupBuilder = () => {
                         {/* Form and Table */}
                         <div style={{
                             height: '100%',
-                            width: isEdit || isCreating ? 'calc(100% - 650px)' : 'calc(100% - 350px)',
-                            minWidth: isEdit || isCreating ? 'calc(100% - 650px)' : 'calc(100% - 350px)',
+                            width: isEdit || isCreating ? 'calc(100% - 630px)' : 'calc(100% - 330px)',
+                            minWidth: isEdit || isCreating ? 'calc(100% - 630px)' : 'calc(100% - 330px)',
                             borderLeft: '1px solid #e8e8e8',
                             borderRight: '1px solid #e8e8e8',
-                            backgroundColor: '#fff',
                             padding: '16px',
                             boxSizing: 'border-box',
                             transition: 'all 0.3s ease-in-out',
@@ -673,7 +667,6 @@ const GroupBuilder = () => {
 
                 </div>
             </div>
-        </>
     );
 };
 

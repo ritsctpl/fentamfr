@@ -16,6 +16,7 @@
 .right-section {
   padding: 12px;
   /* height: calc(100vh - 90px); */
+
   overflow: scroll;
 }
 

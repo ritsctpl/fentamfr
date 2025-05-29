@@ -26,7 +26,7 @@ export function DragableTable({
   onRemoveComponent,
   onClearComponents,
   rowKey = "id",
-  scroll = { y: "calc(100vh - 300px)", x: "max-content" },
+  scroll = { y: "calc(100vh - 400px)", x: "max-content" },
   style,
 }: DragableTableProps) {
   // Default columns if not provided
