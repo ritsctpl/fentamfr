@@ -654,12 +654,10 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
             <div >
                     <div >
                         <div className={styles.split} >
-                            <div style={{ height: '50px', alignItems: 'center' }}>
                                 <p className={styles.headingtext} style={{ marginLeft: '10px' }}>
                                     {selectedRowData ? selectedRowData?.componentLabel : t('createComponent')}
                                 </p>
 
-                            </div>
 
                             <div className={styles.actionButtons}>
                                
@@ -668,12 +666,12 @@ const ComponentBuilderBody: React.FC<ComponentBuilderBodyProps> = ({
                                     <>
                                         <Tooltip title="Copy">
                                             <Button onClick={handleOpenCopyModal} className={styles.actionButton}>
-                                                <CopyIcon sx={{ color: '#1874CE' }} />
+                                                <CopyIcon sx={{ color: '#1874CE', fontSize: '22px' }} />
                                             </Button>
                                         </Tooltip>
                                         <Tooltip title="Delete">
                                             <Button onClick={handleOpenModal} className={styles.actionButton}>
-                                                <DeleteIcon sx={{ color: '#1874CE' }} />
+                                                <DeleteIcon sx={{ color: '#1874CE', fontSize: '22px' }} />
                                             </Button>
                                         </Tooltip>
                                     </>
