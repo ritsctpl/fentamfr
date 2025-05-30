@@ -36,6 +36,8 @@ import { FaLayerGroup } from "react-icons/fa";
 import { CiBoxList } from 'react-icons/ci';
 import { LuComponent, LuLayoutTemplate } from 'react-icons/lu';
 import { VscSymbolStructure } from 'react-icons/vsc';
+import { GoDownload } from "react-icons/go";
+import TemplatePreview, { TemplatePreviewRef } from "./TemplatePreview";
 
 // Types
 import type {
@@ -55,7 +57,6 @@ import { DragableTable } from "./DragableTable";
 import { TemplateStructureTree } from "./TemplateStructureTree";
 import { fetchTemplateBuilderData } from "@services/templateBuilderService";
 import { ConfigureTab } from "./ConfigureTab";
-import TemplatePreview from "./TemplatePreview";
 
 // Type guard to check if item is a TemplateListItem
 function isTemplateListItem(item: any): item is ImportedTemplateListItem {
@@ -176,6 +177,9 @@ function TemplateBuilderTab() {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [previewContent, setPreviewContent] = useState<any>(null);
 
+  // Add ref for TemplatePreview
+  const previewRef = React.useRef<TemplatePreviewRef>(null);
+
   // Update original template state when a template is selected
   useEffect(() => {
     if (selectedTemplate) {
@@ -266,10 +270,10 @@ function TemplateBuilderTab() {
             config: group.config || {
               type: "body",
               logo: "",
-              pageOccurrence: "all",
-              margin: 10,
-              height: 10,
-              alignment: "center"
+              pageOccurrence: "",
+              margin: 0,
+              height: 0,
+              alignment: "left"
             }
           }))
         };
@@ -510,6 +514,8 @@ function TemplateBuilderTab() {
   }, [cookies.site]);
 
   const fetchGroups = useCallback(async (searchValue: string = "") => {
+    console.log("searchValue", searchValue);
+    
     try {
       const response = await fetchTemplateBuilderData(
         { site: cookies.site, groupLabel: searchValue },
@@ -524,29 +530,30 @@ function TemplateBuilderTab() {
   }, [cookies.site]);
 
   const handleSearch = useCallback(() => {
-    switch (selectedBuilderType) {
-      case "Component":
-        fetchComponents(searchTerm);
-        break;
-      case "Section":
-        fetchSections(searchTerm);
-        break;
-      case "Group":
-        fetchGroups(searchTerm);
-        break;
+    // Only search builder items when a template is selected
+    if (selectedTemplate) {
+      switch (selectedBuilderType) {
+        case "Component":
+          fetchComponents(searchTerm);
+          break;
+        case "Section":
+          console.log("searchTermss", searchTerm);
+          fetchSections(searchTerm);
+          break;
+        case "Group":
+          fetchGroups(searchTerm);
+          break;
+      }
+    } else {
+      fetchData(searchTerm);
     }
-  }, [selectedBuilderType, searchTerm, fetchComponents, fetchSections, fetchGroups]);
+  }, [selectedBuilderType, searchTerm, fetchComponents, fetchSections, fetchGroups, fetchData, selectedTemplate]);
 
   useEffect(() => {
     if (selectedTemplate) {
       handleSearch();
     }
   }, [selectedBuilderType, selectedTemplate, handleSearch]);
-
-  // Add a utility function to generate unique ID
-  const generateUniqueId = (prefix: string) => {
-    return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  };
 
   // Update handleAddGroup function
   const handleAddGroup = useCallback(
@@ -567,10 +574,10 @@ function TemplateBuilderTab() {
         config: {
           type: 'body',
           logo: '',
-          pageOccurrence: 'all',
-          margin: 10,
-          height: 10,
-          alignment: 'center',
+          pageOccurrence: '',
+          margin: 0,
+          height: 0,
+          alignment: 'left',
         }
       };
 
@@ -1120,10 +1127,10 @@ function TemplateBuilderTab() {
         config: group.config || {
           type: "body",
           logo: "",
-          pageOccurance: "allPages",
-          margin: "10",
-          height: "10",
-          alignment: "center",
+          pageOccurrence: "",
+          margin: 0,
+          height: 0,
+          alignment: "left",
         }
       })),
     };
@@ -1132,8 +1139,6 @@ function TemplateBuilderTab() {
     setMainFormLoadingMessage(
       isNewTemplate ? "Creating template..." : "Updating template..."
     );
-
-    console.log(payload, "payloadss");
 
     try {
       const response = await fetchTemplateBuilderData(
@@ -1461,6 +1466,13 @@ function TemplateBuilderTab() {
     }));
   };
 
+  // Add handler for PDF download
+  const handlePdfDownload = async () => {
+    if (previewRef.current) {
+      await previewRef.current.exportToPdf();
+    }
+  };
+
   // Add helper functions for visibility
   const shouldShowFooter = selectedTemplate || isCreateMode;
   const shouldShowRightSection = selectedTemplate || isCreateMode;
@@ -1517,16 +1529,28 @@ function TemplateBuilderTab() {
             <>
               {
                 isPreviewMode ? (
-                  <Tooltip title="Un Preview Template Builder">
-                    <EyeInvisibleOutlined
-                      style={{
-                        color: "#1890ff",
-                        cursor: "pointer",
-                        fontSize: "22px",
-                      }}
-                      onClick={handleOpenPreview}
-                    />
-                  </Tooltip>
+                  <>
+                    <Tooltip title="Download Pdf">
+                      <GoDownload
+                        style={{
+                          color: "#006768",
+                          cursor: "pointer",
+                          fontSize: "22px",
+                        }}
+                        onClick={handlePdfDownload} 
+                        />
+                    </Tooltip>
+                    <Tooltip title="Un Preview Template Builder">
+                      <EyeInvisibleOutlined
+                        style={{
+                          color: "#1890ff",
+                          cursor: "pointer",
+                          fontSize: "22px",
+                        }}
+                        onClick={handleOpenPreview}
+                      />
+                    </Tooltip>
+                  </>
                 ) : (
                   <Tooltip title="Preview Template Builder">
                     <EyeOutlined
@@ -1591,13 +1615,12 @@ function TemplateBuilderTab() {
           span={shouldShowRightSection ? 5 : 6}
           className={styles["left-section"]}
           style={{
-            height: shouldShowFooter ? "calc(100vh - 120px)" : "calc(100vh - 70px)",
+            height: shouldShowFooter ? "calc(100vh - 195px)" : "calc(100vh - 145px)",
             display: "flex",
             flexDirection: "column",
             position: "relative",
           }}
         >
-          {/* Left Section Loading Overlay */}
           {isLeftTemplateLoading && (
             <div
               style={{
@@ -1686,7 +1709,6 @@ function TemplateBuilderTab() {
               </div>
             </div>
 
-            {/* Type Selector */}
             {selectedTemplate && (
               <Form.Item
                 style={{
@@ -1706,7 +1728,6 @@ function TemplateBuilderTab() {
               </Form.Item>
             )}
 
-            {/* Search Input */}
             <Form
               form={leftTemplateForm}
               layout="inline"
@@ -1726,7 +1747,7 @@ function TemplateBuilderTab() {
                 }}
               >
                 <Input.Search
-                  placeholder="Search templates..."
+                  placeholder={selectedTemplate ? `Search ${selectedBuilderType}...` : "Search Templates..."}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onSearch={handleSearch}
                   value={searchTerm}
@@ -1735,12 +1756,11 @@ function TemplateBuilderTab() {
               </Form.Item>
             </Form>
 
-            {/* List Container with Scrolling */}
             <div
               style={{
                 flex: 1,
                 overflowY: "auto",
-                maxHeight: "calc(100vh - 200px)",
+                maxHeight: "calc(100vh - 250px)",
                 paddingRight: "8px",
               }}
             >
@@ -1755,13 +1775,12 @@ function TemplateBuilderTab() {
           </div>
         </Col>
 
-        {/* Main Section - Selected Groups */}
         <Col
           span={shouldShowRightSection ? 13 : 18}
           className={styles["main-section"]}
-          style={{ 
-            position: "relative", 
-            height: shouldShowFooter ? "calc(100vh - 120px)" : "calc(100vh - 70px)"
+          style={{
+            position: "relative",
+            height: shouldShowFooter ? "calc(100vh - 195px)" : "calc(100vh - 145px)"
           }}
         >
           {isMainFormLoading && (
@@ -1791,8 +1810,12 @@ function TemplateBuilderTab() {
           )}
 
           {isPreviewMode ? (
-            <div style={{ position: 'relative', padding: '20px', height: 'calc(100vh - 90px)', overflowY: 'auto' }}>
-              <TemplatePreview templateId={previewContent} selectedTemplate={selectedTemplate} />
+            <div style={{ position: 'relative', padding: '20px', height: 'calc(100vh - 120px)', overflowY: 'auto' }}>
+              <TemplatePreview 
+                ref={previewRef}
+                templateId={previewContent} 
+                selectedTemplate={selectedTemplate} 
+              />
             </div>
           ) : (
             <div>
@@ -1804,7 +1827,7 @@ function TemplateBuilderTab() {
                     flexDirection: "column",
                     justifyContent: "center",
                     alignItems: "center",
-                    height: "85vh",
+                    height: "79vh",
                     width: "100%",
                     padding: "20px",
                     boxSizing: "border-box",
@@ -1844,14 +1867,6 @@ function TemplateBuilderTab() {
                                 ...prev,
                                 templateLabel: value,
                               }));
-                              // setSelectedTemplate((prev) =>
-                              //   prev
-                              //     ? {
-                              //       ...prev,
-                              //       templateLabel: value,
-                              //     }
-                              //     : null
-                              // );
                             }}
                           />
                         </Form.Item>
@@ -2006,7 +2021,7 @@ function TemplateBuilderTab() {
             span={6}
             className={styles["right-section"]}
             style={{
-              height: shouldShowFooter ? "calc(100vh - 90px)" : "calc(100vh - 40px)",
+              height: shouldShowFooter ? "calc(100vh - 195px)" : "calc(100vh - 145px)",
               display: "flex",
               flexDirection: "column",
               position: "relative",
@@ -2050,11 +2065,11 @@ function TemplateBuilderTab() {
           </Col>
         )}
 
-        {/* Footer */}
         {shouldShowFooter && (
           <div
             style={{
               height: "7%",
+              width: "100%",
               display: "flex",
               justifyContent: "flex-end",
               alignItems: "center",
@@ -2064,15 +2079,15 @@ function TemplateBuilderTab() {
               zIndex: 100,
             }}
           >
-            <Button 
-              icon={selectedTemplate?.handle ? <SaveOutlined /> : <PlusOutlined />} 
-              onClick={handleSaveOrCreate} 
+            <Button
+              icon={selectedTemplate?.handle ? <SaveOutlined /> : <PlusOutlined />}
+              onClick={handleSaveOrCreate}
               style={{ marginRight: "12px" }}
             >
               {selectedTemplate?.handle ? "Save" : "Create"}
             </Button>
-            <Button 
-              icon={<CloseOutlined />} 
+            <Button
+              icon={<CloseOutlined />}
               onClick={handleCancelTemplate}
             >
               Cancel
