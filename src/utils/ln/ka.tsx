@@ -1116,4 +1116,11 @@ export const kannadaLanguage = {
   "workflowStatesMaster": "ಕಾರ್ಯಪ್ರವಾಹ ಸ್ಥಿತಿಗಳ ಮಾಸ್ಟರ್",
   "workflowStatusMaster": "ಕಾರ್ಯಪ್ರವಾಹ ಸ್ಥಿತಿ ಮಾಸ್ಟರ್",
   "createWorkflowStatusMaster": "ಕಾರ್ಯಪ್ರವಾಹ ಸ್ಥಿತಿ ಮಾಸ್ಟರ್ ರಚಿಸಿ",
+
+  "from": "ಇಂದ",
+  "to": "ಗೆ",
+  "attachmentType": "ಲಗತ್ತು ಪ್ರಕಾರ",
+  "attachedTo": "ಗೆ ಲಗತ್ತಿಸಲಾಗಿದೆ",
+  "attachedStatus": "ಲಗತ್ತು ಸ್ಥಿತಿ",
+  "default": "ಡೀಫಾಲ್ಟ್",
 }
