@@ -12,18 +12,19 @@ import jwtDecode from "jwt-decode";
 import { useTranslation } from 'react-i18next';
 
 
-import { Modal } from "antd";
+import { message, Modal } from "antd";
 
 import ApiConfigurationCommonBar from "./WorkFlowCommonBar";
 
 import { parseCookies } from "nookies";
 import { MyProvider, useMyContext } from "../hooks/WorkFlowConfigurationContext";
-import ApiConfigurationMaintenanceBody from "./WorkFlowMaintenanceBody";
-import { defaultQualityApprovalProcess } from "../types/workFlowTypes";
+import WorkFlowConfigurationMaintenanceBody from "./WorkFlowMaintenanceBody";
+import { defaultConfiguration } from "../types/workFlowTypes";
 import { retrieveAllApiConfigurations, retrieveApiConfigurations, retrieveTop50ApiConfigurations } from "@services/apiConfigurationService";
 import axios from "axios";
 import { fetchAllUserGroup, retrieveUserGroup } from "@services/workFlowService";
 import UserGroup from "@modules/userGroup/components/UserGroupMain";
+import { retrieveAllWorkFlowStatesMaster, retrieveTop50Configurations } from "@services/workflowConfigurationService";
 
 
 
@@ -52,7 +53,7 @@ const WorkFlowConfigurationMaintenance: React.FC = () => {
   const [addClick, setAddClick] = useState<boolean>(false);
   const [addClickCount, setAddClickCount] = useState<number>(0);
   const {setActiveTab, setUserGroupList, payloadData, setPayloadData, 
-     showAlert, setShowAlert, isAdding, setIsAdding} = useMyContext();
+     showAlert, setShowAlert, isAdding, setIsAdding, configurationList, setConfigurationList} = useMyContext();
 
 
   const { t } = useTranslation();
@@ -79,12 +80,17 @@ const WorkFlowConfigurationMaintenance: React.FC = () => {
           const cookies = parseCookies();
           const site = cookies?.site;
           try {
-            // Make the API call using Axios
-            const response = await axios.get('https://mocki.io/v1/4dfc06a3-2397-47d5-a64c-c51cf0ec7e8f');
+            const response = await retrieveTop50Configurations({site});
             // debugger
-            if (response.data) {
+            if (!response?.errorCode) {
+              setTop50Data(response);
+              setFilteredData(response);
+              setConfigurationList(response);
+            }
+            else{
               setTop50Data([]);
-              setFilteredData(response.data);
+              setConfigurationList([]);
+              message.error(response?.message)
             }
           }
           catch (e) {
@@ -136,11 +142,31 @@ const WorkFlowConfigurationMaintenance: React.FC = () => {
     //setResetValueCall(resetValueCall + 1);
     setFullScreen(false);
     setAddClickCount(addClickCount + 1)
-    setPayloadData(defaultQualityApprovalProcess);
+    setPayloadData(defaultConfiguration);
     setShowAlert(false);
     setActiveTab(0);
     handleLevelConfig();
-    
+    const fetchStates = async () => {
+      try{
+      const cookies = parseCookies();
+      const site = cookies?.site;
+      const user = cookies?.rl_user_id
+      const request = {
+          site: site,
+          userId: user,
+          name: ""
+      }
+      const response = await retrieveAllWorkFlowStatesMaster(request);
+      setPayloadData((prev) => ({
+          ...prev,
+          statesList: response
+      }));
+     }
+     catch(e){
+      console.log("Error in retrieving all workflow states: ", e);
+     }
+  }
+  fetchStates();
 
   };
 
@@ -277,37 +303,13 @@ const WorkFlowConfigurationMaintenance: React.FC = () => {
           }} />
       </div>
       <div className={styles.dataFieldBody}>
-        <div className={styles.dataFieldBodyContentsBottom}>
-          <div
-            className={`${styles.commonTableContainer} ${isAdding ? styles.shrink : ""
-              }`}
-          >
-            <ApiConfigurationCommonBar
-              onSearch={handleSearch}
-              setFilteredData={setFilteredData}
-            />
-            <div className={styles.dataFieldBodyContentsTop}>
-              <Typography className={styles.dataLength}>
-                {t("configuration")} ({filteredData ? 0 : 0})
-              </Typography>
-
-              <IconButton
-                onClick={handleAddClick}
-                className={styles.circleButton}
-              >
-                <AddIcon sx={{ fontSize: 30 }} />
-              </IconButton>
-            </div>
-            <CommonTable data={filteredData} onRowSelect={handleRowSelect} />
-          </div>
-          <div
-            className={`${styles.formContainer} ${isAdding
-              ? `${styles.show} ${fullScreen ? styles.showFullScreen : styles.show
-              }`
-              : ""
-              }`}
-          >
-            <ApiConfigurationMaintenanceBody
+          <div className={styles.dataFieldBodyContentsBottom}>
+            <div
+              className={`${styles.commonTableContainer} ${isAdding ? styles.shrink : ""
+                }`}
+            >
+           
+            <WorkFlowConfigurationMaintenanceBody
               call={call}
               onClose={handleClose}
               selectedRowData={selectedRowData}
@@ -318,11 +320,12 @@ const WorkFlowConfigurationMaintenance: React.FC = () => {
               setAddClick={setAddClick}
               itemRowData={itemRowData}
               fullScreen={fullScreen}
+              setSelectedRowData={setSelectedRowData}
             />
+          </div>
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

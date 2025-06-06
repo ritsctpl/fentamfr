@@ -105,7 +105,7 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect }) => {
           : 0;
       },
       sortDirections: ['ascend', 'descend'],
-      width: 200,
+      width: 100,
     },
     {
       title: 'Version',
@@ -114,9 +114,9 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect }) => {
       sorter: (a, b) => {
         const aValue = a.version;
         const bValue = b.version;
-        return typeof aValue === 'number' && typeof bValue === 'number' 
-          ? aValue - bValue 
-          : 0;
+        return typeof aValue === 'string' && typeof bValue === 'string' 
+        ? aValue.localeCompare(bValue) 
+        : 0;
       },
       sortDirections: ['ascend', 'descend'],
       width: 100,
@@ -136,6 +136,20 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect }) => {
       width: 100,
     },
     {
+      title: 'Entity Type',
+      dataIndex: 'entityType',
+      key: 'entityType',
+      sorter: (a, b) => {
+        const aValue = a.entityType;
+        const bValue = b.entityType;
+        return typeof aValue === 'string' && typeof bValue === 'string' 
+          ? aValue.localeCompare(bValue) 
+          : 0;
+      },
+      sortDirections: ['ascend', 'descend'],
+      width: 100,
+    },
+    {
       title: 'Attached To',
       dataIndex: 'attachedTo',
       key: 'attachedTo',
@@ -147,7 +161,7 @@ const CommonTable: React.FC<CommonTableProps> = ({ data, onRowSelect }) => {
           : 0;
       },
       sortDirections: ['ascend', 'descend'],
-      width: 200,
+      width: 100,
     },
   ];
 

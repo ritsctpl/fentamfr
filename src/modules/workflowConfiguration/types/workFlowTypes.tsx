@@ -1,33 +1,27 @@
 // ... existing ApiConfigurationFormData and defaultFormData ...
 
 export interface QualityApprovalProcess {
-  workFlow: string;
+  name: string;
   version: string;
-  description: string;
-  type: string;
-  itemGroup: string;
-  enforceSequenceWorkFlow: boolean;
-  parallelApproval: boolean;
-  emailNotification: boolean;
-  createdDateTime: string;
-  lastModifiedDateTime: string;
-  levelConfigurationList: {
-    sequence: number;
-    userRole: string;
-    user: string;
-    status: string;
-    finalApproval: boolean;
-  }[];
+  entityType: string;
+  attachmenttype: string;
+  isDefault: boolean;
+  currentVersion: boolean;
+  attachedto: any;
+  attachedStatus: any;
+  states: any;
+  transitions: any
 }
 
-export const defaultQualityApprovalProcess: any = {
-  workFlow: "",
+export const defaultConfiguration: any = {
+  name: "",
   version: "",
-  description: "",
-  itemGroup: "",
-  type: "MFR",
-  enforceSequenceWorkFlow: true,
-  parallelApproval: false,
-  emailNotification: false,
-  levelConfigurationList: []
+  entityType: "MFR",
+  attachmenttype: "",
+  isDefault: false,
+  currentVersion: false,
+  attachedto: "Test",
+  attachedStatus: "Releaseable",
+  states: ["Approve"],
+  transitions: []
 };

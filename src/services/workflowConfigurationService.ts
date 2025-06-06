@@ -2,33 +2,33 @@ import api from './api';
 
 
 
-export const createApiConfiguration = async (request: any) => {
-  const response = await api.post('/oee-service/apiconfigurations', {...request});
+export const createConfiguration = async (request: any) => {
+  const response = await api.post('/workflow-service/create', {...request});
   return response?.data;
 };
 
-export const updateApiConfiguration = async (request: any) => {
-  const response = await api.put(`/oee-service/apiconfigurations/${request?.id}`, {...request});
+export const updateConfiguration = async (request: any) => {
+  const response = await api.post(`/workflow-service/update`, {...request});
   return response?.data;
 };
 
-export const deleteApiConfiguration = async (id: any) => {
-  const response = await api.delete(`/oee-service/apiconfigurations/${id}`);
+export const deleteConfiguration = async (request: any) => {
+  const response = await api.post(`/workflow-service/delete`, {...request});
   return response?.data;
 };
 
-export const retrieveApiConfigurations = async (id: any) => {
-  const response = await api.get(`/oee-service/apiconfigurations/${id}`);
+export const retrieveConfigurations = async (request: any) => {
+  const response = await api.post(`/workflow-service/getById`, {...request});
   return response?.data;
 };
 
-export const retrieveTop50ApiConfigurations = async (request: any) => {
-  const response = await api.get(`/oee-service/apiconfigurations`);
+export const retrieveTop50Configurations = async (request: any) => {
+  const response = await api.post(`/workflow-service/getTop50`, {...request});
   return response?.data;
 };
 
-export const retrieveAllApiConfigurations = async (id: any) => {
-  const response = await api.get(`oee-service/apiconfigurations/${id}`);
+export const retrieveAllConfigurations = async (request: any) => {
+  const response = await api.post(`/workflow-service/getAll`, {...request});
   return response?.data;
 };
 
@@ -37,8 +37,14 @@ export const retrieveAllWorkFlowStatesMaster = async (request: any) => {
   return response?.data;
 };
 
+export const fetchAllUserGroup= async (site: string) => {
+  const response = await api.post('/usergroup-service/retrieveAll', { site });
+  return response?.data?.userGroupResponses;
+};
 
-
-
+export const retrieveAllUserGroup= async (request: any) => {
+  const response = await api.post('/usergroup-service/retrieveAll', { ...request });
+  return response?.data?.userGroupResponses;
+};
 
 

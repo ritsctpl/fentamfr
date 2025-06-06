@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Row, Col, Select, Button, Switch, Form, Input, Typography, Card, Tabs, Modal, Table } from 'antd';
 import { useMyContext } from '../hooks/WorkFlowConfigurationContext';
-import { SettingsPhoneTwoTone } from '@mui/icons-material';
-import ListTable from './levelConfigurationTable';
-import AdvancedConfigurationForm from './AdvancedConfigurationForm';
 import { useTranslation } from 'react-i18next';
-import { GrChapterAdd } from "react-icons/gr";
 import { parseCookies } from 'nookies';
 import { retrieveTop50ItemGroup } from '@services/workFlowService';
 
@@ -106,7 +102,7 @@ const WorkFlowForm: React.FC = () => {
 
   return (
     <>
-      <div style={{ marginTop: '10px', marginLeft: '40px' }}>
+      <div style={{ marginTop: '40px', marginLeft: '50px' }}>
         {/* <h4 style={{ marginTop: '-0.1%' }}>Approval Workflow Details</h4> */}
         <Form form={form} layout="horizontal">
           {/* <Row gutter={16}>
@@ -115,7 +111,7 @@ const WorkFlowForm: React.FC = () => {
             label="Name"
             name="name"
             labelCol={{ span: 4 }}
-            wrapperCol={{ span: 8 }}
+            wrapperCol={{ span: 10 }}
             required
             style={{ marginBottom: 15 }}
           >
@@ -127,7 +123,7 @@ const WorkFlowForm: React.FC = () => {
             label="Version"
             name="version"
             labelCol={{ span: 4 }}
-            wrapperCol={{ span: 8 }}
+            wrapperCol={{ span: 10 }}
            style={{ marginBottom: 15 }}
            required
           >
@@ -139,7 +135,7 @@ const WorkFlowForm: React.FC = () => {
             label="Entity Type"
             name="entityType"
             labelCol={{ span: 4 }}
-            wrapperCol={{ span: 8 }}
+            wrapperCol={{ span: 10 }}
            style={{ marginBottom: 15 }}
           >
             <Select defaultValue={"MFR"} onChange={(value) => handleSelectChange("entityType", value)}>
@@ -152,7 +148,7 @@ const WorkFlowForm: React.FC = () => {
             label="Current Version"
             name="currentVersion"
             labelCol={{ span: 4 }}
-            wrapperCol={{ span: 8 }}
+            wrapperCol={{ span: 10 }}
            style={{ marginBottom: 15 }}
           >
             <Switch onChange={(checked) => handleSwitchChange('currentVersion', checked)} />
@@ -161,7 +157,7 @@ const WorkFlowForm: React.FC = () => {
             label="Attachment Type"
             name="attachmentType"
             labelCol={{ span: 4 }}
-            wrapperCol={{ span: 8 }}
+            wrapperCol={{ span: 10 }}
            style={{ marginBottom: 15 }}
             
           >
@@ -171,12 +167,12 @@ const WorkFlowForm: React.FC = () => {
           </Form.Item>
           <Form.Item
             label="Attached To"
-            name="attachedTo"
+            name="attachedto"
             labelCol={{ span: 4 }}
-            wrapperCol={{ span: 8 }}
+            wrapperCol={{ span: 10 }}
            style={{ marginBottom: 15 }}
           >
-            <Select defaultValue={""} onChange={(value) => handleSelectChange("attachedTo", value)}>
+            <Select defaultValue={""} onChange={(value) => handleSelectChange("attachedto", value)}>
               <Select.Option value="Export">Export</Select.Option>
             </Select>
           </Form.Item>
@@ -184,7 +180,7 @@ const WorkFlowForm: React.FC = () => {
             label="Attached Status"
             name="attachedStatus"
             labelCol={{ span: 4 }}
-            wrapperCol={{ span: 8 }}
+            wrapperCol={{ span: 10 }}
            style={{ marginBottom: 15 }}
           >
             <Select defaultValue={"Releaseable"} onChange={(value) => handleSelectChange("attachedStatus", value)}>
@@ -194,22 +190,23 @@ const WorkFlowForm: React.FC = () => {
           </Form.Item>
           <Form.Item
             label="Default"
-            name="default"
+            name="isDefault"
             labelCol={{ span: 4 }}
-            wrapperCol={{ span: 8 }}
+            wrapperCol={{ span: 10 }}
            style={{ marginBottom: 15 }}
           >
-            <Switch onChange={(checked) => handleSwitchChange('default', checked)} />
+            <Switch onChange={(checked) => handleSwitchChange('isDefault', checked)} />
           </Form.Item>
           <Form.Item
             label="States"
             name="states"
             labelCol={{ span: 4 }}
-            wrapperCol={{ span: 8 }}
+            wrapperCol={{ span: 10 }}
            style={{ marginBottom: 15 }}
            required
+           
           >
-            <Select defaultValue="" onChange={(value) => handleSelectChange("states", value)}>
+            <Select defaultValue="" showSearch allowClear onChange={(value) => handleSelectChange("states", value)}>
               {payloadData?.statesList?.map((state) => (
                 <Select.Option key={state.name} value={state.name}>
                   {state.name}
@@ -221,7 +218,7 @@ const WorkFlowForm: React.FC = () => {
                         label={t('productGroup')}
                         name="itemGroup"
                         labelCol={{ span: 4 }}
-                        wrapperCol={{ span: 8 }}
+                        wrapperCol={{ span: 10 }}
                        style={{ marginBottom: 15 }}
                     >
                         <Input 
@@ -237,15 +234,7 @@ const WorkFlowForm: React.FC = () => {
         </Form>
       </div>
 
-      {/* <div>
-            <h4 style={{ marginBottom: '0px' }}>Level Configuration</h4>
-            <ListTable/>
-        </div> */}
-
-      {/* <div>
-        <h4 style={{ marginBottom: '0px' }}>Advanced Configuration</h4>
-        <AdvancedConfigurationForm/>
-        </div> */}
+     
       <Modal
         title={t("selectProductGroup")}
         open={productGroupVisible}

@@ -1,30 +1,27 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import styles from '../styles/WorkFlowMaintenance.module.css';
 import CloseIcon from '@mui/icons-material/Close';
-import { Form, Input, message, Button, Modal, Tooltip, Select } from 'antd';
+import { Form, Input, message, Button, Modal, Tooltip, Select, Row, Typography, Col, List, Tabs } from 'antd';
 import CopyIcon from '@mui/icons-material/FileCopy'; // Import Copy icon
 import DeleteIcon from '@mui/icons-material/Delete'; // Import Delete icon
 import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
-import { Box, Tabs, Tab, } from '@mui/material';
+import { Box, Tab } from '@mui/material';
 import dayjs from 'dayjs';
-import { createApiConfiguration, deleteApiConfiguration, retrieveAllWorkFlowStatesMaster, updateApiConfiguration, } from '@services/workflowConfigurationService';
+import { createConfiguration, deleteConfiguration, fetchAllUserGroup, retrieveAllConfigurations, retrieveAllWorkFlowStatesMaster, retrieveConfigurations, updateConfiguration, } from '@services/workflowConfigurationService';
 import { useTranslation } from 'react-i18next';
 import { useMyContext } from '../hooks/WorkFlowConfigurationContext';
 import ApiConfigurationForm from './WorkFlowForm';
 import { parseCookies } from 'nookies';
 import LevelConfigurationTable from './levelConfigurationTable';
-import AdvancedConfigurationForm from './AdvancedConfigurationForm';
+import FlowChart from './FlowChart';
 const { Option } = Select
-
-interface CustomData {
-    customData: string;
-    value: string;
-}
-
-
-
-
+import { LuComponent } from "react-icons/lu";
+import AddIcon from "@mui/icons-material/Add";
+import { retrieveAllComponents, retrieveComponent } from '@services/componentBuilderService';
+import WorkFlowForm from './WorkFlowForm';
+import { retrieveUserGroup } from '@services/workFlowService';
+import { defaultConfiguration } from '../types/workFlowTypes';
 
 interface ApiConfigurationMaintenanceBodyProps {
     isAdding: boolean;
@@ -37,6 +34,8 @@ interface ApiConfigurationMaintenanceBodyProps {
     fullScreen: boolean;
     call: number;
     setCall: (number) => void;
+    setSelectedRowData: (any) => void;
+
 }
 
 
@@ -44,48 +43,90 @@ interface ApiConfigurationMaintenanceBodyProps {
 
 
 const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = ({
-    isAdding, selectedRowData, onClose, call, setCall, setFullScreen, setAddClick, fullScreen, }) => {
+    isAdding, selectedRowData, onClose, call, setCall, setFullScreen, setAddClick, fullScreen, setSelectedRowData }) => {
 
 
-    const { payloadData, setPayloadData, showAlert, setShowAlert } = useMyContext();
+    const { payloadData, setPayloadData, showAlert, setShowAlert, predefinedUsers, setPredefinedUsers,
+        predefinedStates, setPredefinedStates, triggerToExport, setTriggerToExport, tranisitionList,
+        configurationList, setConfigurationList } = useMyContext();
     // const [activeTab, setActiveTab] = useState<number>(0);
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
     const [isCopyModalVisible, setIsCopyModalVisible] = useState<boolean>(false);
-    // const [encodedXslt, setEncodedXslt] = useState<any>();
-    // const [encodedJsonAta, setEncodedJsonAta] = useState<any>();
     const [form] = Form.useForm();
-    const {activeTab,setActiveTab} = useMyContext();
-    let encodedXslt, encodedJsonAta;
-
+    const { activeTab, setActiveTab } = useMyContext();
+    const [isLoading, setIsLoading] = useState<any>();
+    const [searchTerm, setSearchTerm] = useState<any>();
+    const [collapsed, setCollapsed] = useState<boolean>(false);
 
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-        // console.log("table data on tab change: ", customData);
         setActiveTab(newValue);
         setAddClick(false);
-        debugger;
-        if(newValue == 1){
+        setCollapsed(false)
+        if (newValue == 1) {
+
             const fetchStates = async () => {
-                const cookies = parseCookies();
-                const site = cookies?.site;
-                const user = cookies?.rl_user_id
-                const request = {
-                    site: site,
-                    userId: user,
-                    name: ""
+                try {
+                    const cookies = parseCookies();
+                    const site = cookies?.site;
+                    const user = cookies?.rl_user_id
+                    const request = {
+                        site: site,
+                        userId: user,
+                        name: ""
+                    }
+                    const response = await retrieveAllWorkFlowStatesMaster(request);
+                    setPayloadData((prev) => ({
+                        ...prev,
+                        statesList: response
+                    }));
+                    setPredefinedStates(response);
                 }
-                const response = await retrieveAllWorkFlowStatesMaster(request);
-                setPayloadData((prev) => ({
-                    ...prev,
-                    statesList: response
-                }));
+                catch (error) {
+                    console.error('Error fetching states:', error);
+                }
             }
-            fetchStates();
+            //fetchStates();
+
+            const retrieveUserGroupList = async () => {
+                try {
+                    const cookies = parseCookies();
+                    const site = cookies?.site;
+
+                    // Fetch user group list
+                    const userGroupResponse = await fetchAllUserGroup(site);
+                    let userGroupList = [];
+
+                    if (!userGroupResponse?.errorCode) {
+                        userGroupList = userGroupResponse.map((item, index) => ({
+                            id: index,
+                            userGroup: item?.description
+                        }));
+                    }
+                    setPredefinedUsers(userGroupList);
+                    // Set user group list
+                    setPayloadData(prev => ({
+                        ...prev,
+                        userGroupList: userGroupList
+                    }));
+
+                } catch (e) {
+                    console.log("Error in retrieving user configuration: ", e);
+                    // Set empty lists in case of error
+                    setPayloadData(prev => ({
+                        ...prev,
+                        userGroupList: [],
+                        userList: []
+                    }));
+                }
+            };
+            retrieveUserGroupList();
             setFullScreen(true);
         }
         else {
             setFullScreen(false);
         }
+
     };
 
     const handleOpenChange = () => {
@@ -103,13 +144,13 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
 
     const handleSave = async (oEvent) => {
         message.destroy();
+
         let flagToSave = true, flagToEncode = true;
         let buttonLabel = oEvent.currentTarget.innerText;
-        // debugger
 
-        if (payloadData?.workFlow == "" || payloadData?.workFlow == null || payloadData?.workFlow == undefined) {
+        if (payloadData?.name == "" || payloadData?.name == null || payloadData?.name == undefined) {
             flagToEncode = false;
-            message.error("Work flow cannot be empty");
+            message.error("Name cannot be empty");
             return;
         }
 
@@ -119,75 +160,42 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
             return;
         }
 
-        payloadData?.levelConfigurationList?.map((item, index) => {
-            if (item?.userRole == "" || item?.userRole == null || item?.userRole == undefined) {
-                flagToSave = false;
-                message.error("User Role cannot be empty");
-                return;
-            }
-        }); 
-        
-        const hasEmptyUser = payloadData?.levelConfigurationList?.some((item) => {
-            if (item?.user == "" || item?.user == null || item?.user == undefined) {
-                flagToSave = false;
-                message.error("User cannot be empty");
-                return true;
-            }
-            return false;
-        });
-        
-        const hasEmptyAction = payloadData?.levelConfigurationList?.some((item) => {
-            if (item?.action == "" || item?.action == null || item?.action == undefined) {
-                flagToSave = false;
-                message.error("Action cannot be empty");
-                return true;
-            }
-            return false;
-        });
-
-        const hasEmptyFinalApproval = payloadData?.levelConfigurationList?.some((item) => {
-            if (item?.finalApproval == "" || item?.finalApproval == null || item?.finalApproval == undefined) {
-                flagToSave = false;
-                message.error("Final Approval has to be tue for atleast one level");
-                return true;
-            }
-            return false;
-        });
-
-      
-
-
-
-        const oCreateConfig = async () => { // Rename the inner function to avoid recursion
-
+        const oCreateConfig = async () => {
             try {
                 const cookies = parseCookies();
                 const site = cookies?.site;
                 const user = cookies?.rl_user_id
                 let updatedRequest;
+
+                // Explicitly get the latest transitions
+                const latestTransitions = tranisitionList.current || payloadData?.transitions || [];
+                // debugger
                 updatedRequest = {
                     site: site,
-                   ...payloadData,
-                    userId: user
+                    ...payloadData,
+                    transitions: latestTransitions,
+                    userId: user,
                 }
-                
+
+                // Log the transitions to verify
+                console.log("Transitions being saved:", latestTransitions);
 
                 if (buttonLabel == "Create" || buttonLabel == "बनाएं"
                     || buttonLabel == "ರಚಿಸಿ" || buttonLabel == "உருவாக்க") {
                     try {
-                        // const createResponse = await createApiConfiguration(updatedRequest);
-                        // if (createResponse) {
-                        //     if (createResponse?.errorCode) {
-                        //         message.error(createResponse?.message);
-                        //     }
-                        //     else {
-                        //         setCall(call + 1);
-                        //         setShowAlert(false);
-                        //         // message.success(createResponse?.message_details?.msg);
-                        //         message.success("Created Successfully");
-                        //         onClose();
-                        //     }
-                        // }
+                        const createResponse = await createConfiguration(updatedRequest);
+                        if (createResponse) {
+                            if (createResponse?.errorCode) {
+                                message.error(createResponse?.message);
+                            }
+                            else {
+                                setCall(call + 1);
+                                setShowAlert(false);
+
+
+                                message.success(createResponse?.message);
+                            }
+                        }
                     }
                     catch (error) {
                         console.error('Error creating spec:', error);
@@ -199,18 +207,17 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
 
                     if (flagToSave) {
                         try {
-                            // const updateResponse = await updateApiConfiguration(updatedRequest);
-                            // if (updateResponse) {
-                            //     if (updateResponse?.errorCode) {
-                            //         message.error(updateResponse?.message);
-                            //     }
-                            //     else {
-                            //         setShowAlert(false);
-                            //         // message.success(updateResponse?.message_details?.msg);
-                            //         message.success("Updated Successfully");
-                            //         setCall(call + 1);
-                            //     }
-                            // }
+                            const updateResponse = await updateConfiguration(updatedRequest);
+                            if (updateResponse) {
+                                if (updateResponse?.errorCode) {
+                                    message.error(updateResponse?.message);
+                                }
+                                else {
+                                    setShowAlert(false);
+                                    message.success(updateResponse?.message);
+                                    setCall(call + 1);
+                                }
+                            }
                         }
                         catch (error) {
                             console.error('Error updating configuration:', error);
@@ -224,8 +231,13 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
         };
 
         if (flagToEncode == true) {
+            // Trigger export of workflow steps before saving
+            setTriggerToExport(triggerToExport + 1);
 
+            // Wait a short moment to allow transitions to be captured
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
+
         if (flagToSave == true) {
             try {
                 await oCreateConfig();
@@ -233,9 +245,7 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
             catch (e) {
                 console.error("Error in creating configuration", e);
             }
-
         }
-
     };
 
 
@@ -270,14 +280,24 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                 const cookies = parseCookies();
                 const site = cookies?.site;
                 const id = payloadData?.id;
+                const request = {
+                    site: site,
+                    name: payloadData?.name,
+                    version: payloadData?.version,
+                    userId: cookies?.rl_user_id,
+                    entityType: payloadData?.entityType,
+                    attachedto: payloadData?.attachedto || "",
+                    attachedStatus: payloadData?.attachedStatus || ""
+                }
+
                 try {
-                    const response = await deleteApiConfiguration(id); // Assuming retrieveItem is an API call or a data fetch function
+                    const response = await deleteConfiguration(request); // Assuming retrieveItem is an API call or a data fetch function
                     if (!response.errorCode) {
-                        // message.success(response?.message_details?.msg);
-                        message.success("Deleted Successfully");
+                        message.success(response?.message);
                         setCall(call + 1);
-                        onClose();
                         setShowAlert(false);
+                        setActiveTab(0);
+                        setPayloadData(defaultConfiguration);
                     }
                     else {
                         message.error(response?.message);
@@ -301,9 +321,8 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
         // Optionally reset form fields
         form.resetFields();
         form.setFieldsValue({
-            workFlow: selectedRowData?.workFlow + "_COPY" || '',
+            name: selectedRowData?.name + "_COPY" || '',
             version: '',
-            type: 'MFR'
         });
         // setPayloadData((prev) => ({
         //     ...prev,
@@ -332,6 +351,64 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
         }))
     };
 
+    const handleRowSelect = (row: any) => {
+
+        const fetchConfig = async () => {
+            try {
+                let response;
+                const cookies = parseCookies();
+                const site = cookies?.site;
+                const request = {
+                    site: site,
+                    name: row?.name,
+                    version: row?.version,
+                    entityType: row?.entityType,
+                    attachedto: row?.attachedto || "",
+                    attachedStatus: row?.attachedStatus || ""
+                }
+                try {
+                    response = await retrieveConfigurations(request);
+                    if (!response?.errorCode) {
+                        setActiveTab(0);
+                        setPayloadData(response);
+                        setSelectedRowData(response);
+                    }
+
+                }
+                catch (e) {
+                    console.error("Error in retrieveing the component", e);
+                }
+            } catch (error) {
+                console.error("Error fetching component:", error);
+            }
+        };
+
+        if (showAlert == true) {
+            Modal.confirm({
+                title: t('confirm'),
+                content: t('rowSelectionMsg'),
+                okText: t('ok'),
+                cancelText: t('cancel'),
+                onOk: async () => {
+                    // Proceed with the API call if confirmed
+                    try {
+                        await fetchConfig();
+                    }
+                    catch (e) {
+                        console.error("Error in retrieveing the component: ", e);
+                    }
+                    setShowAlert(false)
+                },
+                onCancel() {
+                },
+            });
+        } else {
+            // If no data to confirm, proceed with the API call
+            fetchConfig();
+        }
+
+    };
+
 
     const handleConfirmCopy = () => {
         form
@@ -342,9 +419,9 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                 message.destroy();
                 let flagToSave = true, flagToEncode = true;
 
-                if (payloadData?.workFlow == "" || payloadData?.workFlow == null || payloadData?.workFlow == undefined) {
+                if (payloadData?.name == "" || payloadData?.name == null || payloadData?.name == undefined) {
                     flagToEncode = false;
-                    message.error("Work flow cannot be empty");
+                    message.error("Name cannot be empty");
                     return;
                 }
 
@@ -361,24 +438,19 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                     const user = cookies?.rl_user_id
                     try {
                         updatedRequest = {
-                            // site: site,
-                            apiName: payloadData?.apiName,
-                            storedProcedure: payloadData?.storedProcedure,
-                            httpMethod: payloadData?.httpMethod,
-                            inputParameters: payloadData?.inputParameters,
-                            outputStructure: payloadData?.outputStructure,
-                            // userId: user
+                            site: site,
+                            ...payloadData,
+                            userId: user
                         }
 
                         try {
-                            const copyResponse = await createApiConfiguration(updatedRequest);
+                            const copyResponse = await createConfiguration(updatedRequest);
                             if (copyResponse?.errorCode) {
                                 message.error(copyResponse?.message);
                             }
                             else {
                                 setCall(call + 1);
-                                // message.success(copyResponse?.message_details?.msg);
-                                message.success("Created Successfully");
+                                message.success(copyResponse?.message);
                                 setShowAlert(false);
                                 onClose();
                             }
@@ -415,118 +487,928 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
 
     const { t } = useTranslation();
 
+    const workflowSteps1 = [
+        {
+            currentUserOrState: [
+                {
+                    action: null,
+                    user: "Initiator"
+                }
+            ],
+            nextState: [
+                {
+                    action: "Submit",
+                    user: "Department Manager"
+                },
+                {
+                    action: "Draft",
+                    user: "Technical Reviewer"
+                }
+            ]
+        },
+        {
+            currentUserOrState: [
+                {
+                    action: "Approve",
+                    user: "Department Manager"
+                },
+                {
+                    action: "Reject",
+                    user: "Department Manager"
+                },
+                {
+                    action: "Approve",
+                    user: "Technical Reviewer"
+                },
+                {
+                    action: "Reject",
+                    user: "Technical Reviewer"
+                }
+            ],
+            nextState: [
+                {
+                    action: "Approve",
+                    user: "Quality Assurance",
+                    fromUser: "Department Manager"
+                },
+                {
+                    action: "Reject",
+                    user: "Initiator",
+                    fromUser: "Department Manager"
+                },
+                {
+                    action: "Approve",
+                    user: "Senior Manager",
+                    fromUser: "Technical Reviewer"
+                },
+                {
+                    action: "Reject",
+                    user: "Initiator",
+                    fromUser: "Technical Reviewer"
+                }
+            ]
+        },
+        {
+            currentUserOrState: [
+                {
+                    action: "Approve",
+                    user: "Quality Assurance"
+                },
+                {
+                    action: "Reject",
+                    user: "Quality Assurance"
+                },
+                {
+                    action: "Approve",
+                    user: "Senior Manager"
+                },
+                {
+                    action: "Reject",
+                    user: "Senior Manager"
+                }
+            ],
+            nextState: [
+                {
+                    action: "Approve",
+                    user: "Final Approver",
+                    fromUser: "Quality Assurance"
+                },
+                {
+                    action: "Reject",
+                    user: "Department Manager",
+                    fromUser: "Quality Assurance"
+                },
+                {
+                    action: "Approve",
+                    user: "Final Approver",
+                    fromUser: "Senior Manager"
+                },
+                {
+                    action: "Reject",
+                    user: "Technical Reviewer",
+                    fromUser: "Senior Manager"
+                }
+            ]
+        },
+        {
+            currentUserOrState: [
+                {
+                    action: "Approve",
+                    user: "Final Approver"
+                },
+                {
+                    action: "Reject",
+                    user: "Final Approver"
+                }
+            ],
+            nextState: [
+                {
+                    action: "Approve",
+                    user: "Completed",
+                    fromUser: "Final Approver"
+                },
+                {
+                    action: "Reject",
+                    user: "Initiator",
+                    fromUser: "Final Approver"
+                }
+            ]
+        }
+    ];
+
+    const workflowSteps2 = [
+        {
+            "currentUserOrState": [
+                {
+                    "action": null,
+                    "user": "Initiator"
+                }
+            ],
+            "nextState": [
+                {
+                    "action": "",
+                    "user": "Initiator",
+                    "fromUser": "Initiator"
+                },
+                {
+                    "action": "Submit",
+                    "user": "Senior Manager",
+                    "fromUser": "Initiator"
+                },
+                {
+                    "action": "Draft",
+                    "user": "Quality Assurance Manager",
+                    "fromUser": "Initiator"
+                }
+            ]
+        },
+        {
+            "currentUserOrState": [
+                {
+                    "action": null,
+                    "user": "Senior Manager"
+                }
+            ],
+            "nextState": [
+                {
+                    "action": "",
+                    "user": "Quality Assurance",
+                    "fromUser": "Senior Manager"
+                },
+                {
+                    "action": "",
+                    "user": "Senior Manager",
+                    "fromUser": "Senior Manager"
+                },
+                {
+                    "action": "",
+                    "user": "Initiator",
+                    "fromUser": "Senior Manager"
+                }
+            ]
+        },
+        {
+            "currentUserOrState": [
+                {
+                    "action": null,
+                    "user": "Quality Assurance Manager"
+                }
+            ],
+            "nextState": [
+                {
+                    "action": "Reject",
+                    "user": "Initiator",
+                    "fromUser": "Quality Assurance Manager"
+                },
+                {
+                    "action": "Approve",
+                    "user": "Department Manager",
+                    "fromUser": "Quality Assurance Manager"
+                },
+                {
+                    "action": "Approve",
+                    "user": "Customer Support",
+                    "fromUser": "Quality Assurance Manager"
+                }
+            ]
+        },
+        {
+            "currentUserOrState": [
+                {
+                    "action": "Approve",
+                    "user": "Department Manager"
+                }
+            ],
+            "nextState": [
+                {
+                    "action": "Approve",
+                    "user": "Technical Reviewer",
+                    "fromUser": "Department Manager"
+                }
+            ]
+        },
+        {
+            "currentUserOrState": [
+                {
+                    "action": "Approve",
+                    "user": "Technical Reviewer"
+                }
+            ],
+            "nextState": [
+                {
+                    "action": "Approve",
+                    "user": "Final Approve",
+                    "fromUser": "Technical Reviewer"
+                },
+                {
+                    "action": "Reject",
+                    "user": "Initiator",
+                    "fromUser": "Technical Reviewer"
+                }
+            ]
+        }
+    ]
+
+    const workflowSteps3 = [
+        {
+            "currentUserOrState": [
+                {
+                    "action": "Submit",
+                    "user": "Department Manager"
+                },
+                {
+                    "action": "Draft",
+                    "user": "Department Manager"
+                }
+            ],
+            "nextState": [
+                {
+                    "action": "Submit",
+                    "user": "Technical Reviewer",
+                    "fromUser": "Department Manager"
+                },
+                {
+                    "action": "Draft",
+                    "user": "Quality Assurance",
+                    "fromUser": "Department Manager"
+                }
+            ]
+        },
+        {
+            "currentUserOrState": [
+                {
+                    "action": "Approve",
+                    "user": "Technical Reviewer"
+                },
+                {
+                    "action": "Reject",
+                    "user": "Technical Reviewer"
+                }
+            ],
+            "nextState": [
+                {
+                    "action": "Approve",
+                    "user": "Quality Assurance Manager",
+                    "fromUser": "Technical Reviewer"
+                },
+                {
+                    "action": "Reject",
+                    "user": "Technical Reviewer",
+                    "fromUser": "Technical Reviewer"
+                },
+                {
+                    "action": "Reject",
+                    "user": "Department Manager",
+                    "fromUser": "Technical Reviewer"
+                }
+            ]
+        },
+        {
+            "currentUserOrState": [
+                {
+                    "action": "Approve",
+                    "user": "Quality Assurance"
+                }
+            ],
+            "nextState": [
+                {
+                    "action": "Approve",
+                    "user": "Technical Reviewer",
+                    "fromUser": "Quality Assurance"
+                }
+            ]
+        }
+    ]
+
+    const workflowSteps4 = {
+        "workflowId": "approval_flow_v1",
+        "transitions": [
+            {
+                "fromUserId": "start",
+                "action": "Send for approval",
+                "toUserId": "user1",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 8
+                }
+            },
+            {
+                "fromUserId": "user1",
+                "action": "Reject",
+                "toUserId": "user2",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 12
+                }
+            },
+            {
+                "fromUserId": "user2",
+                "action": "Send for approval",
+                "toUserId": "user3",
+                "uiConfig": {
+                    "remarksRequired": false,
+                    "attachmentRequired": true
+                },
+                "constraints": {
+                    "dueInHours": 10
+                }
+            },
+            {
+                "fromUserId": "user2",
+                "action": "Reject",
+                "toUserId": "user1",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 6
+                }
+            },
+            {
+                "fromUserId": "user3",
+                "action": "Approve",
+                "toUserId": "user5",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": true
+                },
+                "constraints": {
+                    "dueInHours": 12
+                }
+            },
+            {
+                "fromUserId": "user3",
+                "action": "Reject",
+                "toUserId": "user4",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 8
+                }
+            },
+            {
+                "fromUserId": "user4",
+                "action": "Approve",
+                "toUserId": "user6",
+                "uiConfig": {
+                    "remarksRequired": false,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 4
+                }
+            },
+            {
+                "fromUserId": "user5",
+                "action": "Approve",
+                "toUserId": "user6",
+                "uiConfig": {
+                    "remarksRequired": false,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 4
+                }
+            }
+        ]
+    }
+
+    const workflowSteps5 = {
+        "workflowId": "approval_flow_v1",
+        "transitions": [
+            {
+                "fromUserId": "initiator",
+                "action": "Submit",
+                "toUserId": "departmentManager",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 8
+                }
+            },
+            {
+                "fromUserId": "initiator",
+                "action": "Draft",
+                "toUserId": "seniorManager",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 12
+                }
+            },
+            {
+                "fromUserId": "seniorManager",
+                "action": "Approve",
+                "toUserId": "departmentManager",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 12
+                }
+            },
+            {
+                "fromUserId": "departmentManager",
+                "action": "Reject",
+                "toUserId": "initiator",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 12
+                }
+            },
+            {
+                "fromUserId": "departmentManager",
+                "action": "Approve",
+                "toUserId": "financeReviewer",
+                "uiConfig": {
+                    "remarksRequired": false,
+                    "attachmentRequired": true
+                },
+                "constraints": {
+                    "dueInHours": 10
+                }
+            },
+            {
+                "fromUserId": "financeReviewer",
+                "action": "Reject",
+                "toUserId": "departmentManager",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 6
+                }
+            },
+            {
+                "fromUserId": "financeReviewer",
+                "action": "Approve",
+                "toUserId": "complianceOfficer",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": true
+                },
+                "constraints": {
+                    "dueInHours": 12
+                }
+            },
+            {
+                "fromUserId": "financeReviewer",
+                "action": "Reject",
+                "toUserId": "legalAdvisor",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 8
+                }
+            },
+            {
+                "fromUserId": "legalAdvisor",
+                "action": "Approve",
+                "toUserId": "finalApprover",
+                "uiConfig": {
+                    "remarksRequired": false,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 4
+                }
+            },
+            {
+                "fromUserId": "complianceOfficer",
+                "action": "Approve",
+                "toUserId": "finalApprover",
+                "uiConfig": {
+                    "remarksRequired": false,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 4
+                }
+            }
+        ]
+    };
+
+    const workflowSteps = {
+        "workflowId": "approval_flow_v1",
+        "transitions": [
+            {
+                "fromUserId": "initiator",
+                "action": "Submit",
+                "toUserId": "departmentManager",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 8
+                }
+            },
+            {
+                "fromUserId": "initiator",
+                "action": "Draft",
+                "toUserId": "seniorManager",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 12
+                }
+            },
+            {
+                "fromUserId": "seniorManager",
+                "action": "Approve",
+                "toUserId": "departmentManager",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 12
+                }
+            },
+            {
+                "fromUserId": "departmentManager",
+                "action": "Reject",
+                "toUserId": "initiator",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 12
+                }
+            },
+            {
+                "fromUserId": "departmentManager",
+                "action": "Approve",
+                "toUserId": "financeReviewer",
+                "uiConfig": {
+                    "remarksRequired": false,
+                    "attachmentRequired": true
+                },
+                "constraints": {
+                    "dueInHours": 10
+                }
+            },
+            {
+                "fromUserId": "financeReviewer",
+                "action": "Reject",
+                "toUserId": "departmentManager",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 6
+                }
+            },
+            {
+                "fromUserId": "financeReviewer",
+                "action": "Approve",
+                "toUserId": "complianceOfficer",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": true
+                },
+                "constraints": {
+                    "dueInHours": 12
+                }
+            },
+            {
+                "fromUserId": "financeReviewer",
+                "action": "Reject",
+                "toUserId": "legalAdvisor",
+                "uiConfig": {
+                    "remarksRequired": true,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 8
+                }
+            },
+            {
+                "fromUserId": "legalAdvisor",
+                "action": "Approve",
+                "toUserId": "finalApprover",
+                "uiConfig": {
+                    "remarksRequired": false,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 4
+                }
+            },
+            {
+                "fromUserId": "complianceOfficer",
+                "action": "Approve",
+                "toUserId": "finalApprover",
+                "uiConfig": {
+                    "remarksRequired": false,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 4
+                }
+            },
+            {
+                "fromUserId": "complianceOfficer",
+                "action": "Reject",
+                "toUserId": "initiator",
+                "uiConfig": {
+                    "remarksRequired": false,
+                    "attachmentRequired": false
+                },
+                "constraints": {
+                    "dueInHours": 0
+                }
+            }
+        ]
+    };
+
+
+
+
 
     const renderTabContent = () => {
         switch (activeTab) {
             case 0:
-                return (<div
-
-                    style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 200px', marginLeft: '0%' }}
-                > <ApiConfigurationForm /> </div>)
+                return (
+                    <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 200px)', marginLeft: '0%' }}>
+                        <WorkFlowForm />
+                    </div>
+                );
 
             case 1:
-                return  <LevelConfigurationTable /> 
-                    
+                return (
+                    <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 100px)', marginLeft: '0%' }}>
+                        <FlowChart workflowSteps={payloadData?.transitions} />
+                    </div>
+                );
 
-            // case 2:
-            //     return (<div
 
-            //         style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 270px',  marginLeft: '0%'  }}
-            //     > <AdvancedConfigurationForm /> </div>)
 
             default:
                 return null;
         }
     };
 
-    const handleSelectChange = (fieldName: string, value: string) => {
-        setPayloadData((prev) => ({
-            ...prev,
-            [fieldName]: value
-        }));
-        setShowAlert(true);
+
+
+    const handleOnAdd = () => {
+        setActiveTab(0);
+        setPayloadData(defaultConfiguration);
+        setSelectedRowData(null);
     }
+
+    const handleSearch = async () => {
+
+        const cookies = parseCookies();
+        const site = cookies?.site;
+        const request = {
+            site: site,
+            name: searchTerm
+        }
+        try {
+            let response = await retrieveAllConfigurations(request);
+
+
+            // Update the filtered data state
+            setConfigurationList(response);
+
+        }
+        catch (e) {
+            console.log("Error in retrieving all configuration", e);
+        }
+    }
+
+    const toggleCollapse = () => {
+        setCollapsed(!collapsed);
+    };
 
     return (
         <div className={styles.pageContainer}>
-            <div className={styles.contentWrapper}>
-                <div className={styles.dataFieldBodyContents}>
-                    <div className={isAdding ? styles.heading : styles.headings}>
-                        <div className={styles.split} style={{marginTop: "-1.5%"}}>
-                            <div>
-                                <p className={styles.headingtext}>
-                                    {selectedRowData ? selectedRowData?.workFlow : t('Create Workflow Configuration')}
-                                </p>
-                                {selectedRowData && (
-                                    <>
 
-                                        <p className={styles.dateText}>
-                                            {t('createdDate')}
-                                            <span className={styles.fadedText}>
-                                                {selectedRowData.createdDateTime
-                                                    ? dayjs(selectedRowData.createdDateTime).format('DD-MM-YYYY HH:mm:ss')
-                                                    : 'N/A'}
-                                            </span>
-                                        </p>
-                                        <p className={styles.dateText}>
-                                            {t('modifiedTime')}
-                                            <span className={styles.fadedText}>
-                                                {selectedRowData.modifiedDateTime
-                                                    ? dayjs(selectedRowData.modifiedDateTime).format('DD-MM-YYYY HH:mm:ss')
-                                                    : 'N/A'}
-                                            </span>
-                                        </p>
+            <div >
+                <div >
+                    <div className={styles.split} >
+                        <p className={styles.headingtext} style={{ marginLeft: '10px' }}>
+                            {selectedRowData ? selectedRowData?.name : t('Create Configuration')}
+                        </p>
 
-                                    </>
-                                )}
-                            </div>
 
-                            <div className={styles.actionButtons}>
-                                <Tooltip title={fullScreen ? "Exit Full Screen" : "Enter Full Screen"}>
+                        <div className={styles.actionButtons}>
+                            {activeTab === 1 && (
+                                <Tooltip title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}>
                                     <Button
-                                        onClick={handleOpenChange}
+                                        onClick={toggleCollapse}
                                         className={styles.actionButton}
-                                    >
-                                        {fullScreen ? <CloseFullscreenIcon sx={{ color: '#1874CE' }} /> : <OpenInFullIcon sx={{ color: '#1874CE' }} />}
-                                    </Button>
-                                </Tooltip>
+                                        icon={collapsed ? <OpenInFullIcon /> : <CloseFullscreenIcon />}
 
-                                {selectedRowData && (
-                                    <>
-                                        <Tooltip title="Copy">
-                                            <Button onClick={handleOpenCopyModal} className={styles.actionButton}>
-                                                <CopyIcon sx={{ color: '#1874CE' }} />
-                                            </Button>
-                                        </Tooltip>
-                                        <Tooltip title="Delete">
-                                            <Button onClick={handleOpenModal} className={styles.actionButton}>
-                                                <DeleteIcon sx={{ color: '#1874CE' }} />
-                                            </Button>
-                                        </Tooltip>
-                                    </>
-                                )}
-
-                                <Tooltip title="Close">
-                                    <Button onClick={handleClose} className={styles.actionButton}>
-                                        <CloseIcon sx={{ color: '#1874CE' }} />
-                                    </Button>
+                                    />
                                 </Tooltip>
-                            </div>
+                            )}
+
+                            {selectedRowData && (
+                                <>
+                                    <Tooltip title="Copy">
+                                        <Button onClick={handleOpenCopyModal} className={styles.actionButton}>
+                                            <CopyIcon sx={{ color: '#1874CE', fontSize: '22px' }} />
+                                        </Button>
+                                    </Tooltip>
+                                    <Tooltip title="Delete">
+                                        <Button onClick={handleOpenModal} className={styles.actionButton}>
+                                            <DeleteIcon sx={{ color: '#1874CE', fontSize: '22px' }} />
+                                        </Button>
+                                    </Tooltip>
+                                </>
+                            )}
 
 
                         </div>
+
+
                     </div>
-                    <Box sx={{ borderBottom: 1, borderColor: 'divider', marginTop: "0%" }}>
-                        <Tabs value={activeTab} onChange={handleTabChange} aria-label="Item Maintenance Tabs">
-                            <Tab label={t("Configuration Details")} />
-                            <Tab label={t("userRoleConfiguration")} />
-                        </Tabs>
-                    </Box>
-                    <Box sx={{ padding: 2 }}>
-                        {renderTabContent()}
-                    </Box>
                 </div>
+
+                <div style={{ borderTop: '1px solid #e0e0e0', marginTop: '0%' }}></div>
+
+                <Row className={styles["section-builder-container"]}>
+                    {/* Left side: List of dummy components */}
+                    <Col span={
+                        activeTab === 0
+                            ? (4)  // When tab 0, collapsed hides left column
+                            : (activeTab === 1
+                                ? (collapsed ? 4 : 0)  // When tab 1, collapsed shows left column
+                                : 4)  // Default fallback
+                    } className={styles["left-section"]}>
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                height: "100%",
+                                paddingBottom: "10px",
+                            }}
+                        >
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                fontWeight: 500,
+                                marginBottom: "16px"
+                            }}>
+                                <span>Configurations ({configurationList?.length || 0})</span>
+                                <Tooltip title="Add">
+                                    <Button onClick={handleOnAdd} className={styles.addButton}>
+                                        <AddIcon style={{ cursor: 'pointer' }} />
+                                    </Button>
+                                </Tooltip>
+                            </div>
+                            <Input.Search
+                                placeholder="Search configurations..."
+                                style={{ marginBottom: "16px" }}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                value={searchTerm}
+                                onSearch={handleSearch}
+                            />
+                            <div style={{ flex: 1, overflowY: "auto" }}>
+                                {isLoading ? (
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            height: "100%",
+                                        }}
+                                    >
+                                        Loading configurations...
+                                    </div>
+                                ) : (
+                                    <List
+                                        dataSource={configurationList}
+                                        renderItem={(configuration: any, index) => (
+                                            <List.Item
+                                                key={index}
+                                                style={{
+                                                    padding: "8px 12px",
+                                                    backgroundColor: "#fff",
+                                                    border: "1px solid rgba(0, 0, 0, 0.16)",
+                                                    marginBottom: "8px",
+                                                    borderRadius: "4px",
+                                                    cursor: "pointer",
+                                                    transition: "all 0.3s ease",
+                                                    // border: "1px solid transparent",
+                                                    boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    e.currentTarget.style.backgroundColor = "#f0f7ff";
+                                                    e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
+                                                    e.currentTarget.style.boxShadow = "0 2px 8px rgba(24,144,255,0.15)";
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.currentTarget.style.backgroundColor = "#fff";
+                                                    e.currentTarget.style.borderColor = "1px solid rgba(0, 0, 0, 0.16)";
+                                                    e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.05)";
+                                                }}
+                                                onClick={() => handleRowSelect(configuration)}
+                                            >
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "space-between",
+                                                        width: "100%",
+                                                    }}
+                                                >
+
+                                                    <span style={{
+                                                        fontWeight: "400",
+                                                        fontSize: configuration?.name.length > 30 ? "12px" : "12px",
+                                                        display: 'flex', alignItems: 'center', gap: '3px'
+                                                    }}>
+                                                        <LuComponent /> {configuration.name}
+                                                    </span>
+
+                                                    <Typography style={{
+                                                        fontSize: "0.8em",
+                                                        color: "#666",
+                                                        margin: "0",
+                                                        fontWeight: "bold",
+                                                    }}> {configuration.version} </Typography>
+                                                </div>
+                                            </List.Item>
+                                        )}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </Col>
+
+                    {/* Right side: Existing content */}
+                    <Col span={
+                        activeTab === 0
+                            ? (20)  // When tab 0, collapsed expands right column
+                            : (activeTab === 1
+                                ? (collapsed ? 20 : 24)  // When tab 1, collapsed reduces right column
+                                : 24)  // Default fallback
+                    } style={{ paddingLeft: '10px' }}>
+                        {/* Replace the existing content with Tabs */}
+                        <Tabs
+                            activeKey={activeTab.toString()}
+                            onChange={(key) => handleTabChange(null, parseInt(key))}
+                        >
+                            <Tabs.TabPane key="0" tab="Main">
+                                {renderTabContent()}
+                            </Tabs.TabPane>
+                            <Tabs.TabPane key="1" tab="User Role Configuration">
+                                {renderTabContent()}
+                            </Tabs.TabPane>
+
+                        </Tabs>
+                    </Col>
+                </Row>
+
             </div>
+
             <footer className={styles.footer} style={{ marginTop: '-10%' }}>
                 <div className={styles.floatingButtonContainer}
                     style={{ position: 'fixed', bottom: '10px', right: '20px', display: 'flex', flexDirection: 'row', gap: '10px' }}
@@ -555,7 +1437,7 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                 cancelText={t("cancel")}
                 centered
             >
-                <p>{t("deleteApiConfigMessage")}: <strong>{selectedRowData?.workFlow}</strong>?</p>
+                <p>{t("deleteApiConfigMessage")}: <strong>{selectedRowData?.name}</strong>?</p>
             </Modal>
             <Modal
                 title={t("confirmCopy")}
@@ -570,8 +1452,8 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                     form={form}
                     layout="vertical"
                     initialValues={{
-                        activityId: selectedRowData?.workFlow || '',
-                        description: ''
+                        name: selectedRowData?.name || '',
+                        version: ''
                     }}
                 >
                     <Form.Item
@@ -579,7 +1461,7 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                         name="name"
                         required
                     >
-                        <Input placeholder="" value={payloadData?.workFlow + "_COPY"} onChange={(e) => handleFieldChange(e, 'workFlow')} />
+                        <Input placeholder="" value={payloadData?.name + "_COPY"} onChange={(e) => handleFieldChange(e, 'name')} />
                     </Form.Item>
 
                     <Form.Item
