@@ -7,7 +7,7 @@ import { MyProvider } from '@modules/workflowConfiguration/hooks/WorkFlowConfigu
 const WorkFlowConfigurationPage: React.FC = () => {
   return (
     <MyProvider >
-      <WorkFlowConfigurationMaintenance />;
+      <WorkFlowConfigurationMaintenance />
     </MyProvider>
   )
 };

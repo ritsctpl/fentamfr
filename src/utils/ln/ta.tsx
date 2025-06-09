@@ -1139,4 +1139,5 @@ export const tamilLanguage = {
   "attachedTo": "இணைக்கப்பட்டுள்ளது",
   "attachedStatus": "அடைப்பு நிலை",
   "default": "இயலுநிலை",
+  "workFlowConfiguration": "பணிப்ரவாக கான்பிகரேஷன்",
 }

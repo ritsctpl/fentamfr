@@ -1125,4 +1125,6 @@ export const hindiLanguage = {
     "attachedTo": "से जुड़ा",
     "attachedStatus": "अटैचमेंट स्थिति",
     "default": "डिफ़ॉल्ट",
+    "workFlowConfiguration": "कार्यप्रवाह कॉन्फ़िगरेशन",
+
 }

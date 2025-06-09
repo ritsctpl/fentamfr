@@ -1,28 +1,6 @@
 import React, { useMemo, useCallback, useState, useContext, useEffect } from 'react';
-import { 
-  ReactFlow, 
-  Background, 
-  Controls, 
-  MiniMap, 
-  Node, 
-  Edge, 
-  useNodesState, 
-  useEdgesState,
-  MarkerType,
-  ConnectionLineType,
-  NodeTypes,
-  EdgeTypes,
-  OnNodesDelete,
-  OnEdgesDelete,
-  OnConnect,
-  addEdge,
-  Panel,
-  Connection,
-  useReactFlow,
-  ReactFlowProvider,
-  Handle,
-  Position
-} from '@xyflow/react';
+import { ReactFlow, Background, Controls, MiniMap, Node, Edge, useNodesState, useEdgesState, MarkerType, ConnectionLineType, NodeTypes,
+   EdgeTypes, OnNodesDelete, OnEdgesDelete, OnConnect, addEdge, Panel, Connection, useReactFlow, ReactFlowProvider, Handle, Position } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useMyContext } from '../hooks/WorkFlowConfigurationContext';
 import styles from '../styles/WorkFlowMaintenance.module.css';
@@ -149,90 +127,7 @@ const createPositioningStrategy = (users: string[], transitions: WorkflowTransit
   return nodePositions;
 };
 
-// Modify edge creation to handle different transition types
-function transformWorkflowToGraph1(workflowConfig: WorkflowConfig) {
-  const nodes: Node[] = [];
-  const edges: Edge[] = [];
-  const nodeMap = new Map<string, Node>();
-  let nodeCounter = 1;
 
-  // Extract unique users from transitions
-  const uniqueUsers = new Set<string>();
-  workflowConfig?.transitions?.forEach(transition => {
-    uniqueUsers.add(transition.fromUserId);
-    uniqueUsers.add(transition.toUserId);
-  });
-
-  // Create node positions
-  const usersArray = Array.from(uniqueUsers);
-  const nodePositions = createPositioningStrategy(usersArray, workflowConfig?.transitions);
-
-  // Create nodes
-  usersArray.forEach(user => {
-    const position = nodePositions.get(user) || { x: 0, y: 0 };
-    const node = {
-      id: `n${nodeCounter++}`,
-      data: { label: user },
-      position: position,
-      style: {
-        border: '2px solid #1874CE',
-        borderRadius: '8px',
-        padding: '12px',
-        backgroundColor: '#f0f8ff',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-        fontWeight: 'bold',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minWidth: '120px'
-      },
-      type: 'default'
-    };
-    nodes.push(node);
-    nodeMap.set(user, node);
-  });
-
-  // Create edges based on transitions
-  workflowConfig?.transitions?.forEach((transition, index) => {
-    const sourceNode = nodeMap.get(transition.fromUserId);
-    const targetNode = nodeMap.get(transition.toUserId);
-
-    if (sourceNode && targetNode) {
-      edges.push({
-        id: `e${sourceNode.id}-${targetNode.id}-${index}`,
-        source: sourceNode.id,
-        target: targetNode.id,
-        label: transition.action,
-        type: 'default',
-        markerEnd: { type: MarkerType.ArrowClosed },
-        data: {
-          uiConfig: transition.uiConfig,
-          constraints: transition.constraints
-        },
-        style: { 
-          stroke: transition.action === 'Approve' ? '#4CAF50' : 
-                  transition.action === 'Reject' ? '#F44336' : 
-                  transition.action === 'Submit' ? '#1874CE' :
-                  transition.action === 'Draft' ? '#FFA500' : 
-                  '#000000', 
-          strokeWidth: 2,
-          strokeDasharray: 
-            transition.action === 'Draft' ? '5,5' : 
-            transition.action === 'Submit' ? '5,5' :
-            transition.action === 'Approve' ? '5,5' :
-            transition.action === 'Reject' ? '5,5' : 'none'
-        },
-        animated: 
-          transition.action == 'Draft' || 
-          transition.action == 'Submit' ||
-          transition.action == 'Approve' ||
-          transition.action == 'Reject'
-      });
-    }
-  });
-
-  return { nodes, edges };
-}
 
 // Modify edge creation to handle different transition types
 function transformWorkflowToGraph(workflowConfig: WorkflowConfig, payloadData?: any) {
@@ -263,9 +158,9 @@ function transformWorkflowToGraph(workflowConfig: WorkflowConfig, payloadData?: 
       data: { label: user },
       position: position,
       style: {
-        border: '2px solid #1874CE',
+        // border: '2px solid #1874CE',
         borderRadius: '8px',
-        padding: '12px',
+        padding: '2px',
         backgroundColor: '#f0f8ff',
         boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
         fontWeight: 'bold',
@@ -293,6 +188,7 @@ function transformWorkflowToGraph(workflowConfig: WorkflowConfig, payloadData?: 
         label: transition.action,
         type: 'default',
         markerEnd: { type: MarkerType.ArrowClosed },
+        
         data: {
           uiConfig: transition.uiConfig,
           constraints: transition.constraints
@@ -322,17 +218,7 @@ function transformWorkflowToGraph(workflowConfig: WorkflowConfig, payloadData?: 
   return { nodes, edges };
 }
 
-// Predefined list of users for drag and drop
-const predefinedUsers1 = [
-  {"userGroup": "Department Manager",}, 
-  {"userGroup": "Technical Reviewer",}, 
-  {"userGroup": "Quality Assurance",}, 
-  {"userGroup": "Quality Assurance Manager",}, 
-  {"userGroup": "Initiator",}, 
-  {"userGroup": "Senior Manager",},
-  {"userGroup": "Customer Support",},
-  {"userGroup": "Final Approver",}
-];
+
 
 // Predefined list of states
 const predefinedStates = [
@@ -362,9 +248,7 @@ const UserNode = ({ data }: { data: { label: string } }) => {
     setIsModalVisible(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalVisible(false);
-  };
+ 
 
   return (
     <div 
@@ -401,78 +285,7 @@ const UserNode = ({ data }: { data: { label: string } }) => {
         style={{ background: '#1874CE' }} 
       />
       
-      {/* {isModalVisible && (
-        <div 
-          style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 10000,
-            backgroundColor: 'white',
-            border: '2px solid #1874CE',
-            borderRadius: '12px',
-            padding: '20px',
-            boxShadow: '0 8px 16px rgba(0,0,0,0.2)',
-            width: '350px',
-            textAlign: 'left',
-            maxWidth: '90%',
-            maxHeight: '90%',
-            overflow: 'auto'
-          }}
-        >
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '15px',
-            borderBottom: '1px solid #e0e0e0',
-            paddingBottom: '10px'
-          }}>
-            <h2 style={{ 
-              margin: 0, 
-              color: '#1874CE',
-              fontSize: '1.2em'
-            }}>
-              User Details
-            </h2>
-            <button 
-              onClick={handleCloseModal}
-              style={{
-                background: 'none',
-                border: 'none',
-                fontSize: '1.5em',
-                cursor: 'pointer',
-                color: '#666'
-              }}
-            >
-              ×
-            </button>
-          </div>
-          
-          <div>
-            <p><strong>Role:</strong> {data.label}</p>
-            <p><strong>Permissions:</strong> Workflow Approval</p>
-            <p><strong>Status:</strong> Active</p>
-            
-            <div style={{
-              marginTop: '20px',
-              padding: '10px',
-              backgroundColor: '#f0f0f0',
-              borderRadius: '8px',
-              textAlign: 'center'
-            }}>
-              <p style={{
-                margin: 0,
-                fontSize: '0.9em',
-                color: '#666'
-              }}>
-                Double-click to view details, drag to move
-              </p>
-            </div>
-          </div>
-        </div>
-      )} */}
+     
 
     </div>
   );
@@ -527,7 +340,7 @@ const FlowChartWrapper: React.FC<{ workflowSteps: WorkflowConfig }> = (props) =>
 const FlowChart: React.FC<{ workflowSteps: WorkflowConfig }> = ({ workflowSteps }) => {
   // Initial graph transformation
   const {predefinedUsers, triggerToExport, setTriggerToExport, setPayloadData, tranisitionList, payloadData
-    ,setPredefinedUsers
+    ,setPredefinedUsers, setShowAlert
   } = useMyContext();
   const { nodes: initialNodes, edges: initialEdges } = transformWorkflowToGraph(workflowSteps, payloadData);
   // State management for nodes and edges
@@ -555,6 +368,7 @@ const FlowChart: React.FC<{ workflowSteps: WorkflowConfig }> = ({ workflowSteps 
     dueInHours: 4
   });
   const [searchTerm, setSearchTerm] = useState('');
+  const [stateSearchTerm, setStateSearchTerm] = useState('');
   // React Flow instance
   const reactFlow = useReactFlow();
 
@@ -583,41 +397,11 @@ const FlowChart: React.FC<{ workflowSteps: WorkflowConfig }> = ({ workflowSteps 
     setCurrentState(state);
   }, []);
 
-  // Handle node connection
-  const handleNodeConnect1 = useCallback((sourceNodeId: string, targetNodeId: string) => {
-    if (currentState) {
-      setFlowEdges((eds) => addEdge(
-        { 
-          id: `edge-${sourceNodeId}-${targetNodeId}-${currentState}`,
-          source: sourceNodeId,
-          target: targetNodeId,
-          type: 'default',
-          label: currentState,
-          markerEnd: { 
-            type: MarkerType.ArrowClosed,
-            color: currentState === 'Approve' ? '#4CAF50' : 
-                   currentState === 'Reject' ? '#F44336' : '#000000'
-          },
-          style: { 
-            strokeWidth: 2,
-            stroke: currentState === 'Approve' ? '#4CAF50' : 
-                    currentState === 'Reject' ? '#F44336' : '#000000',
-            strokeDasharray: '5,5',
-            animation: 'dashedLineAnimation 1s linear infinite'
-          },
-          animated: true
-        }, 
-        eds
-      ));
 
-      // Reset connection state
-      setCurrentState(null);
-      setSourceNode(null);
-    }
-  }, [currentState]);
 
   // Handle node connection
 const handleNodeConnect = useCallback((sourceNodeId: string, targetNodeId: string) => {
+  setShowAlert(true);
   if (currentState) {
     // Find the source and target nodes
     const sourceNode = flowNodes.find(n => n.id === sourceNodeId);
@@ -722,7 +506,7 @@ const handleNodeConnect = useCallback((sourceNodeId: string, targetNodeId: strin
   // Handle dropping a new node onto the canvas
   const onDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
-    
+    setShowAlert(true);
     // Get the dropped item details
     const droppedItemStr = event.dataTransfer?.getData('application/json');
     
@@ -744,9 +528,9 @@ const handleNodeConnect = useCallback((sourceNodeId: string, targetNodeId: strin
           position,
           data: { label },
           style: {
-            border: '2px solid #1874CE',
+            // border: '2px solid #1874CE', 
             borderRadius: '8px',
-            padding: '12px',
+            padding: '2px',
             backgroundColor: '#f0f8ff',
             boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
             fontWeight: 'bold',
@@ -857,6 +641,27 @@ const handleNodeConnect = useCallback((sourceNodeId: string, targetNodeId: strin
     catch (e) {
         console.log("Error in retrieving all configuration", e);
     }
+}  
+
+const handleStateSearch = async () => {
+
+    const cookies = parseCookies();
+    const site = cookies?.site;
+    const request = {
+        site: site,
+        userGroup: stateSearchTerm
+    }
+    try {
+        let response = await retrieveAllUserGroup(request);
+
+
+        // Update the filtered data state
+        // setPredefinedStates(response);
+
+    }
+    catch (e) {
+        console.log("Error in retrieving all configuration", e);
+    }
 }
 
   return (
@@ -937,6 +742,12 @@ const handleNodeConnect = useCallback((sourceNodeId: string, targetNodeId: strin
             overflowY: 'auto',
             marginTop: '3px'  // Reduced margin
           }}>
+            <Input.Search
+                  style={{ marginBottom: "1px" }}
+                  onChange={(e) => setStateSearchTerm(e.target.value)}
+                  value={stateSearchTerm}
+                  onSearch={handleStateSearch}
+              />
           { predefinedStates && predefinedStates.map((state) => (
             <StateDrag 
               key={state} 

@@ -8,7 +8,7 @@ import { retrieveTop50ItemGroup } from '@services/workFlowService';
 const { TabPane } = Tabs;
 
 
-const WorkFlowForm: React.FC = () => {
+const WorkFlowForm: React.FC<{ selectedRowData: any }> = ({ selectedRowData }) => {
   const [form] = Form.useForm();
   const { payloadData, setPayloadData, setShowAlert } = useMyContext();
   const [productGroupVisible, setProductGroupVisible] = useState(false)
@@ -55,32 +55,7 @@ const WorkFlowForm: React.FC = () => {
 
 
 
-  const handleProductGroupClick = async () => {
-    setProductGroupVisible(true);
-    const columns = [{
-      title: t('productGroup'),
-      dataIndex: 'itemGroup',
-      key: 'itemGroup',
-    },
-    {
-      title: t('description'),
-      dataIndex: 'groupDescription',
-      key: 'groupDescription',
-    }
-    ]
-    setProductGroupColumns(columns);
-    const cookies = parseCookies();
-    const site = cookies.site;
-    const response = await retrieveTop50ItemGroup(site);
-    if (!response?.errorCode) {
-      const formattedData = response.map((item: any, index: number) => ({
-        id: index,
-        itemGroup: item.itemGroup,
-        groupDescription: item.groupDescription,
-      }));
-      setProductGroupData(formattedData);
-    }
-  };
+  
 
   const handleOk = (selectedRow) => {
     debugger
@@ -108,31 +83,31 @@ const WorkFlowForm: React.FC = () => {
           {/* <Row gutter={16}>
                     <Col span={12}> */}
           <Form.Item
-            label="Name"
+            label={t("name")}
             name="name"
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 10 }}
             required
             style={{ marginBottom: 15 }}
           >
-            <Input onChange={(e) => handleChange(e, 'name')} />
+            <Input disabled={selectedRowData} onChange={(e) => handleChange(e, 'name')} />
           </Form.Item>
           {/* </Col>
                     <Col span={12}> */}
           <Form.Item
-            label="Version"
+            label={t("version")}
             name="version"
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 10 }}
            style={{ marginBottom: 15 }}
            required
           >
-            <Input onChange={(e) => handleChange(e, 'version')} />
+            <Input disabled={selectedRowData} onChange={(e) => handleChange(e, 'version')} />
           </Form.Item>
           {/* </Col> */}
           {/* </Row> */}
           <Form.Item
-            label="Entity Type"
+            label={t("entityType")}
             name="entityType"
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 10 }}
@@ -145,16 +120,16 @@ const WorkFlowForm: React.FC = () => {
             </Select>
           </Form.Item>
           <Form.Item
-            label="Current Version"
+            label={t("currentVersion")}
             name="currentVersion"
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 10 }}
            style={{ marginBottom: 15 }}
           >
-            <Switch onChange={(checked) => handleSwitchChange('currentVersion', checked)} />
+            <Switch value={payloadData?.currentVersion} onChange={(checked) => handleSwitchChange('currentVersion', checked)} />
           </Form.Item>
           <Form.Item
-            label="Attachment Type"
+            label={t("attachmentType")}
             name="attachmentType"
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 10 }}
@@ -166,7 +141,7 @@ const WorkFlowForm: React.FC = () => {
             </Select>
           </Form.Item>
           <Form.Item
-            label="Attached To"
+            label={t("attachedTo")}
             name="attachedto"
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 10 }}
@@ -177,7 +152,7 @@ const WorkFlowForm: React.FC = () => {
             </Select>
           </Form.Item>
           <Form.Item
-            label="Attached Status"
+            label={t("attachedStatus")}
             name="attachedStatus"
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 10 }}
@@ -189,16 +164,16 @@ const WorkFlowForm: React.FC = () => {
             </Select>
           </Form.Item>
           <Form.Item
-            label="Default"
-            name="isDefault"
+            label={t("default")}
+            name="default"
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 10 }}
            style={{ marginBottom: 15 }}
           >
-            <Switch onChange={(checked) => handleSwitchChange('isDefault', checked)} />
+            <Switch onChange={(checked) => handleSwitchChange('default', checked)} />
           </Form.Item>
           <Form.Item
-            label="States"
+            label={t("states")}
             name="states"
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 10 }}
@@ -206,7 +181,7 @@ const WorkFlowForm: React.FC = () => {
            required
            
           >
-            <Select defaultValue="" showSearch allowClear onChange={(value) => handleSelectChange("states", value)}>
+            <Select mode="multiple" showSearch allowClear onChange={(value) => handleSelectChange("states", value)}>
               {payloadData?.statesList?.map((state) => (
                 <Select.Option key={state.name} value={state.name}>
                   {state.name}
@@ -214,23 +189,7 @@ const WorkFlowForm: React.FC = () => {
               ))}
             </Select>
           </Form.Item>
-          {/* <Form.Item
-                        label={t('productGroup')}
-                        name="itemGroup"
-                        labelCol={{ span: 4 }}
-                        wrapperCol={{ span: 10 }}
-                       style={{ marginBottom: 15 }}
-                    >
-                        <Input 
-                        suffix={
-                            <GrChapterAdd
-                              onClick={() =>
-                                handleProductGroupClick()
-                              }
-                            />
-                          }
-                        onChange={(e) => handleChange(e, 'itemGroup')} />
-                    </Form.Item> */}
+        
         </Form>
       </div>
 

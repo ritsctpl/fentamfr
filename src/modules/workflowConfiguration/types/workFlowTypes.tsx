@@ -5,7 +5,7 @@ export interface QualityApprovalProcess {
   version: string;
   entityType: string;
   attachmenttype: string;
-  isDefault: boolean;
+  default: boolean;
   currentVersion: boolean;
   attachedto: any;
   attachedStatus: any;
@@ -18,8 +18,8 @@ export const defaultConfiguration: any = {
   version: "",
   entityType: "MFR",
   attachmenttype: "",
-  isDefault: false,
-  currentVersion: false,
+  default: false,
+  currentVersion: true,
   attachedto: "Test",
   attachedStatus: "Releaseable",
   states: ["Approve"],

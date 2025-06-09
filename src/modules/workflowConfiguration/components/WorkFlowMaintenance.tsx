@@ -6,23 +6,14 @@ import CommonAppBar from "@components/CommonAppBar";
 import { useAuth } from "@/context/AuthContext";
 import { IconButton, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import CommonTable from "./CommonTable";
 import { decryptToken } from "@/utils/encryption";
 import jwtDecode from "jwt-decode";
 import { useTranslation } from 'react-i18next';
-
-
 import { message, Modal } from "antd";
-
-import ApiConfigurationCommonBar from "./WorkFlowCommonBar";
-
 import { parseCookies } from "nookies";
 import { MyProvider, useMyContext } from "../hooks/WorkFlowConfigurationContext";
 import WorkFlowConfigurationMaintenanceBody from "./WorkFlowMaintenanceBody";
 import { defaultConfiguration } from "../types/workFlowTypes";
-import { retrieveAllApiConfigurations, retrieveApiConfigurations, retrieveTop50ApiConfigurations } from "@services/apiConfigurationService";
-import axios from "axios";
-import { fetchAllUserGroup, retrieveUserGroup } from "@services/workFlowService";
 import UserGroup from "@modules/userGroup/components/UserGroupMain";
 import { retrieveAllWorkFlowStatesMaster, retrieveTop50Configurations } from "@services/workflowConfigurationService";
 
@@ -62,7 +53,7 @@ const WorkFlowConfigurationMaintenance: React.FC = () => {
 
   useEffect(() => {
     const fetchItemData = async () => {
-      // debugger;
+      
       if (isAuthenticated && token) {
         try {
           const decryptedToken = decryptToken(token);
@@ -99,190 +90,38 @@ const WorkFlowConfigurationMaintenance: React.FC = () => {
         } catch (error) {
           console.error("Error fetching data fields:", error);
         }
+
+       
+            try {
+                const cookies = parseCookies();
+                const site = cookies?.site;
+                const user = cookies?.rl_user_id
+                const request = {
+                    site: site,
+                    userId: user,
+                    name: ""
+                }
+                const response = await retrieveAllWorkFlowStatesMaster(request);
+                setPayloadData((prev) => ({
+                    ...prev,
+                    statesList: response
+                }));
+                // setPredefinedStates(response);
+            }
+            catch (error) {
+                console.error('Error fetching states:', error);
+            }
+        
+        
+
       }, 1000);
+
+    
     };
 
     fetchItemData();
-}, [isAuthenticated, username, call]);
-
-
-  const handleSearch = async (searchTerm: string) => {
-    try {
-      // Fetch the item list and wait for it to complete
-      const lowercasedTerm = searchTerm.toLowerCase();
-      const cookies = parseCookies();
-      const site = cookies?.site;
-      try {
-        let oAllItem = await retrieveAllApiConfigurations(searchTerm);
-        // Once the item list is fetched, filter the data
-        let filtered;
-        if (lowercasedTerm) {
-          if (!oAllItem?.errorCode)
-            filtered = [oAllItem];
-        } else {
-          filtered = top50Data; // If no search term, show all items
-        }
-        // Update the filtered data state
-        // setFilteredData(filtered);
-
-      }
-      catch (e) {
-        console.log("Error in retrieving all configuration", e);
-      }
-    } catch (error) {
-      console.error('Error fetching config on search:', error);
-    }
-  };
-
-  const handleAddClick = () => {
-    setAddClick(true);
-    setResetValue(true);
-    setSelectedRowData(null);
-    setIsAdding(true);
-    //setResetValueCall(resetValueCall + 1);
-    setFullScreen(false);
-    setAddClickCount(addClickCount + 1)
-    setPayloadData(defaultConfiguration);
-    setShowAlert(false);
-    setActiveTab(0);
-    handleLevelConfig();
-    const fetchStates = async () => {
-      try{
-      const cookies = parseCookies();
-      const site = cookies?.site;
-      const user = cookies?.rl_user_id
-      const request = {
-          site: site,
-          userId: user,
-          name: ""
-      }
-      const response = await retrieveAllWorkFlowStatesMaster(request);
-      setPayloadData((prev) => ({
-          ...prev,
-          statesList: response
-      }));
-     }
-     catch(e){
-      console.log("Error in retrieving all workflow states: ", e);
-     }
-  }
-  fetchStates();
-
-  };
-
-  const handleLevelConfig = async () => {
-    try {
-      const cookies = parseCookies();
-      const site = cookies?.site;
-      
-      // Fetch user group list
-      const userGroupResponse = await fetchAllUserGroup(site);
-      let userGroupList = [];
-      
-      if (!userGroupResponse?.errorCode) {
-        userGroupList = userGroupResponse.map((item, index) => ({
-          ...item,
-          id: index,
-          userRole: item?.description
-        }));
-      }
-      
-      // Set user group list
-      setUserGroupList(userGroupList);
-      setPayloadData(prev => ({
-        ...prev,
-        userGroupList: userGroupList
-      }));
-      
-      // Fetch users for the first user group
-      const userGroup = userGroupList[0]?.userGroup;
-      const userResponse = await retrieveUserGroup(site, userGroup);
-      let userList = [];
-      
-      if (!userResponse?.errorCode) {
-        userList = userResponse?.users?.map((item, index) => ({
-          id: index,
-          user: item?.user
-        })) || [];
-      }
-      
-      // Set user list
-      setPayloadData(prev => ({
-        ...prev,
-        userList: userList
-      }));
-      
-    } catch (e) {
-      console.log("Error in retrieving user configuration: ", e);
-      // Set empty lists in case of error
-      setUserGroupList([]);
-      setPayloadData(prev => ({
-        ...prev,
-        userGroupList: [],
-        userList: []
-      }));
-    }
-  };
-  
-
-  const handleRowSelect = (row: DataRow) => {
-
-    setIsAdding(true);
-    setResetValue(false);
-    setFullScreen(false);
-    setAddClick(false);
-
-    const fetchConfig = async () => {
-      try {
-        let response;
-        const id = row.id;
-        const cookies = parseCookies();
-        const site = cookies?.site;
-        try {
-          // Make the API call using Axios
-          const apiResponse = await axios.get('https://mocki.io/v1/9e6f15b1-9374-4049-a5a1-6d63983018e6');
-          response = apiResponse.data;
     
-          if (!response?.errorCode) {
-            // setPayloadData(response);
-            setSelectedRowData(response);
-          }
-        }
-        catch (e) {
-          console.error("Error in retrieveing the configuration", e);
-        }
-      } catch (error) {
-        console.error("Error fetching configuration:", error);
-      }
-    };
-
-    if (showAlert == true && isAdding == true) {
-      Modal.confirm({
-        title: t('confirm'),
-        content: t('rowSelectionMsg'),
-        okText: t('ok'),
-        cancelText: t('cancel'),
-        onOk: async () => {
-          // Proceed with the API call if confirmed
-          try {
-            await fetchConfig();
-          }
-          catch (e) {
-            console.error("Error in retrieveing the configuartion: ", e);
-          }
-          setShowAlert(false)
-        },
-        onCancel() {
-        },
-      });
-    } else {
-      // If no data to confirm, proceed with the API call
-      fetchConfig();
-    }
-    setIsAdding(true);
-
-  };
-
+}, [isAuthenticated, username, call]);
 
   const handleClose = () => {
     setIsAdding(false);

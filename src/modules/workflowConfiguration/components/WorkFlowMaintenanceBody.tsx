@@ -8,7 +8,8 @@ import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
 import OpenInFullIcon from '@mui/icons-material/OpenInFull';
 import { Box, Tab } from '@mui/material';
 import dayjs from 'dayjs';
-import { createConfiguration, deleteConfiguration, fetchAllUserGroup, retrieveAllConfigurations, retrieveAllWorkFlowStatesMaster, retrieveConfigurations, updateConfiguration, } from '@services/workflowConfigurationService';
+import { createConfiguration, deleteConfiguration, fetchAllUserGroup, retrieveAllConfigurations, retrieveAllWorkFlowStatesMaster, retrieveConfigurations,
+     updateConfiguration, } from '@services/workflowConfigurationService';
 import { useTranslation } from 'react-i18next';
 import { useMyContext } from '../hooks/WorkFlowConfigurationContext';
 import ApiConfigurationForm from './WorkFlowForm';
@@ -18,7 +19,6 @@ import FlowChart from './FlowChart';
 const { Option } = Select
 import { LuComponent } from "react-icons/lu";
 import AddIcon from "@mui/icons-material/Add";
-import { retrieveAllComponents, retrieveComponent } from '@services/componentBuilderService';
 import WorkFlowForm from './WorkFlowForm';
 import { retrieveUserGroup } from '@services/workFlowService';
 import { defaultConfiguration } from '../types/workFlowTypes';
@@ -49,7 +49,6 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
     const { payloadData, setPayloadData, showAlert, setShowAlert, predefinedUsers, setPredefinedUsers,
         predefinedStates, setPredefinedStates, triggerToExport, setTriggerToExport, tranisitionList,
         configurationList, setConfigurationList } = useMyContext();
-    // const [activeTab, setActiveTab] = useState<number>(0);
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
     const [isCopyModalVisible, setIsCopyModalVisible] = useState<boolean>(false);
     const [form] = Form.useForm();
@@ -129,17 +128,7 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
 
     };
 
-    const handleOpenChange = () => {
-        if (fullScreen == false)
-            setFullScreen(true);
-        else
-            setFullScreen(false);
-    }
-
-
-    const handleClose = () => {
-        onClose();
-    };
+   
 
 
     const handleSave = async (oEvent) => {
@@ -157,6 +146,12 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
         if (payloadData?.version == "" || payloadData?.version == null || payloadData?.version == undefined) {
             flagToEncode = false;
             message.error("Version cannot be empty");
+            return;
+        }
+
+        if ((payloadData?.states == "" || payloadData?.states == null || payloadData?.states == undefined) || (payloadData?.states?.length == 0)) {
+            flagToEncode = false;
+            message.error("States cannot be empty");
             return;
         }
 
@@ -191,9 +186,9 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                             else {
                                 setCall(call + 1);
                                 setShowAlert(false);
-
-
-                                message.success(createResponse?.message);
+                                setPayloadData(createResponse?.response);
+                                setSelectedRowData(createResponse?.response);
+                                message.success(createResponse?.message_details?.msg);
                             }
                         }
                     }
@@ -214,7 +209,9 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                                 }
                                 else {
                                     setShowAlert(false);
-                                    message.success(updateResponse?.message);
+                                    message.success(updateResponse?.message_details?.msg);
+                                    setPayloadData(updateResponse?.response);
+                                    setSelectedRowData(updateResponse?.response);
                                     setCall(call + 1);
                                 }
                             }
@@ -259,7 +256,8 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
             cancelText: t('cancel'),
             onOk: async () => {
                 // Proceed with the API call if confirmed
-                onClose();
+                setSelectedRowData(null);
+                setPayloadData(defaultConfiguration);
             },
             onCancel() {
             },
@@ -440,6 +438,8 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                         updatedRequest = {
                             site: site,
                             ...payloadData,
+                            name: values?.name,
+                            version: values?.version,
                             userId: user
                         }
 
@@ -450,7 +450,7 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                             }
                             else {
                                 setCall(call + 1);
-                                message.success(copyResponse?.message);
+                                message.success(copyResponse?.message_details?.msg);
                                 setShowAlert(false);
                                 onClose();
                             }
@@ -484,698 +484,14 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
             });
     };
 
-
     const { t } = useTranslation();
-
-    const workflowSteps1 = [
-        {
-            currentUserOrState: [
-                {
-                    action: null,
-                    user: "Initiator"
-                }
-            ],
-            nextState: [
-                {
-                    action: "Submit",
-                    user: "Department Manager"
-                },
-                {
-                    action: "Draft",
-                    user: "Technical Reviewer"
-                }
-            ]
-        },
-        {
-            currentUserOrState: [
-                {
-                    action: "Approve",
-                    user: "Department Manager"
-                },
-                {
-                    action: "Reject",
-                    user: "Department Manager"
-                },
-                {
-                    action: "Approve",
-                    user: "Technical Reviewer"
-                },
-                {
-                    action: "Reject",
-                    user: "Technical Reviewer"
-                }
-            ],
-            nextState: [
-                {
-                    action: "Approve",
-                    user: "Quality Assurance",
-                    fromUser: "Department Manager"
-                },
-                {
-                    action: "Reject",
-                    user: "Initiator",
-                    fromUser: "Department Manager"
-                },
-                {
-                    action: "Approve",
-                    user: "Senior Manager",
-                    fromUser: "Technical Reviewer"
-                },
-                {
-                    action: "Reject",
-                    user: "Initiator",
-                    fromUser: "Technical Reviewer"
-                }
-            ]
-        },
-        {
-            currentUserOrState: [
-                {
-                    action: "Approve",
-                    user: "Quality Assurance"
-                },
-                {
-                    action: "Reject",
-                    user: "Quality Assurance"
-                },
-                {
-                    action: "Approve",
-                    user: "Senior Manager"
-                },
-                {
-                    action: "Reject",
-                    user: "Senior Manager"
-                }
-            ],
-            nextState: [
-                {
-                    action: "Approve",
-                    user: "Final Approver",
-                    fromUser: "Quality Assurance"
-                },
-                {
-                    action: "Reject",
-                    user: "Department Manager",
-                    fromUser: "Quality Assurance"
-                },
-                {
-                    action: "Approve",
-                    user: "Final Approver",
-                    fromUser: "Senior Manager"
-                },
-                {
-                    action: "Reject",
-                    user: "Technical Reviewer",
-                    fromUser: "Senior Manager"
-                }
-            ]
-        },
-        {
-            currentUserOrState: [
-                {
-                    action: "Approve",
-                    user: "Final Approver"
-                },
-                {
-                    action: "Reject",
-                    user: "Final Approver"
-                }
-            ],
-            nextState: [
-                {
-                    action: "Approve",
-                    user: "Completed",
-                    fromUser: "Final Approver"
-                },
-                {
-                    action: "Reject",
-                    user: "Initiator",
-                    fromUser: "Final Approver"
-                }
-            ]
-        }
-    ];
-
-    const workflowSteps2 = [
-        {
-            "currentUserOrState": [
-                {
-                    "action": null,
-                    "user": "Initiator"
-                }
-            ],
-            "nextState": [
-                {
-                    "action": "",
-                    "user": "Initiator",
-                    "fromUser": "Initiator"
-                },
-                {
-                    "action": "Submit",
-                    "user": "Senior Manager",
-                    "fromUser": "Initiator"
-                },
-                {
-                    "action": "Draft",
-                    "user": "Quality Assurance Manager",
-                    "fromUser": "Initiator"
-                }
-            ]
-        },
-        {
-            "currentUserOrState": [
-                {
-                    "action": null,
-                    "user": "Senior Manager"
-                }
-            ],
-            "nextState": [
-                {
-                    "action": "",
-                    "user": "Quality Assurance",
-                    "fromUser": "Senior Manager"
-                },
-                {
-                    "action": "",
-                    "user": "Senior Manager",
-                    "fromUser": "Senior Manager"
-                },
-                {
-                    "action": "",
-                    "user": "Initiator",
-                    "fromUser": "Senior Manager"
-                }
-            ]
-        },
-        {
-            "currentUserOrState": [
-                {
-                    "action": null,
-                    "user": "Quality Assurance Manager"
-                }
-            ],
-            "nextState": [
-                {
-                    "action": "Reject",
-                    "user": "Initiator",
-                    "fromUser": "Quality Assurance Manager"
-                },
-                {
-                    "action": "Approve",
-                    "user": "Department Manager",
-                    "fromUser": "Quality Assurance Manager"
-                },
-                {
-                    "action": "Approve",
-                    "user": "Customer Support",
-                    "fromUser": "Quality Assurance Manager"
-                }
-            ]
-        },
-        {
-            "currentUserOrState": [
-                {
-                    "action": "Approve",
-                    "user": "Department Manager"
-                }
-            ],
-            "nextState": [
-                {
-                    "action": "Approve",
-                    "user": "Technical Reviewer",
-                    "fromUser": "Department Manager"
-                }
-            ]
-        },
-        {
-            "currentUserOrState": [
-                {
-                    "action": "Approve",
-                    "user": "Technical Reviewer"
-                }
-            ],
-            "nextState": [
-                {
-                    "action": "Approve",
-                    "user": "Final Approve",
-                    "fromUser": "Technical Reviewer"
-                },
-                {
-                    "action": "Reject",
-                    "user": "Initiator",
-                    "fromUser": "Technical Reviewer"
-                }
-            ]
-        }
-    ]
-
-    const workflowSteps3 = [
-        {
-            "currentUserOrState": [
-                {
-                    "action": "Submit",
-                    "user": "Department Manager"
-                },
-                {
-                    "action": "Draft",
-                    "user": "Department Manager"
-                }
-            ],
-            "nextState": [
-                {
-                    "action": "Submit",
-                    "user": "Technical Reviewer",
-                    "fromUser": "Department Manager"
-                },
-                {
-                    "action": "Draft",
-                    "user": "Quality Assurance",
-                    "fromUser": "Department Manager"
-                }
-            ]
-        },
-        {
-            "currentUserOrState": [
-                {
-                    "action": "Approve",
-                    "user": "Technical Reviewer"
-                },
-                {
-                    "action": "Reject",
-                    "user": "Technical Reviewer"
-                }
-            ],
-            "nextState": [
-                {
-                    "action": "Approve",
-                    "user": "Quality Assurance Manager",
-                    "fromUser": "Technical Reviewer"
-                },
-                {
-                    "action": "Reject",
-                    "user": "Technical Reviewer",
-                    "fromUser": "Technical Reviewer"
-                },
-                {
-                    "action": "Reject",
-                    "user": "Department Manager",
-                    "fromUser": "Technical Reviewer"
-                }
-            ]
-        },
-        {
-            "currentUserOrState": [
-                {
-                    "action": "Approve",
-                    "user": "Quality Assurance"
-                }
-            ],
-            "nextState": [
-                {
-                    "action": "Approve",
-                    "user": "Technical Reviewer",
-                    "fromUser": "Quality Assurance"
-                }
-            ]
-        }
-    ]
-
-    const workflowSteps4 = {
-        "workflowId": "approval_flow_v1",
-        "transitions": [
-            {
-                "fromUserId": "start",
-                "action": "Send for approval",
-                "toUserId": "user1",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 8
-                }
-            },
-            {
-                "fromUserId": "user1",
-                "action": "Reject",
-                "toUserId": "user2",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 12
-                }
-            },
-            {
-                "fromUserId": "user2",
-                "action": "Send for approval",
-                "toUserId": "user3",
-                "uiConfig": {
-                    "remarksRequired": false,
-                    "attachmentRequired": true
-                },
-                "constraints": {
-                    "dueInHours": 10
-                }
-            },
-            {
-                "fromUserId": "user2",
-                "action": "Reject",
-                "toUserId": "user1",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 6
-                }
-            },
-            {
-                "fromUserId": "user3",
-                "action": "Approve",
-                "toUserId": "user5",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": true
-                },
-                "constraints": {
-                    "dueInHours": 12
-                }
-            },
-            {
-                "fromUserId": "user3",
-                "action": "Reject",
-                "toUserId": "user4",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 8
-                }
-            },
-            {
-                "fromUserId": "user4",
-                "action": "Approve",
-                "toUserId": "user6",
-                "uiConfig": {
-                    "remarksRequired": false,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 4
-                }
-            },
-            {
-                "fromUserId": "user5",
-                "action": "Approve",
-                "toUserId": "user6",
-                "uiConfig": {
-                    "remarksRequired": false,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 4
-                }
-            }
-        ]
-    }
-
-    const workflowSteps5 = {
-        "workflowId": "approval_flow_v1",
-        "transitions": [
-            {
-                "fromUserId": "initiator",
-                "action": "Submit",
-                "toUserId": "departmentManager",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 8
-                }
-            },
-            {
-                "fromUserId": "initiator",
-                "action": "Draft",
-                "toUserId": "seniorManager",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 12
-                }
-            },
-            {
-                "fromUserId": "seniorManager",
-                "action": "Approve",
-                "toUserId": "departmentManager",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 12
-                }
-            },
-            {
-                "fromUserId": "departmentManager",
-                "action": "Reject",
-                "toUserId": "initiator",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 12
-                }
-            },
-            {
-                "fromUserId": "departmentManager",
-                "action": "Approve",
-                "toUserId": "financeReviewer",
-                "uiConfig": {
-                    "remarksRequired": false,
-                    "attachmentRequired": true
-                },
-                "constraints": {
-                    "dueInHours": 10
-                }
-            },
-            {
-                "fromUserId": "financeReviewer",
-                "action": "Reject",
-                "toUserId": "departmentManager",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 6
-                }
-            },
-            {
-                "fromUserId": "financeReviewer",
-                "action": "Approve",
-                "toUserId": "complianceOfficer",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": true
-                },
-                "constraints": {
-                    "dueInHours": 12
-                }
-            },
-            {
-                "fromUserId": "financeReviewer",
-                "action": "Reject",
-                "toUserId": "legalAdvisor",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 8
-                }
-            },
-            {
-                "fromUserId": "legalAdvisor",
-                "action": "Approve",
-                "toUserId": "finalApprover",
-                "uiConfig": {
-                    "remarksRequired": false,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 4
-                }
-            },
-            {
-                "fromUserId": "complianceOfficer",
-                "action": "Approve",
-                "toUserId": "finalApprover",
-                "uiConfig": {
-                    "remarksRequired": false,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 4
-                }
-            }
-        ]
-    };
-
-    const workflowSteps = {
-        "workflowId": "approval_flow_v1",
-        "transitions": [
-            {
-                "fromUserId": "initiator",
-                "action": "Submit",
-                "toUserId": "departmentManager",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 8
-                }
-            },
-            {
-                "fromUserId": "initiator",
-                "action": "Draft",
-                "toUserId": "seniorManager",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 12
-                }
-            },
-            {
-                "fromUserId": "seniorManager",
-                "action": "Approve",
-                "toUserId": "departmentManager",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 12
-                }
-            },
-            {
-                "fromUserId": "departmentManager",
-                "action": "Reject",
-                "toUserId": "initiator",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 12
-                }
-            },
-            {
-                "fromUserId": "departmentManager",
-                "action": "Approve",
-                "toUserId": "financeReviewer",
-                "uiConfig": {
-                    "remarksRequired": false,
-                    "attachmentRequired": true
-                },
-                "constraints": {
-                    "dueInHours": 10
-                }
-            },
-            {
-                "fromUserId": "financeReviewer",
-                "action": "Reject",
-                "toUserId": "departmentManager",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 6
-                }
-            },
-            {
-                "fromUserId": "financeReviewer",
-                "action": "Approve",
-                "toUserId": "complianceOfficer",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": true
-                },
-                "constraints": {
-                    "dueInHours": 12
-                }
-            },
-            {
-                "fromUserId": "financeReviewer",
-                "action": "Reject",
-                "toUserId": "legalAdvisor",
-                "uiConfig": {
-                    "remarksRequired": true,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 8
-                }
-            },
-            {
-                "fromUserId": "legalAdvisor",
-                "action": "Approve",
-                "toUserId": "finalApprover",
-                "uiConfig": {
-                    "remarksRequired": false,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 4
-                }
-            },
-            {
-                "fromUserId": "complianceOfficer",
-                "action": "Approve",
-                "toUserId": "finalApprover",
-                "uiConfig": {
-                    "remarksRequired": false,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 4
-                }
-            },
-            {
-                "fromUserId": "complianceOfficer",
-                "action": "Reject",
-                "toUserId": "initiator",
-                "uiConfig": {
-                    "remarksRequired": false,
-                    "attachmentRequired": false
-                },
-                "constraints": {
-                    "dueInHours": 0
-                }
-            }
-        ]
-    };
-
-
-
-
 
     const renderTabContent = () => {
         switch (activeTab) {
             case 0:
                 return (
                     <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 200px)', marginLeft: '0%' }}>
-                        <WorkFlowForm />
+                        <WorkFlowForm selectedRowData={selectedRowData} />
                     </div>
                 );
 
@@ -1233,12 +549,12 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                 <div >
                     <div className={styles.split} >
                         <p className={styles.headingtext} style={{ marginLeft: '10px' }}>
-                            {selectedRowData ? selectedRowData?.name : t('Create Configuration')}
+                            {selectedRowData ? selectedRowData?.name + " / " + selectedRowData?.version : t('createConfiguration')}
                         </p>
 
 
                         <div className={styles.actionButtons}>
-                            {activeTab === 1 && (
+                            {activeTab == 1 && (
                                 <Tooltip title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}>
                                     <Button
                                         onClick={toggleCollapse}
@@ -1472,20 +788,7 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                         <Input placeholder="" value={payloadData?.version} onChange={(e) => handleFieldChange(e, 'version')} />
                     </Form.Item>
 
-                    {/* <Form.Item
-                        label={t('type')}
-                        
-                    >
-                        <Select
-                            value={payloadData?.type}
-                            onChange={(value) => handleSelectChange("type", value)}
-                        >
-                            <Option value="MFR">MFR</Option>
-                            <Option value="BMR">BMR</Option>
-                            <Option value="BPR">BPR</Option>
-                            <Option value="eBMR">eBMR</Option>
-                        </Select>
-                    </Form.Item> */}
+                   
 
                 </Form>
             </Modal>
