@@ -1124,4 +1124,5 @@ export const kannadaLanguage = {
   "attachedStatus": "ಲಗತ್ತು ಸ್ಥಿತಿ",
   "default": "ಡೀಫಾಲ್ಟ್",
   "workFlowConfiguration": "ಕಾರ್ಯಪ್ರವಾಹ ಕಾನ್ಫಿಗರೇಷನ್",
+  "userRoleConfiguration": "ಬಳಕೆದಾರ ಭೂಮಿಕೆ ಕಾನ್ಫಿಗರೇಷನ್",
 }

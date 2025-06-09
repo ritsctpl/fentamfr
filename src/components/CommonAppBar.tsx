@@ -205,7 +205,7 @@ const CommonAppBar: React.FC<CommonAppBarProps> = ({
         // debugger
         if (Array.isArray(response)) {
           // response = response.map(site => site == 'RITS' ? '*' : site);
-          // setAvailableSites(response);
+         
         } else {
           console.error("Unexpected response format:", response);
         }
@@ -235,7 +235,7 @@ const CommonAppBar: React.FC<CommonAppBarProps> = ({
           // Fetch site details first
           const responseSite = await fetchSiteAll(response.data.currentSite);
           setSiteDetails(responseSite);
-          // console.log(responseSite.theme, "responseSite");
+          console.log(response.data.site, "responseSite");
           // localStorage.setItem("theme", JSON.stringify(responseSite.theme));
           // console.log(JSON.parse(localStorage.getItem("theme"))["color"]);
           // Then update other state and cookies
@@ -394,41 +394,7 @@ const CommonAppBar: React.FC<CommonAppBarProps> = ({
     }
   };
  
-  // Modified useEffect for initializing theme
-  // useEffect(() => {
-  //   const initializeTheme = async () => {
-  //     if (isAuthenticated && username) {
-  //       try {
-  //         setIsLoading(true);
-  //         const response = await api.post(
-  //           "/user-service/retrieve_detailed_user",
-  //           {
-  //             user: username,
-  //           }
-  //         );
  
-  //         // Fetch site details first
-  //         const responseSite = await fetchSiteAll(response.data.currentSite);
-  //         setSiteDetails(responseSite);
- 
-  //         // Update theme immediately after getting site details
-  //         await updateThemeFromSite(responseSite);
- 
-  //         // Set other state and cookies
-  //         setCookie(null, "site", response.data.currentSite, { path: "/" });
-  //         setSite(response.data.currentSite);
- 
-  //         // ... rest of your initialization code ...
-  //       } catch (error) {
-  //         console.error("Error initializing:", error);
-  //       } finally {
-  //         setIsLoading(false);
-  //       }
-  //     }
-  //   };
- 
-  //   initializeTheme();
-  // }, [isAuthenticated, username]);
 
   useEffect(() => {
     message.destroy();

@@ -17,10 +17,10 @@ export const defaultConfiguration: any = {
   name: "",
   version: "",
   entityType: "MFR",
-  attachmenttype: "",
+  attachmenttype: "Export",
   default: false,
   currentVersion: true,
-  attachedto: "Test",
+  attachedto: "Item",
   attachedStatus: "Releaseable",
   states: ["Approve"],
   transitions: []

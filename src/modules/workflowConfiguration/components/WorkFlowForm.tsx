@@ -10,7 +10,7 @@ const { TabPane } = Tabs;
 
 const WorkFlowForm: React.FC<{ selectedRowData: any }> = ({ selectedRowData }) => {
   const [form] = Form.useForm();
-  const { payloadData, setPayloadData, setShowAlert } = useMyContext();
+  const { payloadData, setPayloadData, setShowAlert, predefinedStates } = useMyContext();
   const [productGroupVisible, setProductGroupVisible] = useState(false)
   const [productGroupColumns, setProductGroupColumns] = useState([]);
   const [productGroupData, setProductGroupData] = useState([]);
@@ -90,7 +90,7 @@ const WorkFlowForm: React.FC<{ selectedRowData: any }> = ({ selectedRowData }) =
             required
             style={{ marginBottom: 15 }}
           >
-            <Input disabled={selectedRowData} onChange={(e) => handleChange(e, 'name')} />
+            <Input  onChange={(e) => handleChange(e, 'name')} />
           </Form.Item>
           {/* </Col>
                     <Col span={12}> */}
@@ -102,7 +102,7 @@ const WorkFlowForm: React.FC<{ selectedRowData: any }> = ({ selectedRowData }) =
            style={{ marginBottom: 15 }}
            required
           >
-            <Input disabled={selectedRowData} onChange={(e) => handleChange(e, 'version')} />
+            <Input  onChange={(e) => handleChange(e, 'version')} />
           </Form.Item>
           {/* </Col> */}
           {/* </Row> */}
@@ -137,6 +137,7 @@ const WorkFlowForm: React.FC<{ selectedRowData: any }> = ({ selectedRowData }) =
             
           >
             <Select defaultValue={"Export"} onChange={(value) => handleSelectChange("attachmentType", value)}>
+              <Select.Option value="Import">Import</Select.Option>
               <Select.Option value="Export">Export</Select.Option>
             </Select>
           </Form.Item>
@@ -148,7 +149,11 @@ const WorkFlowForm: React.FC<{ selectedRowData: any }> = ({ selectedRowData }) =
            style={{ marginBottom: 15 }}
           >
             <Select defaultValue={""} onChange={(value) => handleSelectChange("attachedto", value)}>
-              <Select.Option value="Export">Export</Select.Option>
+              <Select.Option value="Item">Item</Select.Option>
+              <Select.Option value="ItemGroup">ItemGroup</Select.Option>
+              <Select.Option value="Operation">Operation</Select.Option>
+              <Select.Option value="Resource">Resource</Select.Option>
+              <Select.Option value="Storage Location">Storage Location</Select.Option>
             </Select>
           </Form.Item>
           <Form.Item
@@ -182,7 +187,7 @@ const WorkFlowForm: React.FC<{ selectedRowData: any }> = ({ selectedRowData }) =
            
           >
             <Select mode="multiple" showSearch allowClear onChange={(value) => handleSelectChange("states", value)}>
-              {payloadData?.statesList?.map((state) => (
+              {predefinedStates?.map((state) => (
                 <Select.Option key={state.name} value={state.name}>
                   {state.name}
                 </Select.Option>

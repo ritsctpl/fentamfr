@@ -1140,4 +1140,5 @@ export const tamilLanguage = {
   "attachedStatus": "அடைப்பு நிலை",
   "default": "இயலுநிலை",
   "workFlowConfiguration": "பணிப்ரவாக கான்பிகரேஷன்",
+  "userRoleConfiguration": "பயனர் பாத்திரங்கள் கான்பிகரேஷன்",
 }

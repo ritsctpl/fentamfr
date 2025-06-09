@@ -1192,5 +1192,4 @@ export const englishLanguage = {
   "default": "Default",
   "workFlowConfiguration": "Work Flow Configuration",
   "userRoleConfiguration": "User Role Configuration",
-
 }

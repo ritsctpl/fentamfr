@@ -6,7 +6,8 @@ import { useMyContext } from '../hooks/WorkFlowConfigurationContext';
 import styles from '../styles/WorkFlowMaintenance.module.css';
 import { Input } from 'antd';
 import { parseCookies } from 'nookies';
-import { fetchAllUserGroup, retrieveAllUserGroup } from '@services/workflowConfigurationService';
+import { fetchAllUserGroup, retrieveAllUserGroup, retrieveAllWorkFlowStatesMaster } from '@services/workflowConfigurationService';
+import { AnyAaaaRecord } from 'dns';
 
 
 // Update the interface to match the new JSON structure
@@ -221,7 +222,7 @@ function transformWorkflowToGraph(workflowConfig: WorkflowConfig, payloadData?: 
 
 
 // Predefined list of states
-const predefinedStates = [
+const predefinedStates1 = [
   'Approve', 
   'Reject', 
   'Draft', 
@@ -340,7 +341,7 @@ const FlowChartWrapper: React.FC<{ workflowSteps: WorkflowConfig }> = (props) =>
 const FlowChart: React.FC<{ workflowSteps: WorkflowConfig }> = ({ workflowSteps }) => {
   // Initial graph transformation
   const {predefinedUsers, triggerToExport, setTriggerToExport, setPayloadData, tranisitionList, payloadData
-    ,setPredefinedUsers, setShowAlert
+    ,setPredefinedUsers, setShowAlert, predefinedStates, setPredefinedStates
   } = useMyContext();
   const { nodes: initialNodes, edges: initialEdges } = transformWorkflowToGraph(workflowSteps, payloadData);
   // State management for nodes and edges
@@ -584,43 +585,215 @@ const handleNodeConnect = useCallback((sourceNodeId: string, targetNodeId: strin
     return transitions; // Return transitions directly
   }, [flowNodes, flowEdges]);
 
-  const handleNodeDoubleClick = useCallback((event: React.MouseEvent, node: Node) => {
-    setSelectedNode(node);
-    setIsNodeModalVisible(true);
-  }, []);
+  // Add a new state to store node configurations
+  const [nodeConfigurations, setNodeConfigurations] = useState<{
+    [nodeName: string]: {
+      remarksRequired: boolean;
+      attachmentRequired: boolean;
+      dueInHours: number;
+    }
+  }>({});
 
   const handleCloseNodeModal = useCallback(() => {
     setIsNodeModalVisible(false);
     setSelectedNode(null);
   }, []);
 
+
+  const handleNodeDoubleClick = useCallback((event: React.MouseEvent, node: Node) => {
+    const nodeLabel: any = node.data.label;
+    
+    // Find related edges where this node is the target
+    const relatedIncomingEdges = flowEdges.filter(
+      edge => {
+        const targetNode = flowNodes.find(n => n.id === edge.target);
+        return targetNode?.data.label === nodeLabel;
+      }
+    );
+
+    // Find related edges where this node is the source
+    const relatedOutgoingEdges = flowEdges.filter(
+      edge => {
+        const sourceNode = flowNodes.find(n => n.id === edge.source);
+        return sourceNode?.data.label === nodeLabel;
+      }
+    );
+
+    // Find related transitions from payloadData
+    const relatedTransitions = payloadData?.transitions?.filter(
+      transition => 
+        transition.fromUserId === nodeLabel || 
+        transition.toUserId === nodeLabel
+    ) || [];
+
+    // Enhanced selection logic
+    const selectMostRelevantConfiguration = () => {
+      // Priority 1: Exact match for incoming edges
+      for (const edge of relatedIncomingEdges) {
+        const sourceNode = flowNodes.find(n => n.id === edge.source);
+        const matchingTransition = relatedTransitions.find(
+          transition => 
+            transition.fromUserId === sourceNode?.data.label &&
+            transition.toUserId === nodeLabel &&
+            transition.action === edge.label
+        );
+
+        if (matchingTransition) {
+          return {
+            edge,
+            transition: matchingTransition,
+            type: 'incoming'
+          };
+        }
+      }
+
+      // Priority 2: Exact match for outgoing edges
+      for (const edge of relatedOutgoingEdges) {
+        const targetNode = flowNodes.find(n => n.id === edge.target);
+        const matchingTransition = relatedTransitions.find(
+          transition => 
+            transition.fromUserId === nodeLabel &&
+            transition.toUserId === targetNode?.data.label &&
+            transition.action === edge.label
+        );
+
+        if (matchingTransition) {
+          return {
+            edge,
+            transition: matchingTransition,
+            type: 'outgoing'
+          };
+        }
+      }
+
+      // Fallback: Use first available transition or edge
+      return relatedTransitions.length > 0
+        ? {
+            transition: relatedTransitions[0],
+            edge: relatedIncomingEdges[0] || relatedOutgoingEdges[0],
+            type: relatedTransitions[0].toUserId === nodeLabel ? 'incoming' : 'outgoing'
+          }
+        : null;
+    };
+
+    const selectedConfiguration : any = selectMostRelevantConfiguration();
+
+    // Prepare node configuration
+    const nodeConfig = selectedConfiguration 
+      ? {
+          remarksRequired: 
+            selectedConfiguration.transition.uiConfig.remarksRequired ?? 
+            selectedConfiguration.edge?.data?.uiConfig?.remarksRequired ?? 
+            false,
+          attachmentRequired: 
+            selectedConfiguration.transition.uiConfig.attachmentRequired ?? 
+            selectedConfiguration.edge?.data?.uiConfig?.attachmentRequired ?? 
+            false,
+          dueInHours: 
+            selectedConfiguration.transition.constraints.dueInHours ?? 
+            selectedConfiguration.edge?.data?.constraints?.dueInHours ?? 
+            4,
+          source: 
+            selectedConfiguration.type === 'incoming' 
+              ? selectedConfiguration.transition.fromUserId 
+              : nodeLabel,
+          target: 
+            selectedConfiguration.type === 'incoming' 
+              ? nodeLabel 
+              : selectedConfiguration.transition.toUserId,
+          action: selectedConfiguration.transition.action
+        }
+      : {
+          remarksRequired: false,
+          attachmentRequired: false,
+          dueInHours: 4,
+          source: '',
+          target: '',
+          action: ''
+        };
+
+    // Set the current node configuration
+    setNodeConfig(nodeConfig);
+    
+    setSelectedNode(node);
+    setIsNodeModalVisible(true);
+  }, [flowEdges, flowNodes, payloadData]);
+
   const handleNodeConfigSave = useCallback(() => {
     if (selectedNode) {
-      // Update the node's data with the new configuration
-      setFlowNodes((nodes) => 
-        nodes.map((node) => 
-          node.id === selectedNode.id 
-            ? { 
-                ...node, 
-                data: { 
-                  ...node.data, 
-                  uiConfig: {
-                    remarksRequired: nodeConfig.remarksRequired,
-                    attachmentRequired: nodeConfig.attachmentRequired
-                  },
-                  constraints: {
-                    dueInHours: nodeConfig.dueInHours
-                  }
-                } 
+      const nodeLabel: any = selectedNode.data.label;
+
+      // Update transitions in payloadData
+      const updatedTransitions = payloadData.transitions.map(transition => {
+        // Match transitions where the node is either source or target
+        if (
+          transition.fromUserId === nodeLabel || 
+          transition.toUserId === nodeLabel
+        ) {
+          return {
+            ...transition,
+            uiConfig: {
+              remarksRequired: nodeConfig.remarksRequired,
+              attachmentRequired: nodeConfig.attachmentRequired
+            },
+            constraints: {
+              dueInHours: nodeConfig.dueInHours
+            }
+          };
+        }
+        return transition;
+      });
+
+      // Update payload data
+      setPayloadData(prev => ({
+        ...prev,
+        transitions: updatedTransitions
+      }));
+
+      // Update flow edges for both incoming and outgoing edges
+      setFlowEdges(edges => 
+        edges.map(edge => {
+          const sourceNode = flowNodes.find(n => n.id === edge.source);
+          const targetNode = flowNodes.find(n => n.id === edge.target);
+          
+          // Update edges where the node is either source or target
+          if (
+            sourceNode?.data.label === nodeLabel || 
+            targetNode?.data.label === nodeLabel
+          ) {
+            return {
+              ...edge,
+              data: {
+                ...edge.data,
+                uiConfig: {
+                  remarksRequired: nodeConfig.remarksRequired,
+                  attachmentRequired: nodeConfig.attachmentRequired
+                },
+                constraints: {
+                  dueInHours: nodeConfig.dueInHours
+                }
               }
-            : node
-        )
+            };
+          }
+          return edge;
+        })
       );
+
+      // Update transitions list
+      tranisitionList.current = updatedTransitions;
       
       // Close the modal
       handleCloseNodeModal();
     }
-  }, [selectedNode, nodeConfig, setFlowNodes, handleCloseNodeModal]);
+  }, [
+    selectedNode, 
+    nodeConfig, 
+    flowNodes, 
+    flowEdges, 
+    payloadData, 
+    handleCloseNodeModal, 
+    setPayloadData
+  ]);
 
   const handleSearch = async () => {
 
@@ -649,18 +822,18 @@ const handleStateSearch = async () => {
     const site = cookies?.site;
     const request = {
         site: site,
-        userGroup: stateSearchTerm
+        name: stateSearchTerm
     }
     try {
-        let response = await retrieveAllUserGroup(request);
+        let response = await retrieveAllWorkFlowStatesMaster(request);
 
 
         // Update the filtered data state
-        // setPredefinedStates(response);
+        setPredefinedStates(response);
 
     }
     catch (e) {
-        console.log("Error in retrieving all configuration", e);
+        console.log("Error in retrieving all workflow states", e);
     }
 }
 
@@ -750,8 +923,8 @@ const handleStateSearch = async () => {
               />
           { predefinedStates && predefinedStates.map((state) => (
             <StateDrag 
-              key={state} 
-              state={state} 
+              key={state?.name} 
+              state={state?.name} 
               onStateSelect={handleStateSelect} 
             />
           ))}

@@ -85,7 +85,7 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                     console.error('Error fetching states:', error);
                 }
             }
-            //fetchStates();
+            fetchStates();
 
             const retrieveUserGroupList = async () => {
                 try {
@@ -245,9 +245,6 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
         }
     };
 
-
-
-
     const handleCancel = () => {
         Modal.confirm({
             title: t('confirm'),
@@ -291,11 +288,12 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                 try {
                     const response = await deleteConfiguration(request); // Assuming retrieveItem is an API call or a data fetch function
                     if (!response.errorCode) {
-                        message.success(response?.message);
+                        message.success(response?.message_details?.msg);
                         setCall(call + 1);
                         setShowAlert(false);
                         setActiveTab(0);
                         setPayloadData(defaultConfiguration);
+                        setSelectedRowData(null);
                     }
                     else {
                         message.error(response?.message);
@@ -370,6 +368,7 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                         setActiveTab(0);
                         setPayloadData(response);
                         setSelectedRowData(response);
+                        tranisitionList.current = response?.transitions;
                     }
 
                 }
@@ -435,11 +434,13 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                     const site = cookies?.site;
                     const user = cookies?.rl_user_id
                     try {
+                        debugger
                         updatedRequest = {
                             site: site,
                             ...payloadData,
                             name: values?.name,
                             version: values?.version,
+                            transitions: tranisitionList?.current || payloadData?.transitions,
                             userId: user
                         }
 
@@ -514,6 +515,28 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
     const handleOnAdd = () => {
         setActiveTab(0);
         setPayloadData(defaultConfiguration);
+        const fetchStates = async () => {
+            try {
+                const cookies = parseCookies();
+                const site = cookies?.site;
+                const user = cookies?.rl_user_id
+                const request = {
+                    site: site,
+                    userId: user,
+                    name: ""
+                }
+                const response = await retrieveAllWorkFlowStatesMaster(request);
+                setPayloadData((prev) => ({
+                    ...prev,
+                    statesList: response
+                }));
+                setPredefinedStates(response);
+            }
+            catch (error) {
+                console.error('Error fetching states:', error);
+            }
+        }
+        fetchStates();
         setSelectedRowData(null);
     }
 
@@ -712,10 +735,10 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                             activeKey={activeTab.toString()}
                             onChange={(key) => handleTabChange(null, parseInt(key))}
                         >
-                            <Tabs.TabPane key="0" tab="Main">
+                            <Tabs.TabPane key="0" tab={t("main")}>
                                 {renderTabContent()}
                             </Tabs.TabPane>
-                            <Tabs.TabPane key="1" tab="User Role Configuration">
+                            <Tabs.TabPane key="1" tab={t("userRoleConfiguration")}>
                                 {renderTabContent()}
                             </Tabs.TabPane>
 
