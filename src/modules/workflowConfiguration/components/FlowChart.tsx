@@ -4,11 +4,13 @@ import { ReactFlow, Background, Controls, MiniMap, Node, Edge, useNodesState, us
 import '@xyflow/react/dist/style.css';
 import { useMyContext } from '../hooks/WorkFlowConfigurationContext';
 import styles from '../styles/WorkFlowMaintenance.module.css';
-import { Input } from 'antd';
+import { Input, Modal, Table, Button, Space } from 'antd';
 import { parseCookies } from 'nookies';
 import { fetchAllUserGroup, retrieveAllUserGroup, retrieveAllWorkFlowStatesMaster } from '@services/workflowConfigurationService';
 import { AnyAaaaRecord } from 'dns';
-
+import { GrFormView } from "react-icons/gr";
+import { CheckOutlined, CloseCircleTwoTone, CloseOutlined, EyeTwoTone } from '@ant-design/icons';
+import { CheckCircleTwoTone } from '@ant-design/icons';
 
 // Update the interface to match the new JSON structure
 interface WorkflowTransition {
@@ -837,6 +839,19 @@ const handleStateSearch = async () => {
     }
 }
 
+// Add state for modal visibility and selected transitions
+const [isTransitionModalVisible, setIsTransitionModalVisible] = useState(false);
+
+// Function to handle displaying transitions in table
+const handleDisplayinTable = useCallback(() => {
+  setIsTransitionModalVisible(true);
+}, []);
+
+// Close modal function
+const handleCloseTransitionModal = useCallback(() => {
+  setIsTransitionModalVisible(false);
+}, []);
+
   return (
     <div  style={{ height: 'calc(100vh - 150px)', width: '100%', display: 'flex',   }}>
       {/* Sidebar for Draggable Items */}
@@ -982,6 +997,25 @@ const handleStateSearch = async () => {
         {/* <MiniMap /> */}
       </ReactFlow>
 
+     
+           
+            <button 
+              onClick={handleDisplayinTable}
+              style={{
+                position: 'absolute',
+                top: '0px',
+                right: '15px',
+                background: 'none',
+                border: 'none',
+                fontSize: '1.5em',
+                cursor: 'pointer',
+                color: '#666'
+              }}
+            >
+             <EyeTwoTone twoToneColor="#124561"/>
+            </button>
+          
+     
       {/* Node Details Modal */}
       {isNodeModalVisible && selectedNode && (
         <div 
@@ -1138,6 +1172,70 @@ const handleStateSearch = async () => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Transition Modal */}
+      {isTransitionModalVisible && (
+        <Modal
+          title="Workflow Transitions"
+          open={isTransitionModalVisible}
+          onCancel={handleCloseTransitionModal}
+          footer={null}
+          width="80%"
+        >
+          <Table 
+            dataSource={payloadData?.transitions || []} 
+            columns={[
+              {
+                title: 'From User',
+                dataIndex: 'fromUserId',
+                key: 'fromUserId',
+                align: 'center',
+              },
+              {
+                title: 'To User',
+                dataIndex: 'toUserId',
+                key: 'toUserId',
+                align: 'center',
+              },
+              {
+                title: 'Action',
+                dataIndex: 'action',
+                key: 'action',
+                align: 'center',
+              },
+              {
+                title: 'Remarks Required',
+                dataIndex: ['uiConfig', 'remarksRequired'],
+                key: 'remarksRequired',
+                align: 'center',
+                render: (text) => text 
+                  ? <CheckCircleTwoTone twoToneColor="#52c41a" style={{ fontSize: '18px' }} /> 
+                  : <CloseCircleTwoTone twoToneColor="#f5222d" style={{ fontSize: '18px' }}/>
+              },
+              {
+                title: 'Attachment Required',
+                dataIndex: ['uiConfig', 'attachmentRequired'],
+                key: 'attachmentRequired',
+                align: 'center',
+                render: (text) => text 
+                  ? <CheckCircleTwoTone twoToneColor="#52c41a" style={{ fontSize: '18px' }}/> 
+                  : <CloseCircleTwoTone twoToneColor="#f5222d" style={{ fontSize: '18px' }}/>
+              },
+              {
+                title: 'Due Hours',
+                dataIndex: ['constraints', 'dueInHours'],
+                key: 'dueInHours',
+                align: 'center',
+              },
+            ]}
+            rowKey={(record: any) => `${record.fromUserId}-${record.toUserId}-${record.action}`}
+            pagination={false}
+            scroll={{ y: 300 }}
+            bordered
+            size="small"
+          />
+        </Modal>
       )}
     </div>
   );
