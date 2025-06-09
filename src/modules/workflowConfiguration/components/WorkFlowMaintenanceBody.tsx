@@ -149,11 +149,11 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
             return;
         }
 
-        if ((payloadData?.states == "" || payloadData?.states == null || payloadData?.states == undefined) || (payloadData?.states?.length == 0)) {
-            flagToEncode = false;
-            message.error("States cannot be empty");
-            return;
-        }
+        // if ((payloadData?.states == "" || payloadData?.states == null || payloadData?.states == undefined) || (payloadData?.states?.length == 0)) {
+        //     flagToEncode = false;
+        //     message.error("States cannot be empty");
+        //     return;
+        // }
 
         const oCreateConfig = async () => {
             try {

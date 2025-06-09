@@ -177,7 +177,7 @@ const WorkFlowForm: React.FC<{ selectedRowData: any }> = ({ selectedRowData }) =
           >
             <Switch onChange={(checked) => handleSwitchChange('default', checked)} />
           </Form.Item>
-          <Form.Item
+          {/* <Form.Item
             label={t("states")}
             name="states"
             labelCol={{ span: 4 }}
@@ -193,7 +193,7 @@ const WorkFlowForm: React.FC<{ selectedRowData: any }> = ({ selectedRowData }) =
                 </Select.Option>
               ))}
             </Select>
-          </Form.Item>
+          </Form.Item> */}
         
         </Form>
       </div>

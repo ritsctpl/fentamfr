@@ -1184,7 +1184,7 @@ const handleCloseTransitionModal = useCallback(() => {
           width="80%"
         >
           <Table 
-            dataSource={payloadData?.transitions || []} 
+            dataSource={  payloadData?.transitions || []} 
             columns={[
               {
                 title: 'From User',
