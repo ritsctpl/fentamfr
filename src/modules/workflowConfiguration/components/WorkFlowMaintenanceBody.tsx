@@ -171,6 +171,7 @@ const WorkFlowMaintenanceBody: React.FC<ApiConfigurationMaintenanceBodyProps> = 
                     transitions: latestTransitions,
                     userId: user,
                 }
+                delete  updatedRequest?.statesList
 
                 // Log the transitions to verify
                 console.log("Transitions being saved:", latestTransitions);

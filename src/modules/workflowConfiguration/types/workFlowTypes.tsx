@@ -9,7 +9,7 @@ export interface QualityApprovalProcess {
   currentVersion: boolean;
   attachedto: any;
   attachedStatus: any;
-  states: any;
+  // states: any;
   transitions: any
 }
 
@@ -22,6 +22,6 @@ export const defaultConfiguration: any = {
   currentVersion: true,
   attachedto: "Item",
   attachedStatus: "Releaseable",
-  states: ["Approve"],
+  // states: ["Approve"],
   transitions: []
 };

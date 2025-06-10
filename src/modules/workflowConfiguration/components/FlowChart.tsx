@@ -80,8 +80,8 @@ const createPositioningStrategy = (users: string[], transitions: WorkflowTransit
     const outgoingTransitions = transitionsBySource[currentUser] || [];
 
     // Group transitions by action type
-    const submitTransitions = outgoingTransitions.filter(t => t.action === 'Submit');
-    const draftTransitions = outgoingTransitions.filter(t => t.action === 'Draft');
+    const submitTransitions = outgoingTransitions.filter(t => t.action == 'Submit');
+    const draftTransitions = outgoingTransitions.filter(t => t.action == 'Draft');
     const otherTransitions = outgoingTransitions.filter(
       t => t.action !== 'Submit' && t.action !== 'Draft'
     );
@@ -197,17 +197,17 @@ function transformWorkflowToGraph(workflowConfig: WorkflowConfig, payloadData?: 
           constraints: transition.constraints
         },
         style: { 
-          stroke: transition.action === 'Approve' ? '#4CAF50' : 
-                  transition.action === 'Reject' ? '#F44336' : 
-                  transition.action === 'Submit' ? '#1874CE' :
-                  transition.action === 'Draft' ? '#FFA500' : 
+          stroke: transition.action == 'Approve' ? '#4CAF50' : 
+                  transition.action == 'Reject' ? '#F44336' : 
+                  transition.action == 'Submit' ? '#1874CE' :
+                  transition.action == 'Draft' ? '#FFA500' : 
                   '#000000', 
           strokeWidth: 2,
           strokeDasharray: 
-            transition.action === 'Draft' ? '5,5' : 
-            transition.action === 'Submit' ? '5,5' :
-            transition.action === 'Approve' ? '5,5' :
-            transition.action === 'Reject' ? '5,5' : 'none'
+            transition.action == 'Draft' ? '5,5' : 
+            transition.action == 'Submit' ? '5,5' :
+            transition.action == 'Approve' ? '5,5' :
+            transition.action == 'Reject' ? '5,5' : 'none'
         },
         animated: 
           transition.action == 'Draft' || 
@@ -407,8 +407,8 @@ const handleNodeConnect = useCallback((sourceNodeId: string, targetNodeId: strin
   setShowAlert(true);
   if (currentState) {
     // Find the source and target nodes
-    const sourceNode = flowNodes.find(n => n.id === sourceNodeId);
-    const targetNode = flowNodes.find(n => n.id === targetNodeId);
+    const sourceNode = flowNodes.find(n => n.id == sourceNodeId);
+    const targetNode = flowNodes.find(n => n.id == targetNodeId);
 
     if (sourceNode && targetNode) {
       // Create the transition object
@@ -433,13 +433,13 @@ const handleNodeConnect = useCallback((sourceNodeId: string, targetNodeId: strin
         label: currentState,
         markerEnd: { 
           type: MarkerType.ArrowClosed,
-          color: currentState === 'Approve' ? '#4CAF50' : 
-                 currentState === 'Reject' ? '#F44336' : '#000000'
+          color: currentState == 'Approve' ? '#4CAF50' : 
+                 currentState == 'Reject' ? '#F44336' : '#000000'
         },
         style: { 
           strokeWidth: 2,
-          stroke: currentState === 'Approve' ? '#4CAF50' : 
-                  currentState === 'Reject' ? '#F44336' : '#000000',
+          stroke: currentState == 'Approve' ? '#4CAF50' : 
+                  currentState == 'Reject' ? '#F44336' : '#000000',
           strokeDasharray: '5,5',
           animation: 'dashedLineAnimation 1s linear infinite'
         },
@@ -517,7 +517,7 @@ const handleNodeConnect = useCallback((sourceNodeId: string, targetNodeId: strin
       const { label, type } = JSON.parse(droppedItemStr);
       
       // Only create a node if it's a user
-      if (type === 'user') {
+      if (type == 'user') {
         // Calculate position based on drop coordinates
         const position = reactFlow.screenToFlowPosition({
           x: event.clientX,
@@ -554,12 +554,12 @@ const handleNodeConnect = useCallback((sourceNodeId: string, targetNodeId: strin
   // Export workflow steps method
   const exportWorkflowSteps = useCallback(() => {
     const transitions: any = flowEdges.map(edge => {
-      const sourceNode = flowNodes.find(n => n.id === edge.source);
-      const targetNode = flowNodes.find(n => n.id === edge.target);
+      const sourceNode = flowNodes.find(n => n.id == edge.source);
+      const targetNode = flowNodes.find(n => n.id == edge.target);
 
       return {
         fromUserId: sourceNode?.data.label || '',
-        action: typeof edge.label === 'string' ? edge.label : '',
+        action: typeof edge.label == 'string' ? edge.label : '',
         toUserId: targetNode?.data.label || '',
         uiConfig: edge.data?.uiConfig || {
           remarksRequired: false,
@@ -608,36 +608,36 @@ const handleNodeConnect = useCallback((sourceNodeId: string, targetNodeId: strin
     // Find related edges where this node is the target
     const relatedIncomingEdges = flowEdges.filter(
       edge => {
-        const targetNode = flowNodes.find(n => n.id === edge.target);
-        return targetNode?.data.label === nodeLabel;
+        const targetNode = flowNodes.find(n => n.id == edge.target);
+        return targetNode?.data.label == nodeLabel;
       }
     );
 
     // Find related edges where this node is the source
     const relatedOutgoingEdges = flowEdges.filter(
       edge => {
-        const sourceNode = flowNodes.find(n => n.id === edge.source);
-        return sourceNode?.data.label === nodeLabel;
+        const sourceNode = flowNodes.find(n => n.id == edge.source);
+        return sourceNode?.data.label == nodeLabel;
       }
     );
 
     // Find related transitions from payloadData
     const relatedTransitions = payloadData?.transitions?.filter(
       transition => 
-        transition.fromUserId === nodeLabel || 
-        transition.toUserId === nodeLabel
+        transition.fromUserId == nodeLabel || 
+        transition.toUserId == nodeLabel
     ) || [];
 
     // Enhanced selection logic
     const selectMostRelevantConfiguration = () => {
       // Priority 1: Exact match for incoming edges
       for (const edge of relatedIncomingEdges) {
-        const sourceNode = flowNodes.find(n => n.id === edge.source);
+        const sourceNode = flowNodes.find(n => n.id == edge.source);
         const matchingTransition = relatedTransitions.find(
           transition => 
-            transition.fromUserId === sourceNode?.data.label &&
-            transition.toUserId === nodeLabel &&
-            transition.action === edge.label
+            transition.fromUserId == sourceNode?.data.label &&
+            transition.toUserId == nodeLabel &&
+            transition.action == edge.label
         );
 
         if (matchingTransition) {
@@ -651,12 +651,12 @@ const handleNodeConnect = useCallback((sourceNodeId: string, targetNodeId: strin
 
       // Priority 2: Exact match for outgoing edges
       for (const edge of relatedOutgoingEdges) {
-        const targetNode = flowNodes.find(n => n.id === edge.target);
+        const targetNode = flowNodes.find(n => n.id == edge.target);
         const matchingTransition = relatedTransitions.find(
           transition => 
-            transition.fromUserId === nodeLabel &&
-            transition.toUserId === targetNode?.data.label &&
-            transition.action === edge.label
+            transition.fromUserId == nodeLabel &&
+            transition.toUserId == targetNode?.data.label &&
+            transition.action == edge.label
         );
 
         if (matchingTransition) {
@@ -673,7 +673,7 @@ const handleNodeConnect = useCallback((sourceNodeId: string, targetNodeId: strin
         ? {
             transition: relatedTransitions[0],
             edge: relatedIncomingEdges[0] || relatedOutgoingEdges[0],
-            type: relatedTransitions[0].toUserId === nodeLabel ? 'incoming' : 'outgoing'
+            type: relatedTransitions[0].toUserId == nodeLabel ? 'incoming' : 'outgoing'
           }
         : null;
     };
@@ -696,11 +696,11 @@ const handleNodeConnect = useCallback((sourceNodeId: string, targetNodeId: strin
             selectedConfiguration.edge?.data?.constraints?.dueInHours ?? 
             4,
           source: 
-            selectedConfiguration.type === 'incoming' 
+            selectedConfiguration.type == 'incoming' 
               ? selectedConfiguration.transition.fromUserId 
               : nodeLabel,
           target: 
-            selectedConfiguration.type === 'incoming' 
+            selectedConfiguration.type == 'incoming' 
               ? nodeLabel 
               : selectedConfiguration.transition.toUserId,
           action: selectedConfiguration.transition.action
@@ -726,11 +726,11 @@ const handleNodeConnect = useCallback((sourceNodeId: string, targetNodeId: strin
       const nodeLabel: any = selectedNode.data.label;
 
       // Update transitions in payloadData
-      const updatedTransitions = payloadData.transitions.map(transition => {
+      const updatedTransitions = payloadData?.transitions && payloadData?.transitions.map(transition => {
         // Match transitions where the node is either source or target
         if (
-          transition.fromUserId === nodeLabel || 
-          transition.toUserId === nodeLabel
+          transition.fromUserId == nodeLabel || 
+          transition.toUserId == nodeLabel
         ) {
           return {
             ...transition,
@@ -755,13 +755,13 @@ const handleNodeConnect = useCallback((sourceNodeId: string, targetNodeId: strin
       // Update flow edges for both incoming and outgoing edges
       setFlowEdges(edges => 
         edges.map(edge => {
-          const sourceNode = flowNodes.find(n => n.id === edge.source);
-          const targetNode = flowNodes.find(n => n.id === edge.target);
+          const sourceNode = flowNodes.find(n => n.id == edge.source);
+          const targetNode = flowNodes.find(n => n.id == edge.target);
           
           // Update edges where the node is either source or target
           if (
-            sourceNode?.data.label === nodeLabel || 
-            targetNode?.data.label === nodeLabel
+            sourceNode?.data.label == nodeLabel || 
+            targetNode?.data.label == nodeLabel
           ) {
             return {
               ...edge,
