@@ -1132,4 +1132,13 @@ export const tamilLanguage = {
 
   "workflowStatusMaster": "பணிப்ரவாக நிலை தலைமை",
   "createWorkflowStatusMaster": "பணிப்ரவாக நிலை தலைமை உருவாக்கு",
+
+  "from": "இருந்து",
+  "to": "க்கு",
+  "attachmentType": "அடைப்பு வகை",
+  "attachedTo": "இணைக்கப்பட்டுள்ளது",
+  "attachedStatus": "அடைப்பு நிலை",
+  "default": "இயலுநிலை",
+  "workFlowConfiguration": "பணிப்ரவாக கான்பிகரேஷன்",
+  "userRoleConfiguration": "பயனர் பாத்திரங்கள் கான்பிகரேஷன்",
 }

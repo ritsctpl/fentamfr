@@ -1182,4 +1182,14 @@ export const englishLanguage = {
   "workflowStatesMaster": "Workflow States Master",
   "workflowStatusMaster": "Workflow Status Master",
   "createWorkflowStatusMaster": "Create Workflow Status Master",
+
+
+  "from": "From",
+  "to": "To",
+  "attachmentType": "Attachment Type",
+  "attachedTo": "Attached To",
+  "attachedStatus": "Attachment Status",
+  "default": "Default",
+  "workFlowConfiguration": "Work Flow Configuration",
+  "userRoleConfiguration": "User Role Configuration",
 }

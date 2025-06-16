@@ -1118,4 +1118,13 @@ export const hindiLanguage = {
   "workflowStatesMaster": "कार्यप्रवाह अवस्था मास्टर",
   "workflowStatusMaster": "कार्यप्रवाह स्थिति मास्टर",
   "createWorkflowStatusMaster": "कार्यप्रवाह स्थिति मास्टर बनाएं",
+
+    "from": "से",
+    "to": "तक",
+    "attachmentType": "अटैचमेंट प्रकार",
+    "attachedTo": "से जुड़ा",
+    "attachedStatus": "अटैचमेंट स्थिति",
+    "default": "डिफ़ॉल्ट",
+    "workFlowConfiguration": "कार्यप्रवाह कॉन्फ़िगरेशन",
+    "userRoleConfiguration": "उपयोगकर्ता भूमिका कॉन्फ़िगरेशन",
 }
