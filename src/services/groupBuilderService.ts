@@ -5,8 +5,8 @@ export const createGroup = async (group: any) => {
     return response.data;
 };
 
-export const getTop50Groups = async () => {
-    const response = await api.post('/groupbuilder-service/getAllGroup', {site:'1004'});
+export const getTop50Groups = async (searchParams: any) => {
+    const response = await api.post('/groupbuilder-service/getAllGroup', searchParams);
     return response.data;
 };
 

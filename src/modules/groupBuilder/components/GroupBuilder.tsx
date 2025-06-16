@@ -79,33 +79,45 @@ const GroupBuilder = () => {
     const [isSectionTabDisabled, setIsSectionTabDisabled] = useState(true);
 
     // Derived states (computed values) with null checks and type checking
-    const filteredGroups = Array.isArray(groups) ? groups.filter(group =>
-        group.groupLabel.toLowerCase().includes(searchTerm.toLowerCase())
-    ) : [];
+    // const filteredGroups = Array.isArray(groups) ? groups.filter(group =>
+    //     group.groupLabel.toLowerCase().includes(searchTerm.toLowerCase())
+    // ) : [];
 
-    const filteredSections = Array.isArray(sections) ? sections.filter(section =>
-        section.sectionLabel.toLowerCase().includes(sectionSearchTerm.toLowerCase())
-    ) : [];
+    // const filteredSections = Array.isArray(sections) ? sections.filter(section =>
+    //     section.sectionLabel.toLowerCase().includes(sectionSearchTerm.toLowerCase())
+    // ) : [];
+
+    // Separate useEffects for groups and sections
+    useEffect(() => {
+        const fetchGroups = async () => {
+            try {
+                const groupsData = await getTop50Groups({ site: '1004', groupLabel: searchTerm });
+                setGroups(Array.isArray(groupsData) ? groupsData : []);
+            } catch (error) {
+                message.error('Failed to load groups');
+                console.error('Error fetching groups:', error);
+                setGroups([]);
+            }
+        };
+        fetchGroups();
+    }, [searchTerm]);
 
     useEffect(() => {
-        const fetchInitialData = async () => {
+        const fetchSections = async () => {
             try {
-                const [groupsData, sectionsData] = await Promise.all([
-                    getTop50Groups(),
-                    getSections({ site: '1004', sectionLabel: sectionSearchTerm })
-                ]);
-                // Ensure we're setting arrays
-                setGroups(Array.isArray(groupsData) ? groupsData : []);
+                const sectionsData = await getSections({ site: '1004', sectionLabel: sectionSearchTerm });
                 setSections(Array.isArray(sectionsData) ? sectionsData : []);
             } catch (error) {
-                message.error('Failed to load initial data');
-                console.error('Error fetching initial data:', error);
-                setGroups([]);
+                message.error('Failed to load sections');
+                console.error('Error fetching sections:', error);
                 setSections([]);
             }
         };
-        fetchInitialData();
-    }, []);
+        // Only fetch sections if the tab is active and not disabled
+        if (activeTab === 'sections' && !isSectionTabDisabled) {
+            fetchSections();
+        }
+    }, [sectionSearchTerm, activeTab, isSectionTabDisabled]);
 
     // Update tree data when sections order or group name changes
     useEffect(() => {
@@ -175,7 +187,7 @@ const GroupBuilder = () => {
 
             const response = await createGroup(groupData);
             if (response) {
-                const updatedGroups = await getTop50Groups();
+                const updatedGroups = await getTop50Groups({ site: '1004', groupLabel: searchTerm });
                 setGroups(updatedGroups || []);
                 setIsCreating(false);
                 resetForm();
@@ -202,7 +214,7 @@ const GroupBuilder = () => {
 
             const response = await updateGroup(groupData);
             if (response) {
-                const updatedGroups = await getTop50Groups();
+                const updatedGroups = await getTop50Groups({ site: '1004', groupLabel: searchTerm });
                 setGroups(updatedGroups || []);
                 resetForm();
                 message.success(response.message_details.msg);
@@ -247,11 +259,10 @@ const GroupBuilder = () => {
         setPreviewSections(false);
     };
 
-    const handleSelectGroup = (row: any) => {
+    const handleSelectGroup = (row: Group) => {
         try {
             if (!row || !row.handle) return;
-            const selectedGroupItem = Array.isArray(filteredGroups) ?
-                filteredGroups.find((item) => item.handle === row.handle) : null;
+            const selectedGroupItem = groups.find((item) => item.handle === row.handle);
             if (selectedGroupItem) {
                 setSelectedGroup(selectedGroupItem);
                 setIsEdit(true);
@@ -263,21 +274,25 @@ const GroupBuilder = () => {
                 });
 
                 // Map sections with their original handles and find matching section data
-                const mappedSections = Array.isArray(selectedGroupItem.sectionIds) ?
-                    selectedGroupItem.sectionIds.map(sectionId => {
-                        const originalSection = Array.isArray(sections) ?
-                            sections.find(s => s.sectionLabel === sectionId.sectionLabel) : null;
+                const mappedSections = selectedGroupItem.sectionIds.map(sectionId => {
+                    const originalSection = sections.find(s => s.sectionLabel === sectionId.sectionLabel);
+                    const uniqueId = `${sectionId.handle}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-                        const uniqueId = `${sectionId.handle}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
+                    if (!originalSection) {
                         return {
-                            id: originalSection?.id || 0,
+                            id: 0,
                             handle: sectionId.handle,
                             instanceId: uniqueId,
                             sectionLabel: sectionId.sectionLabel,
-                            componentIds: Array.isArray(originalSection?.componentIds) ? originalSection.componentIds : []
-                        };
-                    }) : [];
+                            componentIds: []
+                        } as OrderedSection;
+                    }
+
+                    return {
+                        ...originalSection,
+                        instanceId: uniqueId,
+                    } as OrderedSection;
+                });
 
                 setOrderedSections(mappedSections);
                 setIsFullScreen(true);
@@ -456,13 +471,7 @@ const GroupBuilder = () => {
                                     children: (
                                         <div style={{ height: '100%' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', marginTop: '10px' }}>
-                                                <div style={{ fontWeight: 500, fontSize: '14px' }}>List of Groups ({filteredGroups.length})</div>
-                                                {/* <Button
-                                                    type='text'
-                                                    icon={<PlusOutlined />}
-                                                    onClick={handleNewGroup}
-                                                >
-                                                </Button> */}
+                                                <div style={{ fontWeight: 500, fontSize: '14px' }}>List of Groups ({groups.length})</div>
                                             </div>
                                             <Input.Search
                                                 placeholder="Search groups..."
@@ -471,8 +480,8 @@ const GroupBuilder = () => {
                                                 value={searchTerm}
                                             />
                                             <List
-                                                dataSource={filteredGroups}
-                                                renderItem={(item) => (
+                                                dataSource={groups}
+                                                renderItem={(item: Group) => (
                                                     <List.Item
                                                         key={item.handle}
                                                         style={{
@@ -517,7 +526,7 @@ const GroupBuilder = () => {
                                     children: (
                                         <div style={{ height: '100%' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px', gap: '10px', marginTop: '10px' }}>
-                                                <div style={{ fontWeight: 500, fontSize: '14px' }}>List of Sections ({filteredSections.length})</div>
+                                                <div style={{ fontWeight: 500, fontSize: '14px' }}>List of Sections ({sections.length})</div>
                                             </div>
                                             <Input.Search
                                                 placeholder="Search sections..."
@@ -526,8 +535,8 @@ const GroupBuilder = () => {
                                                 value={sectionSearchTerm}
                                             />
                                             <List
-                                                dataSource={filteredSections}
-                                                renderItem={(section) => (
+                                                dataSource={sections}
+                                                renderItem={(section: Section) => (
                                                     <List.Item
                                                         key={section.id}
                                                         style={{
