@@ -29,3 +29,28 @@ export const getGroupPreview = async (group: any) => {
     const response = await api.post(`/groupbuilder-service/previewGroup`, group);
     return response.data;
 };
+
+export const getTop50Components = async (searchParams: any) => {
+    const response = await api.post(`/componentbuilder-service/getTop50Component`, searchParams);
+    return response.data;
+};
+
+export const getComponentById = async (id: any) => {        
+    const response = await api.post(`/componentbuilder-service/getComponentById`, id);
+    return response.data;
+};
+
+export const createComponent = async (component: any) => {
+    const response = await api.post(`/componentbuilder-service/createComponent`, component);
+    return response.data;
+};
+
+export const updateComponent = async (component: any) => {
+    const response = await api.post(`/componentbuilder-service/updateComponent`, component);
+    return response.data;
+};
+
+export const deleteComponent = async (component: any) => {
+    const response = await api.post(`/componentbuilder-service/deleteComponent`, component);
+    return response.data;
+};

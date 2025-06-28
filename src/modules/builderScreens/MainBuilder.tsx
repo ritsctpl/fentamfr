@@ -8,6 +8,8 @@ import ApiConfigMaintenance from '@modules/componentBuilder/components/Component
 import { MyProvider } from '@modules/componentBuilder/hooks/componentBuilderContext';
 import TemplateBuilderMain from '@modules/templateCreater/TemplateBuilderMain';
 import CommonAppBar from '@components/CommonAppBar';
+import ComponentBuilderMaintenance from '@modules/componentBuilder/components/ComponentBuilderMain';
+import ComponentBuilder from '@modules/newComponentBuilder/components/ComponentBuilder';
 
 export default function MainBuilder() {
     const [call, setCall] = useState(0);
@@ -41,21 +43,21 @@ export default function MainBuilder() {
                                 </div>
                             )
                         },
-                        {
-                            key: '2',
-                            label: 'Component Builder',
-                            style: {
-                                width: '100%',
-                                height: '100%'
-                            },
-                            children: (
-                                <div style={{ height: '100%', width: '100%' }}>
-                                    <MyProvider >
-                                        <ApiConfigMaintenance />
-                                    </MyProvider>
-                                </div>
-                            )
-                        },
+                        // {
+                        //     key: '2',
+                        //     label: 'Component Builder',
+                        //     style: {
+                        //         width: '100%',
+                        //         height: '100%'
+                        //     },
+                        //     children: (
+                        //         <div style={{ height: '100%', width: '100%' }}>
+                        //             <MyProvider >
+                        //                 <ComponentBuilderMaintenance />
+                        //             </MyProvider>
+                        //         </div>
+                        //     )
+                        // },
                         {
                             key: '3',
                             label: 'Section Builder',
@@ -79,6 +81,19 @@ export default function MainBuilder() {
                             children: (
                                 <div style={{ height: '100%', width: '100%' }}>
                                     <GroupBuilder />
+                                </div>
+                            )
+                        },
+                         {
+                            key: '5',
+                            label: 'Component Builder',
+                            style: {
+                                width: '100%',
+                                height: '100%'
+                            },
+                            children: (
+                                <div style={{ height: '100%', width: '100%' }}>
+                                    <ComponentBuilder />
                                 </div>
                             )
                         }
