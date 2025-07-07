@@ -7,17 +7,24 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { createComponent, deleteComponent, getComponentById, getTop50Components, updateComponent } from '@services/groupBuilderService';
 import '../styles/group.css';
 import { FaLayerGroup } from "react-icons/fa";
-import UniversalTable from './UniversalTable';
+import UniversalTable from './UniversalTable/UniversalTable';
+import UniversalForm from './UniversalForm/UniversalForm';
+
 
 type Group = {
     handle: string;
-    componentLabel: string;
-    dataType: string;
-    defaultValue: string;
-    required?: boolean;
-    modifiedDateTime?: string;
-    createdBy?: string;
-    modifiedBy?: string;
+    component_name: string;
+    component_type: string;
+    component_version: number;
+    component_sequence: number;
+    active: boolean;
+    description: string;
+    tag: string[];
+    execution_mode: string;
+    modified_at?: string;
+    created_at?: string;
+    created_by?: string;
+    modified_by?: string;
 };
 
 const ComponentBuilder = () => {
@@ -29,11 +36,12 @@ const ComponentBuilder = () => {
     const [showSections, setShowSections] = useState(false);
     const [previewSections, setPreviewSections] = useState(false);
     const [isCreating, setIsCreating] = useState(false)
+    const [fields,setFields] = useState(false)
 
     // Form
     const [form] = Form.useForm();
 
-    const dataType = Form.useWatch('dataType', form) || '';
+    const dataType = Form.useWatch('component_type', form) || '';
 
     // Data states
     const [groups, setGroups] = useState<Group[]>([]);
@@ -58,7 +66,7 @@ const ComponentBuilder = () => {
     const handleSaveGroup = async () => {
         try {
             const values = await form.validateFields();
-            const response = await createComponent({ ...values, site: '1004', userId: "ajai" });
+            const response = await createComponent({ ...values, site: '1004', userId: "ajai" , fields  });
             if (!response.errorCode) {
                 const updatedGroups = await getTop50Components({ site: '1004' });
                 setGroups(updatedGroups || []);
@@ -112,7 +120,7 @@ const ComponentBuilder = () => {
                 title: 'Delete Group',
                 content: 'Are you sure you want to delete this component?',
                 onOk: async () => {
-                    const response = await deleteComponent({ site: '1004', componentLabel: selectedGroup.componentLabel });
+                    const response = await deleteComponent({ site: '1004', component_name: selectedGroup.component_name });
                     if (!response.errorCode) {
                         const updatedGroups = await getTop50Components({ site: '1004' });
                         setGroups(updatedGroups || []);
@@ -145,7 +153,7 @@ const ComponentBuilder = () => {
             if (!row || !row.handle) return;
             const selectedGroupItem = groups.find((item) => item.handle === row.handle);
             if (selectedGroupItem) {
-                const component = await getComponentById({ site: '1004', componentLabel: selectedGroupItem.componentLabel })
+                const component = await getComponentById({ site: '1004', component_name: selectedGroupItem.component_name })
                 setSelectedGroup(component);
                 setIsEdit(true);
                 setShowSections(true);
@@ -190,9 +198,9 @@ const ComponentBuilder = () => {
         if (!selectedGroup) return;
 
         // Create a copy of the selected group with a new name
-        const newGroupLabel = `${selectedGroup.componentLabel} (Copy)`;
+        const newGroupLabel = `${selectedGroup.component_name} (Copy)`;
         form.setFieldsValue({
-            componentLabel: newGroupLabel,
+            component_name: newGroupLabel,
         });
 
         setIsEdit(false);
@@ -224,7 +232,7 @@ const ComponentBuilder = () => {
                         <Breadcrumb>
                             <Breadcrumb.Item><div style={{ color: '#666', fontWeight: isEdit || isCreating ? '400' : '500' }}>Component Builder</div></Breadcrumb.Item>
                             {(isEdit || isCreating) && (
-                                <Breadcrumb.Item><div style={{ color: '#666', fontWeight: '500' }}>{selectedGroup?.componentLabel || 'Create Component'}</div></Breadcrumb.Item>
+                                <Breadcrumb.Item><div style={{ color: '#666', fontWeight: '500' }}>{selectedGroup?.component_name || 'Create Component'}</div></Breadcrumb.Item>
                             )}
                         </Breadcrumb>
                     </div>
@@ -343,7 +351,7 @@ const ComponentBuilder = () => {
                                                     >
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                             <FaLayerGroup style={{ fontSize: '14px', color: '#666' }} />
-                                                            <div style={{ fontWeight: '450', fontSize: item.componentLabel.length > 30 ? "0.8em" : "0.8em" }}>{item.componentLabel}</div>
+                                                            <div style={{ fontWeight: '450', fontSize: "0.8em"}}>{item?.component_name}</div>
                                                         </div>
                                                     </List.Item>
                                                 )}
@@ -360,24 +368,20 @@ const ComponentBuilder = () => {
                                     disabled: isSectionTabDisabled,
                                     children: (
                                         <div style={{ height: '100%', paddingTop: 15 }}>
-                                            {/* <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', marginTop: '10px' }}>
-                                                <div style={{ fontWeight: 500, fontSize: '14px' }}>Component Fields</div>
-                                            </div> */}
                                             <Form
                                                 form={form}
                                                 layout="vertical"
                                                 wrapperCol={{ flex: 1 }}
                                                 style={{ width: '100%' }}
                                                 initialValues={{
-                                                    componentLabel: '',
-                                                    dataType: 'table',
-                                                    unit: 'kg',
-                                                    apiUrl: '',
-                                                    bulletPointText: '',
-                                                    dataIndex: '',
-                                                    defaultValue: '',
-                                                    isRequired: false,
-                                                    validation: ''
+                                                    component_name: '',
+                                                    component_type: 'table',
+                                                    component_version: 1,
+                                                    component_sequence: 1,
+                                                    active: true,
+                                                    description: '',
+                                                    tag: [],
+                                                    execution_mode: 'online_offline',
                                                 }}
                                             >
                                                 <div style={{
@@ -386,131 +390,106 @@ const ComponentBuilder = () => {
                                                     width: '100%'
                                                 }}>
                                                     <Form.Item
-                                                        label="Component Label :"
-                                                        name="componentLabel"
+                                                        label="Component Name :"
+                                                        name="component_name"
                                                         required={true}
-                                                        rules={[{ required: true, message: 'Component label is required' }]}
+                                                        rules={[{ required: true, message: 'Component name is required' }]}
                                                     >
                                                         <Input
                                                             disabled={isEdit && !isCreating}
-                                                            placeholder='Enter component label'
+                                                            placeholder='Enter component name'
                                                         />
                                                     </Form.Item>
                                                     <Form.Item
-                                                        label="Data Type :"
-                                                        name="dataType"
+                                                        label="Component Type :"
+                                                        name="component_type"
                                                         required={true}
-                                                        rules={[{ required: true, message: 'Data type is required' }]}
+                                                        rules={[{ required: true, message: 'Component type is required' }]}
                                                     >
                                                         <Select
-                                                            placeholder='Select data type'
+                                                            placeholder='Select component type'
                                                             options={[
-                                                                { value: 'input', label: 'Input' },
-                                                                { value: 'integer', label: 'Integer' },
-                                                                { value: 'select', label: 'Select' },
-                                                                { value: 'textarea', label: 'Textarea' },
-                                                                { value: 'checkbox', label: 'Checkbox' },
                                                                 { value: 'table', label: 'Table' },
                                                                 { value: 'form', label: 'Form' },
-                                                                { value: 'switch', label: 'Switch' },
-                                                                { value: 'datePicker', label: 'Date Picker' },
                                                             ]}
                                                         />
                                                     </Form.Item>
-                                                    {(() => {
-                                                        switch (dataType) {
-                                                            case 'input':
-                                                            case 'integer':
-                                                                return (<Form.Item
-                                                                    label="Unit :"
-                                                                    name="unit"
-                                                                    required={false}
-                                                                    rules={[{ required: false, message: 'unit is required' }]}
-                                                                >
-                                                                    <Select
-                                                                        allowClear
-                                                                        placeholder='Select unit'
-                                                                        options={[
-                                                                            { value: 'kg', label: 'kg' },
-                                                                            { value: 'g', label: 'g' },
-                                                                            { value: 'm', label: 'm' },
-                                                                            { value: 'mg', label: 'mg' },
-                                                                            { value: 'mg%', label: 'mg%' },
-                                                                            { value: 'ml', label: 'ml' },
-                                                                            { value: 'cm', label: 'cm' },
-                                                                            { value: 'mm', label: 'mm' },
-                                                                            { value: 's', label: 's' },
-                                                                            { value: '°C', label: '°C' },
-                                                                            { value: '°F', label: '°F' },
-                                                                            { value: '%', label: '%' }
-                                                                        ]}
-                                                                    />
-                                                                </Form.Item>);
-                                                            case 'select':
-                                                                return (<Form.Item
-                                                                    label="Api url :"
-                                                                    name="apiUrl"
-                                                                    required={false}
-                                                                    rules={[{ required: false, message: 'apiUrl  is required' }]}
-                                                                >
-                                                                    <Input
-                                                                        placeholder='Enter default value label'
-                                                                    />
-                                                                </Form.Item>);
-                                                            default:
-                                                                return <div></div>;
-                                                        }
-                                                    })()}
-
-                                                    {(() => {
-                                                        switch (dataType) {
-                                                            case 'textarea':
-                                                                return (
-                                                                <Form.Item
-                                                                    label="Default value :"
-                                                                    name="defaultValue"
-                                                                    required={false}
-                                                                    rules={[{ required: false, message: 'default value is required' }]}
-                                                                >
-                                                                    <Input.TextArea
-                                                                        placeholder='Enter default value label'
-                                                                    />
-                                                                </Form.Item>
-                                                                );
-                                                            default:
-                                                                return (
-                                                                    <Form.Item
-                                                                        label="Default value :"
-                                                                        name="defaultValue"
-                                                                        required={false}
-                                                                        rules={[{ required: false, message: 'default value is required' }]}
-                                                                    >
-                                                                        <Input
-                                                                            placeholder='Enter default value label'
-                                                                        />
-                                                                    </Form.Item>
-                                                                );
-                                                        }
-                                                    })()}
-
                                                     <Form.Item
-                                                        label="Required :"
-                                                        name="required"
+                                                        label="Component Version :"
+                                                        name="component_version"
                                                         required={false}
-                                                        rules={[{ required: false, message: 'required is required' }]}
+                                                        rules={[{ required: false, message: 'Component version is required' }]}
+                                                    >
+                                                        <Input
+                                                            type='number'
+                                                            placeholder='Enter component version'
+                                                        />
+                                                    </Form.Item>
+                                                    <Form.Item
+                                                        label="Component Sequence :"
+                                                        name="component_sequence"
+                                                        required={false}
+                                                        rules={[{ required: false, message: 'Component sequence is required' }]}
+                                                    >
+                                                        <Input
+                                                            type='number'
+                                                            placeholder='Enter component sequence'
+                                                        />
+                                                    </Form.Item>
+                                                    <Form.Item
+                                                        label="Component Status :"
+                                                        name="active"
+                                                        required={false}
+                                                        rules={[{ required: false, message: 'Component status is required' }]}
                                                     >
                                                         <Switch />
                                                     </Form.Item>
                                                     <Form.Item
-                                                        label="Validation :"
-                                                        name="validation"
+                                                        label="Description :"
+                                                        name="description"
                                                         required={false}
-                                                        rules={[{ required: false, message: 'Validation is required' }]}
+                                                        rules={[{ required: false, message: 'Description is required' }]}
                                                     >
                                                         <Input.TextArea
-                                                            placeholder='Enter validation'
+                                                            placeholder='Enter description'
                                                         />
                                                     </Form.Item>
+                                                    <Form.Item
+                                                        label="Component Tag :"
+                                                        name="tag"
+                                                        required={false}
+                                                        rules={[{ required: false, message: 'Component tag is required' }]}
+                                                    >
+                                                       <Select
+                                                            placeholder='Select component tag'
+                                                            mode='multiple'
+                                                            allowClear
+                                                            options={[
+                                                                { value: 'bmr', label: 'BMR' },
+                                                                { value: 'mes', label: 'MES' },
+                                                                { value: 'validated', label: 'Validated' },
+                                                                { value: 'prefilled', label: 'Prefilled' },
+                                                                { value: 'instruction', label: 'Instruction' },
+                                                            ]}
+                                                        />
+                                                    </Form.Item>
+
+                                                    <Form.Item
+                                                        label="Execution Mode :"
+                                                        name="execution_mode"
+                                                        required={false}
+                                                        rules={[{ required: false, message: 'Execution mode is required' }]}
+                                                    >
+                                                        <Select
+                                                            placeholder='Select execution mode'
+                                                            options={[
+                                                                { value: 'online', label: 'Online' },
+                                                                { value: 'offline', label: 'Offline' },
+                                                                { value: 'online_offline', label: 'Both' },
+                                                            ]}
+                                                        />
+                                                    </Form.Item>
+
                                                 </div>
                                             </Form>
                                         </div>
@@ -556,15 +535,15 @@ const ComponentBuilder = () => {
                                 width: '100%',
                                 display: 'flex',
                                 flexDirection: 'column',
-                                gap: '16px'
+                                gap: '10px'
                             }}>
                                 <span style={{ fontSize: '14px', fontWeight: 500, color: '#888' }}>{dataType.toUpperCase()} - PREVIEW</span>
                                 {(() => {
                                     switch (dataType) {
                                         case 'table':
-                                            return <UniversalTable />;
+                                            return <UniversalTable editMode={true} />;
                                         case 'form':
-                                            return <Form>Form preview</Form>;
+                                            return <UniversalForm editMode={true} setFields={setFields} />;
                                         default:
                                             return <div>No preview available</div>;
                                     }

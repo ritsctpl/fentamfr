@@ -56,7 +56,7 @@
 }
 
 .header-edit-input {
-  color: white;
+  color: black;
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.3);
   width: calc(100% - 50px);
@@ -231,6 +231,11 @@ td {
   background-color: #f3f4f6;
 }
 
+.field-label-placeholder {
+  color: #bfbfbf;
+  font-style: italic;
+}
+
 .label-edit-input {
   font-size: 0.8125rem;
   padding: 2px 4px;
@@ -394,13 +399,13 @@ td {
   margin-right: 1rem;
 }
 
-.table-row[data-level="1"] td:first-child {
-  padding-left: 2rem;
+ .table-row[data-level="1"] td{
+  padding-left: 1rem;
 }
-
+/*
 .table-row[data-level="2"] td:first-child {
   padding-left: 4rem;
-}
+} */
 
 .group-cell:hover {
   background: #e6f4ff;
@@ -430,17 +435,31 @@ td {
   background-color: #fafafa;
 }
 
+.merged-cell .cell-type-dropdown {
+  visibility: hidden;
+  opacity: 0;
+  z-index: 10;
+}
+
+.merged-cell:hover .cell-type-dropdown,
+.merged-cell:focus .cell-type-dropdown,
+.merged-cell.editing .cell-type-dropdown {
+  visibility: visible;
+  opacity: 1;
+}
+
 .merged-cell .cell-content {
   height: 100%;
   display: flex;
   align-items: center;
-  padding-left: 30px !important;
+  padding-left: 1rem;
+  transition: padding 0.2s ease;
 }
 
-.merged-cell .cell-type-dropdown {
-  visibility: visible;
-  opacity: 1;
-  z-index: 10;
+.merged-cell:hover .cell-content,
+.merged-cell:focus .cell-content,
+.merged-cell.editing .cell-content {
+  padding-left: 30px;
 }
 
 .merged-cell:not(.selected) {
@@ -453,12 +472,6 @@ td {
 
 .merged-cell:hover {
   background-color: #e8e8e817;
-}
-
-.merged-cell:hover .cell-type-dropdown,
-.merged-cell:focus .cell-type-dropdown {
-  visibility: visible;
-  opacity: 1;
 }
 
 .universal-table[data-selection-mode="true"] .universal-cell {
@@ -496,4 +509,92 @@ td {
 
 .empty-cell:hover {
   background-color: #f0f0f0;
+}
+
+.number-cell,
+.unit-cell,
+.date-cell,
+.formula-cell {
+  width: 100%;
+}
+
+.formula-cell .ant-input-prefix {
+  color: #1890ff;
+}
+
+.formula-cell:not(.editing) {
+  color: #1890ff;
+  font-family: monospace;
+}
+
+.unit-cell .ant-input-number {
+  width: 60% !important;
+  border-right: none;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.unit-cell .ant-select {
+  width: 40% !important;
+}
+
+.unit-cell .ant-select .ant-select-selector {
+  border-left: none !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+.unit-cell .ant-space-compact {
+  display: flex;
+  width: 100%;
+}
+
+.unit-cell .ant-select-selection-item {
+  font-weight: normal;
+  text-align: center;
+}
+
+.cell-type-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.formula-error {
+  color: #ff4d4f;
+  font-style: italic;
+}
+
+.unit-cell .ant-select-dropdown {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.unit-cell .ant-select-item-group {
+  font-weight: bold;
+  background: #f5f5f5;
+  padding: 8px;
+}
+
+.unit-cell .ant-select-item-option {
+  padding: 8px 12px;
+}
+
+.unit-cell .ant-select-item-option-content {
+  font-size: 14px;
+}
+
+.formula-cell .ant-input-prefix {
+  margin-right: 8px;
+  color: #1890ff;
+}
+
+.formula-cell .ant-tooltip {
+  max-width: 300px;
+}
+
+.formula-cell .ant-input {
+  font-family: monospace;
 }

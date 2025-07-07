@@ -43,21 +43,21 @@ export default function MainBuilder() {
                                 </div>
                             )
                         },
-                        // {
-                        //     key: '2',
-                        //     label: 'Component Builder',
-                        //     style: {
-                        //         width: '100%',
-                        //         height: '100%'
-                        //     },
-                        //     children: (
-                        //         <div style={{ height: '100%', width: '100%' }}>
-                        //             <MyProvider >
-                        //                 <ComponentBuilderMaintenance />
-                        //             </MyProvider>
-                        //         </div>
-                        //     )
-                        // },
+                        {
+                            key: '2',
+                            label: 'Component Builder',
+                            style: {
+                                width: '100%',
+                                height: '100%'
+                            },
+                            children: (
+                                <div style={{ height: '100%', width: '100%' }}>
+                                    <MyProvider >
+                                        <ComponentBuilderMaintenance />
+                                    </MyProvider>
+                                </div>
+                            )
+                        },
                         {
                             key: '3',
                             label: 'Section Builder',
@@ -86,7 +86,7 @@ export default function MainBuilder() {
                         },
                          {
                             key: '5',
-                            label: 'Component Builder',
+                            label: 'New Component Builder',
                             style: {
                                 width: '100%',
                                 height: '100%'

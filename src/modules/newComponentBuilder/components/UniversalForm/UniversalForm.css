@@ -1,0 +1,266 @@
+.universal-form-container {
+  padding: 0px;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.toolbar-container {
+  margin-bottom: 24px;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+/* Field Card Styles */
+.field-card {
+  transition: all 0.3s ease;
+}
+
+.field-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.field-card .field-icon {
+  color: #1890ff;
+  font-size: 16px;
+  margin-right: 4px;
+}
+
+.field-card.formula .field-icon {
+  color: #722ed1;
+}
+
+.field-card.lookup .field-icon {
+  color: #13c2c2;
+}
+
+/* Instruction Block Styles */
+.instruction-block {
+  background: #f5f5f5;
+  padding: 16px;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+
+.instruction-block .instruction-line {
+  margin-bottom: 8px;
+  padding-left: 24px;
+  position: relative;
+}
+
+.instruction-block .instruction-line:last-child {
+  margin-bottom: 0;
+}
+
+.instruction-block .instruction-line::before {
+  content: attr(data-number);
+  position: absolute;
+  left: 0;
+  color: #1890ff;
+  font-weight: 500;
+}
+
+/* Template Text Styles */
+.template-text {
+  background: #e6f7ff;
+  padding: 12px;
+  border-radius: 4px;
+  border-left: 4px solid #1890ff;
+}
+
+.template-text .variable {
+  color: #1890ff;
+  background: rgba(24, 144, 255, 0.1);
+  padding: 2px 4px;
+  border-radius: 2px;
+  margin: 0 2px;
+}
+
+/* Formula Preview Styles */
+.formula-preview {
+  font-family: monospace;
+  background: #f5f5f5;
+  padding: 8px;
+  border-radius: 4px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+/* Debug Info Styles */
+.debug-info {
+  margin-top: 8px;
+  padding: 8px;
+  background: #fafafa;
+  border-radius: 4px;
+  border: 1px dashed #d9d9d9;
+}
+
+/* Field Label Styles */
+.ant-typography strong {
+  font-size: 14px;
+  color: #262626;
+}
+
+/* Required Field Indicator */
+.ant-typography-danger {
+  margin-left: 4px;
+}
+
+/* Read-only Indicator */
+.anticon-lock {
+  color: #bfbfbf;
+  margin-left: 8px;
+}
+
+/* Form Field Spacing */
+.ant-input,
+.ant-select,
+.ant-input-number {
+  margin-top: 4px;
+}
+
+/* Modal Tabs */
+.ant-tabs-nav {
+  margin-bottom: 24px !important;
+}
+
+.ant-tabs-tab {
+  padding: 12px 16px !important;
+}
+
+.ant-tabs-tab .anticon {
+  margin-right: 8px;
+}
+
+/* Access Denied Message */
+.access-denied {
+  text-align: center;
+  padding: 48px 24px;
+  color: #ff4d4f;
+  font-size: 16px;
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 4px;
+}
+
+/* Field Value Container */
+.field-value-container {
+  background: #fafafa;
+  border-radius: 4px;
+  padding: 4px;
+  border: 1px solid #1890ff;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.field-value-container .ant-input,
+.field-value-container .ant-select,
+.field-value-container .ant-input-number {
+  margin: 0;
+  width: 100%;
+}
+
+.field-value-container .ant-switch {
+  margin: 4px 8px;
+}
+
+.field-value-container .ant-typography {
+  width: 100%;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+/* Editable Field Hover */
+.field-card:not(.read-only) .field-value-container:hover {
+  background: #f0f0f0;
+  cursor: pointer;
+}
+
+/* Active Editing State */
+.field-value-container.editing {
+  background: #ffffff;
+  border: 1px solid #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+}
+
+/* Field Display Value */
+.field-display-value {
+  padding: 4px 8px;
+  
+  color: rgba(0, 0, 0, 0.85);
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+/* Field Select Wrapper */
+.field-select-wrapper {
+  width: 100%;
+}
+
+.field-select-wrapper .ant-select {
+  width: 100%;
+  min-width: 120px;
+}
+
+.field-select-wrapper .ant-select-selector {
+  padding: 4px 8px !important;
+  height: 32px !important;
+}
+
+/* Field Switch Wrapper */
+.field-switch-wrapper {
+  padding: 8px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.field-switch-wrapper .switch-label {
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+}
+
+/* Input Styling */
+.field-card .ant-input {
+  padding: 4px 8px;
+  height: 32px;
+}
+
+.field-card .ant-input:not(:hover):not(:focus) {
+  background: transparent;
+}
+
+.field-card .ant-input:hover {
+  background: #f5f5f5;
+}
+
+.field-card .ant-input:focus {
+  background: #ffffff;
+  box-shadow: none;
+}
+
+/* Responsive Grid */
+@media (max-width: 768px) {
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .universal-form-container {
+    padding: 16px;
+  }
+
+  .toolbar-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

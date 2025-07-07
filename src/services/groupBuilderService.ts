@@ -41,7 +41,7 @@ export const getComponentById = async (id: any) => {
 };
 
 export const createComponent = async (component: any) => {
-    const response = await api.post(`/componentbuilder-service/createComponent`, component);
+    const response = await api.post(`/docbuilder-service/components/text/create`, component);
     return response.data;
 };
 
