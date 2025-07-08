@@ -12,7 +12,7 @@ export interface Option {
 }
 
 export interface RoleControl {
-  editable_by: string[];
+  editableBy: string[];
 }
 
 export interface BindingFields {
@@ -20,33 +20,33 @@ export interface BindingFields {
 }
 
 export interface FormField {
-  field_id: string;
-  field_name: string;
-  field_type: FieldType;
-  display_mode?: DisplayMode;
-  instruction_level?: string;
+  fieldId: string;
+  fieldName: string;
+  fieldType: FieldType;
+  displayMode?: DisplayMode;
+  instructionLevel?: string;
   multiline?: boolean;
   rows?: number;
   content?: string[];
-  data_source?: DataSource;
-  api_endpoint?: string;
+  dataSource?: DataSource;
+  apiEndpoint?: string;
   endpoint?: string;
-  bind_field?: string;
+  bindField?: string;
   required?: boolean;
-  role_control?: RoleControl;
-  read_only?: boolean;
-  label_position?: LabelPosition;
+  roleControl?: RoleControl;
+  readOnly?: boolean;
+  labelPosition?: LabelPosition;
   alignment?: Alignment;
-  layout_column?: number;
+  layoutColumn?: number;
   order?: number;
-  max_length?: number;
+  maxLength?: number;
   options?: Option[];
-  default_value?: string | boolean | number | object;
+  defaultValue?: string | boolean | number | object;
   unit?: string;
   precision?: number;
   formula?: string;
-  template_text?: string;
-  binding_fields?: BindingFields;
+  templateText?: string;
+  bindingFields?: BindingFields;
 }
 
 export interface FieldEditorTab {

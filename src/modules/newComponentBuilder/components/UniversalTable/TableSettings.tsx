@@ -41,13 +41,13 @@ export const TableSettingsModal = ({
                 <Tabs.TabPane tab="Layout" key="layout">
                     <Form form={form} layout="vertical">
                         <Form.Item
-                            name={['column_layout', 'column_count']}
+                            name={['columnLayout', 'columnCount']}
                             label="Columns per Row"
                         >
                             <InputNumber min={1} max={12} />
                         </Form.Item>
                         <Form.Item
-                            name={['column_layout', 'column_width_mode']}
+                            name={['columnLayout', 'columnWidthMode']}
                             label="Column Width Mode"
                         >
                             <Select>
@@ -56,13 +56,13 @@ export const TableSettingsModal = ({
                             </Select>
                         </Form.Item>
                         <Form.Item
-                            name={['column_layout', 'sticky_headers']}
+                            name={['columnLayout', 'stickyHeaders']}
                             valuePropName="checked"
                         >
                             <Switch checkedChildren="Sticky Headers" unCheckedChildren="Normal Headers" />
                         </Form.Item>
                         <Form.Item
-                            name={['column_layout', 'resizable_columns']}
+                            name={['columnLayout', 'resizableColumns']}
                             valuePropName="checked"
                         >
                             <Switch checkedChildren="Resizable Columns" unCheckedChildren="Fixed Width" />
@@ -72,31 +72,31 @@ export const TableSettingsModal = ({
                 <Tabs.TabPane tab="Style" key="style">
                     <Form form={form} layout="vertical">
                         <Form.Item
-                            name={['style', 'table_border']}
+                            name={['style', 'tableBorder']}
                             valuePropName="checked"
                         >
                             <Switch checkedChildren="Show Borders" unCheckedChildren="Hide Borders" />
                         </Form.Item>
                         <Form.Item
-                            name={['style', 'striped_rows']}
+                            name={['style', 'stripedRows']}
                             valuePropName="checked"
                         >
                             <Switch checkedChildren="Striped Rows" unCheckedChildren="Plain Rows" />
                         </Form.Item>
                         <Form.Item
-                            name={['style', 'alternate_row_color']}
+                            name={['style', 'alternateRowColor']}
                             label="Alternate Row Color"
                         >
                             <Input type="color" />
                         </Form.Item>
                         <Form.Item
-                            name={['style', 'header_color']}
+                            name={['style', 'headerColor']}
                             label="Header Background"
                         >
                             <Input type="color" />
                         </Form.Item>
                         <Form.Item
-                            name={['style', 'header_font_color']}
+                            name={['style', 'headerFontColor']}
                             label="Header Text Color"
                         >
                             <Input type="color" />
@@ -112,7 +112,7 @@ export const TableSettingsModal = ({
                             <Switch checkedChildren="Enable Pagination" unCheckedChildren="Disable Pagination" />
                         </Form.Item>
                         <Form.Item
-                            name={['pagination', 'rows_per_page']}
+                            name={['pagination', 'rowsPerPage']}
                             label="Rows per Page"
                         >
                             <Select>
@@ -127,7 +127,7 @@ export const TableSettingsModal = ({
                 <Tabs.TabPane tab="Row Controls" key="rows">
                     <Form form={form} layout="vertical">
                         <Form.Item
-                            name={['row_controls', 'mode']}
+                            name={['rowControls', 'mode']}
                             label="Row Mode"
                         >
                             <Select>
@@ -136,25 +136,25 @@ export const TableSettingsModal = ({
                             </Select>
                         </Form.Item>
                         <Form.Item
-                            name={['row_controls', 'min_rows']}
+                            name={['rowControls', 'minRows']}
                             label="Minimum Rows"
                         >
                             <InputNumber min={0} />
                         </Form.Item>
                         <Form.Item
-                            name={['row_controls', 'max_rows']}
+                            name={['rowControls', 'maxRows']}
                             label="Maximum Rows"
                         >
                             <InputNumber min={1} />
                         </Form.Item>
                         <Form.Item
-                            name={['row_controls', 'allow_add_remove']}
+                            name={['rowControls', 'allowAddRemove']}
                             valuePropName="checked"
                         >
                             <Switch checkedChildren="Allow Add/Remove" unCheckedChildren="Fixed Rows" />
                         </Form.Item>
                         <Form.Item
-                            name={['row_controls', 'initial_rows']}
+                            name={['rowControls', 'initialRows']}
                             label="Initial Rows"
                         >
                             <InputNumber min={1} />

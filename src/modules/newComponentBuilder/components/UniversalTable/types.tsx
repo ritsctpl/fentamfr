@@ -44,27 +44,27 @@ export interface Validation {
 }
 
 export interface Column {
-    field_id: string;
-    field_name: string;
-    field_type: FieldType;
+    fieldId: string;
+    fieldName: string;
+    fieldType: FieldType;
     unit?: string;
     precision?: number;
     required?: boolean;
-    read_only?: boolean;
-    default_value?: any;
+    readOnly?: boolean;
+    defaultValue?: any;
     validation?: ValidationRules;
     options?: FieldOption[];
     formula?: string;
     endpoint?: string;
-    bind_field?: string;
+    bindField?: string;
     multiline?: boolean;
-    max_length?: number;
+    maxLength?: number;
     rows?: number;
-    capture_camera?: boolean;
-    file_types?: string[];
-    max_size_mb?: number;
-    signed_by_role?: string[];
-    visibility_condition?: string;
+    captureCamera?: boolean;
+    fileTypes?: string[];
+    maxSizeMb?: number;
+    signedByRole?: string[];
+    visibilityCondition?: string;
 }
 
 export interface HeaderStructure {
@@ -76,39 +76,39 @@ export interface HeaderStructure {
 
 export interface RowControls {
     mode: 'fixed' | 'growing';
-    min_rows?: number;
-    max_rows?: number;
-    allow_add_remove?: boolean;
-    initial_rows?: number;
+    minRows?: number;
+    maxRows?: number;
+    allowAddRemove?: boolean;
+    initialRows?: number;
 }
 
 export interface PaginationConfig {
     enabled: boolean;
-    rows_per_page: number;
+    rowsPerPage: number;
 }
 
 export interface ColumnLayout {
-    column_count: number;
-    column_width_mode: 'auto' | 'fixed';
-    sticky_headers: boolean;
-    resizable_columns: boolean;
+    columnCount: number;
+    columnWidthMode: 'auto' | 'fixed';
+    stickyHeaders: boolean;
+    resizableColumns: boolean;
 }
 
 export interface TableStyle {
-    table_border: boolean;
-    striped_rows: boolean;
-    alternate_row_color: string;
-    header_color: string;
-    header_font_color: string;
+    tableBorder: boolean;
+    stripedRows: boolean;
+    alternateRowColor: string;
+    headerColor: string;
+    headerFontColor: string;
 }
 
 export interface TemplateData {
-    header_structure?: HeaderStructure[];
+    headerStructure?: HeaderStructure[];
     columns: Column[];
-    preload_rows?: Record<string, any>[];
-    row_controls?: RowControls;
+    preloadRows?: Record<string, any>[];
+    rowControls?: RowControls;
     pagination?: PaginationConfig;
-    column_layout?: ColumnLayout;
+    columnLayout?: ColumnLayout;
     style?: TableStyle;
 }
 

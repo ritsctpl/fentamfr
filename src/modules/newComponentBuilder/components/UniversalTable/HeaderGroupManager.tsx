@@ -241,7 +241,7 @@ const HeaderGroupManager: React.FC<HeaderGroupManagerProps> = ({
 
     const renderGroup = (group: HeaderStructure, level = 0) => {
         const assignedColumns = columns.filter(col => 
-            group.columns?.includes(col.field_id)
+            group.columns?.includes(col.fieldId)
         );
 
         const isEditing = group.id in editingLabels;
@@ -276,7 +276,7 @@ const HeaderGroupManager: React.FC<HeaderGroupManagerProps> = ({
                             dataSource={assignedColumns}
                             renderItem={(col: Column) => (
                                 <List.Item>
-                                    <Text>{col.field_name}</Text>
+                                    <Text>{col.fieldName}</Text>
                                 </List.Item>
                             )}
                         />
@@ -320,10 +320,10 @@ const HeaderGroupManager: React.FC<HeaderGroupManagerProps> = ({
                         renderItem={column => (
                             <List.Item>
                                 <Space direction="vertical" style={{ width: '100%' }}>
-                                    <Text>{column.field_name}</Text>
+                                    <Text>{column.fieldName}</Text>
                                     <Radio.Group
-                                        value={findColumnGroup(headerStructure, column.field_id)}
-                                        onChange={e => assignColumnToGroup(column.field_id, e.target.value)}
+                                        value={findColumnGroup(headerStructure, column.fieldId)}
+                                        onChange={e => assignColumnToGroup(column.fieldId, e.target.value)}
                                     >
                                         {allGroups
                                             .filter(group => !editingHeaderId || group.id === editingHeaderId)

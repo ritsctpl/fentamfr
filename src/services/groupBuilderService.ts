@@ -31,17 +31,17 @@ export const getGroupPreview = async (group: any) => {
 };
 
 export const getTop50Components = async (searchParams: any) => {
-    const response = await api.post(`/componentbuilder-service/getTop50Component`, searchParams);
+    const response = await api.post(`/docbuilder-service/components/retrieveTop50`, searchParams);
     return response.data;
 };
 
-export const getComponentById = async (id: any) => {        
-    const response = await api.post(`/componentbuilder-service/getComponentById`, id);
+export const getComponentById = async (id: any,dataType: string) => {        
+    const response = await api.post(`/docbuilder-service/components/${dataType}/fetch`, id);
     return response.data;
 };
 
-export const createComponent = async (component: any) => {
-    const response = await api.post(`/docbuilder-service/components/text/create`, component);
+export const createComponent = async (dataType: string, component: any) => {
+    const response = await api.post(`/docbuilder-service/components/${dataType}/create`, component);
     return response.data;
 };
 

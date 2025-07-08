@@ -23,7 +23,7 @@ const FieldList: React.FC<FieldListProps> = ({
     <div className="field-grid">
       {templateData.map((field) => (
         <FieldCard
-          key={field.field_id}
+          key={field.fieldId}
           field={field}
           onEdit={canEditField(field) ? onEdit : undefined}
           onDelete={canEditField(field) ? onDelete : undefined}

@@ -9,22 +9,24 @@ import '../styles/group.css';
 import { FaLayerGroup } from "react-icons/fa";
 import UniversalTable from './UniversalTable/UniversalTable';
 import UniversalForm from './UniversalForm/UniversalForm';
+import { v4 as uuidv4 } from 'uuid';
 
 
 type Group = {
+    componentId: string;
     handle: string;
-    component_name: string;
-    component_type: string;
-    component_version: number;
-    component_sequence: number;
+    componentName: string;
+    componentType: string;
+    componentVersion: number;
+    componentSequence: number;
     active: boolean;
     description: string;
     tag: string[];
-    execution_mode: string;
-    modified_at?: string;
-    created_at?: string;
-    created_by?: string;
-    modified_by?: string;
+    executionMode: string;
+    modifiedAt?: string;
+    createdAt?: string;
+    createdBy?: string;
+    modifiedBy?: string;
 };
 
 const ComponentBuilder = () => {
@@ -36,12 +38,13 @@ const ComponentBuilder = () => {
     const [showSections, setShowSections] = useState(false);
     const [previewSections, setPreviewSections] = useState(false);
     const [isCreating, setIsCreating] = useState(false)
-    const [fields,setFields] = useState(false)
+    const [fields, setFields] = useState<any>(null)
+    const [tableConfig, setTableConfig] = useState<any>(null)
 
     // Form
     const [form] = Form.useForm();
 
-    const dataType = Form.useWatch('component_type', form) || '';
+    const dataType = Form.useWatch('componentType', form) || '';
 
     // Data states
     const [groups, setGroups] = useState<Group[]>([]);
@@ -66,7 +69,7 @@ const ComponentBuilder = () => {
     const handleSaveGroup = async () => {
         try {
             const values = await form.validateFields();
-            const response = await createComponent({ ...values, site: '1004', userId: "ajai" , fields  });
+            const response = await createComponent(dataType, { ...values, componentId: uuidv4(), site: '1004', userId: "ajai", fields: fields, tableConfig: tableConfig });
             if (!response.errorCode) {
                 const updatedGroups = await getTop50Components({ site: '1004' });
                 setGroups(updatedGroups || []);
@@ -92,7 +95,7 @@ const ComponentBuilder = () => {
     const handleUpdateGroup = async () => {
         try {
             const values = await form.validateFields();
-            const response = await updateComponent({ ...values, site: '1004', userId: "ajai" });
+            const response = await updateComponent({ ...values, componentId: selectedGroup?.componentId, site: '1004', userId: "ajai", fields: fields, tableConfig: tableConfig });
             if (!response.errorCode) {
                 const updatedGroups = await getTop50Components({ site: '1004' });
                 setGroups(updatedGroups || []);
@@ -120,7 +123,7 @@ const ComponentBuilder = () => {
                 title: 'Delete Group',
                 content: 'Are you sure you want to delete this component?',
                 onOk: async () => {
-                    const response = await deleteComponent({ site: '1004', component_name: selectedGroup.component_name });
+                    const response = await deleteComponent({ site: '1004', componentName: selectedGroup.componentName });
                     if (!response.errorCode) {
                         const updatedGroups = await getTop50Components({ site: '1004' });
                         setGroups(updatedGroups || []);
@@ -150,10 +153,10 @@ const ComponentBuilder = () => {
 
     const handleSelectGroup = async (row: Group) => {
         try {
-            if (!row || !row.handle) return;
-            const selectedGroupItem = groups.find((item) => item.handle === row.handle);
+            if (!row || !row.componentId) return;
+            const selectedGroupItem = groups.find((item) => item.componentId === row.componentId);
             if (selectedGroupItem) {
-                const component = await getComponentById({ site: '1004', component_name: selectedGroupItem.component_name })
+                const component = await getComponentById({ site: '1004', componentId: selectedGroupItem.componentId }, row.componentType)
                 setSelectedGroup(component);
                 setIsEdit(true);
                 setShowSections(true);
@@ -198,9 +201,9 @@ const ComponentBuilder = () => {
         if (!selectedGroup) return;
 
         // Create a copy of the selected group with a new name
-        const newGroupLabel = `${selectedGroup.component_name} (Copy)`;
+        const newGroupLabel = `${selectedGroup.componentName} (Copy)`;
         form.setFieldsValue({
-            component_name: newGroupLabel,
+            componentName: newGroupLabel,
         });
 
         setIsEdit(false);
@@ -232,7 +235,7 @@ const ComponentBuilder = () => {
                         <Breadcrumb>
                             <Breadcrumb.Item><div style={{ color: '#666', fontWeight: isEdit || isCreating ? '400' : '500' }}>Component Builder</div></Breadcrumb.Item>
                             {(isEdit || isCreating) && (
-                                <Breadcrumb.Item><div style={{ color: '#666', fontWeight: '500' }}>{selectedGroup?.component_name || 'Create Component'}</div></Breadcrumb.Item>
+                                <Breadcrumb.Item><div style={{ color: '#666', fontWeight: '500' }}>{selectedGroup?.componentName || 'Create Component'}</div></Breadcrumb.Item>
                             )}
                         </Breadcrumb>
                     </div>
@@ -318,7 +321,7 @@ const ComponentBuilder = () => {
                                             </div>
                                             <Input.Search
                                                 placeholder="Search components..."
-                                                style={{ marginBottom: '16px' }}
+                                                style={{ marginBottom: '16px', marginTop: '0px' }}
                                                 onChange={(e) => setSearchTerm(e.target.value)}
                                                 value={searchTerm}
                                             />
@@ -349,9 +352,13 @@ const ComponentBuilder = () => {
                                                         }}
                                                         onClick={() => handleSelectGroup(item)}
                                                     >
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                            <FaLayerGroup style={{ fontSize: '14px', color: '#666' }} />
-                                                            <div style={{ fontWeight: '450', fontSize: "0.8em"}}>{item?.component_name}</div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'space-between', width: '100%' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                                <FaLayerGroup style={{ fontSize: '14px', color: '#666' }} />
+                                                                <div style={{ fontWeight: '450', fontSize: "0.8em" }}>{item?.componentName}</div>
+                                                            </div>
+                                                            <div style={{ fontWeight: '450', fontSize: "0.8em" }}>{item?.componentType}</div>
+                                                            {/* <div style={{ fontWeight: '450', fontSize: "0.8em"}}>{item?.componentVersion}</div> */}
                                                         </div>
                                                     </List.Item>
                                                 )}
@@ -374,14 +381,14 @@ const ComponentBuilder = () => {
                                                 wrapperCol={{ flex: 1 }}
                                                 style={{ width: '100%' }}
                                                 initialValues={{
-                                                    component_name: '',
-                                                    component_type: 'table',
-                                                    component_version: 1,
-                                                    component_sequence: 1,
+                                                    componentName: '',
+                                                    componentType: 'table',
+                                                    componentVersion: 1,
+                                                    componentSequence: 1,
                                                     active: true,
                                                     description: '',
                                                     tag: [],
-                                                    execution_mode: 'online_offline',
+                                                    executionMode: 'online_offline',
                                                 }}
                                             >
                                                 <div style={{
@@ -391,7 +398,7 @@ const ComponentBuilder = () => {
                                                 }}>
                                                     <Form.Item
                                                         label="Component Name :"
-                                                        name="component_name"
+                                                        name="componentName"
                                                         required={true}
                                                         rules={[{ required: true, message: 'Component name is required' }]}
                                                     >
@@ -402,7 +409,7 @@ const ComponentBuilder = () => {
                                                     </Form.Item>
                                                     <Form.Item
                                                         label="Component Type :"
-                                                        name="component_type"
+                                                        name="componentType"
                                                         required={true}
                                                         rules={[{ required: true, message: 'Component type is required' }]}
                                                     >
@@ -410,13 +417,13 @@ const ComponentBuilder = () => {
                                                             placeholder='Select component type'
                                                             options={[
                                                                 { value: 'table', label: 'Table' },
-                                                                { value: 'form', label: 'Form' },
+                                                                { value: 'text', label: 'Text' },
                                                             ]}
                                                         />
                                                     </Form.Item>
                                                     <Form.Item
                                                         label="Component Version :"
-                                                        name="component_version"
+                                                        name="componentVersion"
                                                         required={false}
                                                         rules={[{ required: false, message: 'Component version is required' }]}
                                                     >
@@ -427,7 +434,7 @@ const ComponentBuilder = () => {
                                                     </Form.Item>
                                                     <Form.Item
                                                         label="Component Sequence :"
-                                                        name="component_sequence"
+                                                        name="componentSequence"
                                                         required={false}
                                                         rules={[{ required: false, message: 'Component sequence is required' }]}
                                                     >
@@ -460,7 +467,7 @@ const ComponentBuilder = () => {
                                                         required={false}
                                                         rules={[{ required: false, message: 'Component tag is required' }]}
                                                     >
-                                                       <Select
+                                                        <Select
                                                             placeholder='Select component tag'
                                                             mode='multiple'
                                                             allowClear
@@ -476,7 +483,7 @@ const ComponentBuilder = () => {
 
                                                     <Form.Item
                                                         label="Execution Mode :"
-                                                        name="execution_mode"
+                                                        name="executionMode"
                                                         required={false}
                                                         rules={[{ required: false, message: 'Execution mode is required' }]}
                                                     >
@@ -541,8 +548,8 @@ const ComponentBuilder = () => {
                                 {(() => {
                                     switch (dataType) {
                                         case 'table':
-                                            return <UniversalTable editMode={true} />;
-                                        case 'form':
+                                            return <UniversalTable editMode={true} setTableConfig={setTableConfig} />;
+                                        case 'text':
                                             return <UniversalForm editMode={true} setFields={setFields} />;
                                         default:
                                             return <div>No preview available</div>;

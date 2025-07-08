@@ -14,35 +14,35 @@ import { HeaderStructure, TemplateData, Column, UserData } from './types';
 import TableHeader from './TableHeader';
 import HeaderGroupManager from './HeaderGroupManager';
 
-const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
+const UniversalTable = ({ editMode, setTableConfig }: { editMode?: boolean, setTableConfig?: (config: any) => void }) => {
     const [templateData, setTemplateData] = useState<TemplateData>({
         columns: [],
-        header_structure: [],
-        row_controls: {
+        headerStructure: [],
+        rowControls: {
             mode: 'growing',
-            min_rows: 1,
-            max_rows: 10,
-            allow_add_remove: true,
-            initial_rows: 1
+            minRows: 1,
+            maxRows: 10,
+            allowAddRemove: true,
+            initialRows: 1
         },
         pagination: {
             enabled: false,
-            rows_per_page: 10
+            rowsPerPage: 10
         },
-        column_layout: {
-            column_count: 1,
-            column_width_mode: 'auto',
-            sticky_headers: true,
-            resizable_columns: true
+        columnLayout: {
+            columnCount: 1,
+            columnWidthMode: 'auto',
+            stickyHeaders: true,
+            resizableColumns: true
         },
         style: {
-            table_border: true,
-            striped_rows: true,
-            alternate_row_color: '#ffffff',
-            header_color: '#f0f0f0',
-            header_font_color: '#000000'
+            tableBorder: true,
+            stripedRows: true,
+            alternateRowColor: '#ffffff',
+            headerColor: '#f0f0f0',
+            headerFontColor: '#000000'
         },
-        preload_rows: []
+        preloadRows: []
     });
     
     const [userData, setUserData] = useState<UserData[]>([]);
@@ -59,8 +59,8 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
     // Load sample data
     useEffect(() => {
         // Initialize user data with preloaded rows if not in edit mode
-        if (!editMode && templateData.preload_rows && templateData.preload_rows.length > 0) {
-            setUserData(templateData.preload_rows);
+        if (!editMode && templateData.preloadRows && templateData.preloadRows.length > 0) {
+            setUserData(templateData.preloadRows);
         }
     }, [editMode]);
 
@@ -70,22 +70,23 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
             if (userData.length > 0) {
                 setTemplateData(prev => ({
                     ...prev,
-                    preload_rows: userData
+                    preloadRows: userData
                 }));
                 // Clear userData as we're in edit mode now
                 setUserData([]);
             }
         } else {
             // When switching to view mode, load data from preload_rows
-            if (templateData.preload_rows && templateData.preload_rows.length > 0) {
-                setUserData(templateData.preload_rows);
+            if (templateData.preloadRows && templateData.preloadRows.length > 0) {
+                setUserData(templateData.preloadRows);
             }
         }
     }, [editMode]);
 
     useEffect(() => {
-        console.log(templateData, 'templateData');
-        console.log(userData, 'userData');
+        if (setTableConfig) {
+            setTableConfig(templateData);
+        }
     }, [templateData, userData]);
 
     const evaluateFormula = (formula: string, rowData: UserData): number | string => {
@@ -128,7 +129,7 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
         // In edit mode, update preload_rows; otherwise, update userData
         if (editMode) {
             setTemplateData(prev => {
-                const newPreloadRows = [...(prev.preload_rows || [])];
+                const newPreloadRows = [...(prev.preloadRows || [])];
                 
                 // Ensure the row exists
                 if (!newPreloadRows[rowIndex]) {
@@ -144,7 +145,7 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
                 // Update formula fields
                 prev.columns.forEach(column => {
                     if (column.formula) {
-                        newPreloadRows[rowIndex][column.field_id] = evaluateFormula(
+                        newPreloadRows[rowIndex][column.fieldId] = evaluateFormula(
                             column.formula,
                             newPreloadRows[rowIndex]
                         );
@@ -153,7 +154,7 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
                 
                 return {
                     ...prev,
-                    preload_rows: newPreloadRows
+                    preloadRows: newPreloadRows
                 };
             });
         } else {
@@ -174,7 +175,7 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
                 // Update formula fields
                 templateData.columns.forEach(column => {
                     if (column.formula) {
-                        newData[rowIndex][column.field_id] = evaluateFormula(
+                        newData[rowIndex][column.fieldId] = evaluateFormula(
                             column.formula,
                             newData[rowIndex]
                         );
@@ -199,14 +200,14 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
             }
             
             // Ensure precision is set for number fields
-            if (column.field_type === 'number' && formValues.precision === undefined) {
+            if (column.fieldType === 'number' && formValues.precision === undefined) {
                 formValues.precision = 1;
             }
 
             // For select/enum fields, ensure default value is in options
-            if ((column.field_type === 'select' || column.field_type === 'enum') && column.options) {
-                if (!column.options.some(opt => opt.value === column.default_value)) {
-                    formValues.default_value = column.options.length > 0 ? column.options[0].value : '';
+            if ((column.fieldType === 'select' || column.fieldType === 'enum') && column.options) {
+                if (!column.options.some(opt => opt.value === column.defaultValue)) {
+                    formValues.defaultValue = column.options.length > 0 ? column.options[0].value : '';
                 }
             }
             
@@ -259,11 +260,11 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
             }
             
             // Generate field_id from field_name if not editing an existing column
-            const field_id = editingColumn?.field_id || generateFieldId(values.field_name);
+            const fieldId = editingColumn?.fieldId || generateFieldId(values.fieldName);
             
             const newColumn: Column = {
                 ...values,
-                field_id
+                fieldId
             };
 
             // Update the column in templateData
@@ -272,7 +273,7 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
                     ...prev,
                     columns: editingColumn
                         ? prev.columns.map(col => 
-                            col.field_id === editingColumn.field_id ? newColumn : col
+                            col.fieldId === editingColumn.fieldId ? newColumn : col
                           )
                         : [...prev.columns, newColumn]
                 };
@@ -284,42 +285,42 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
 
                         // For new columns, apply default value
                         if (!editingColumn) {
-                            if (newColumn.default_value !== undefined) {
-                                updatedRow[field_id] = newColumn.default_value;
+                            if (newColumn.defaultValue !== undefined) {
+                                updatedRow[fieldId] = newColumn.defaultValue;
                             }
                         } 
                         // For existing columns
                         else {
                             // If field type changed, reset to default value
-                            if (editingColumn.field_type !== newColumn.field_type) {
-                                updatedRow[field_id] = newColumn.default_value;
+                            if (editingColumn.fieldType !== newColumn.fieldType) {
+                                updatedRow[fieldId] = newColumn.defaultValue;
                             }
                             // If default value changed and current value is undefined/null
-                            else if (newColumn.default_value !== editingColumn.default_value && 
-                                    (updatedRow[field_id] === undefined || updatedRow[field_id] === null)) {
-                                updatedRow[field_id] = newColumn.default_value;
+                            else if (newColumn.defaultValue !== editingColumn.defaultValue && 
+                                    (updatedRow[fieldId] === undefined || updatedRow[fieldId] === null)) {
+                                updatedRow[fieldId] = newColumn.defaultValue;
                             }
                         }
 
                         // Handle formula fields
-                        if (newColumn.field_type === 'formula' && newColumn.formula) {
-                            updatedRow[field_id] = evaluateFormula(newColumn.formula, updatedRow);
+                        if (newColumn.fieldType === 'formula' && newColumn.formula) {
+                            updatedRow[fieldId] = evaluateFormula(newColumn.formula, updatedRow);
                         }
 
                         // Handle number precision changes
-                        if (newColumn.field_type === 'number' && typeof updatedRow[field_id] === 'number') {
-                            updatedRow[field_id] = Number(updatedRow[field_id].toFixed(newColumn.precision || 0));
+                        if (newColumn.fieldType === 'number' && typeof updatedRow[fieldId] === 'number') {
+                            updatedRow[fieldId] = Number(updatedRow[fieldId].toFixed(newColumn.precision || 0));
                         }
 
                         // Handle validation constraints
                         if (newColumn.validation) {
                             const { min, max } = newColumn.validation;
-                            if (typeof updatedRow[field_id] === 'number') {
-                                if (min !== undefined && updatedRow[field_id] < min) {
-                                    updatedRow[field_id] = min;
+                            if (typeof updatedRow[fieldId] === 'number') {
+                                if (min !== undefined && updatedRow[fieldId] < min) {
+                                    updatedRow[fieldId] = min;
                                 }
-                                if (max !== undefined && updatedRow[field_id] > max) {
-                                    updatedRow[field_id] = max;
+                                if (max !== undefined && updatedRow[fieldId] > max) {
+                                    updatedRow[fieldId] = max;
                                 }
                             }
                         }
@@ -329,8 +330,8 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
                 };
 
                 // Update both preload_rows and userData
-                if (editMode && newTemplateData.preload_rows) {
-                    newTemplateData.preload_rows = updateExistingRows(newTemplateData.preload_rows);
+                if (editMode && newTemplateData.preloadRows) {
+                    newTemplateData.preloadRows = updateExistingRows(newTemplateData.preloadRows);
                 } else {
                     setUserData(prevUserData => updateExistingRows(prevUserData));
                 }
@@ -360,16 +361,16 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
     const deleteColumn = (fieldId: string) => {
         setTemplateData(prev => ({
             ...prev,
-            columns: prev.columns.filter(col => col.field_id !== fieldId)
+            columns: prev.columns.filter(col => col.fieldId !== fieldId)
         }));
     };
 
     const addRow = () => {
         const newRow = templateData.columns.reduce((acc, column) => {
-            let defaultValue = column.default_value;
+            let defaultValue = column.defaultValue;
             
             // For select/enum fields, validate that default value is in options
-            if ((column.field_type === 'select' || column.field_type === 'enum') && column.options) {
+            if ((column.fieldType === 'select' || column.fieldType === 'enum') && column.options) {
                 // If default value is not in options, use first option or null
                 if (!column.options.some(opt => opt.value === defaultValue)) {
                     defaultValue = column.options.length > 0 ? column.options[0].value : null;
@@ -378,14 +379,14 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
             
             return {
                 ...acc,
-                [column.field_id]: defaultValue
+                [column.fieldId]: defaultValue
             };
         }, {});
         
         if (editMode) {
             setTemplateData(prev => ({
                 ...prev,
-                preload_rows: [...(prev.preload_rows || []), newRow]
+                preloadRows: [...(prev.preloadRows || []), newRow]
             }));
         } else {
             setUserData([...userData, newRow]);
@@ -395,11 +396,11 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
     const deleteRow = (rowIndex: number) => {
         if (editMode) {
             setTemplateData(prev => {
-                const newPreloadRows = [...(prev.preload_rows || [])];
+                const newPreloadRows = [...(prev.preloadRows || [])];
                 newPreloadRows.splice(rowIndex, 1);
                 return {
                     ...prev,
-                    preload_rows: newPreloadRows
+                    preloadRows: newPreloadRows
                 };
             });
         } else {
@@ -409,14 +410,14 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
 
     // Get the data to display based on edit mode
     const displayData = useMemo(() => {
-        return editMode ? (templateData.preload_rows || []) : userData;
-    }, [editMode, templateData.preload_rows, userData]);
+        return editMode ? (templateData.preloadRows || []) : userData;
+    }, [editMode, templateData.preloadRows, userData]);
 
     const paginatedData = useMemo(() => {
         if (!templateData.pagination?.enabled) return displayData;
         
-        const startIndex = (currentPage - 1) * (templateData.pagination.rows_per_page || 10);
-        const endIndex = startIndex + (templateData.pagination.rows_per_page || 10);
+        const startIndex = (currentPage - 1) * (templateData.pagination.rowsPerPage || 10);
+        const endIndex = startIndex + (templateData.pagination.rowsPerPage || 10);
         return displayData.slice(startIndex, endIndex);
     }, [displayData, currentPage, templateData.pagination]);
 
@@ -430,10 +431,10 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
 
     // Process hierarchical headers
     const processHeaderStructure = useMemo(() => {
-        if (!templateData.header_structure || templateData.header_structure.length === 0) {
+        if (!templateData.headerStructure || templateData.headerStructure.length === 0) {
             return {
-                headers: templateData.header_structure || [],
-                leafColumns: templateData.columns.map(col => col.field_id),
+                headers: templateData.headerStructure || [],
+                leafColumns: templateData.columns.map(col => col.fieldId),
                 columnsNotInStructure: []
             };
         }
@@ -447,7 +448,7 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
             }));
         };
 
-        const headersWithIds = ensureIds(templateData.header_structure);
+        const headersWithIds = ensureIds(templateData.headerStructure);
 
         // Get all leaf-level columns
         const leafColumns = new Set<string>();
@@ -469,17 +470,17 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
             headers: headersWithIds,
             leafColumns: Array.from(leafColumns),
             columnsNotInStructure: templateData.columns
-                .map(col => col.field_id)
+                .map(col => col.fieldId)
                 .filter(id => !leafColumns.has(id))
         };
-    }, [templateData.header_structure, templateData.columns]);
+    }, [templateData.headerStructure, templateData.columns]);
 
     // Get the ordered list of columns to display in the table body
     const orderedColumns = useMemo(() => {
         const { leafColumns, columnsNotInStructure } = processHeaderStructure;
         const allOrderedColumnIds = [...leafColumns, ...columnsNotInStructure];
         return allOrderedColumnIds
-            .map(id => templateData.columns.find(col => col.field_id === id))
+            .map(id => templateData.columns.find(col => col.fieldId === id))
             .filter(Boolean) as Column[];
     }, [processHeaderStructure, templateData.columns]);
 
@@ -506,7 +507,7 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
 
         setTemplateData(prev => ({
             ...prev,
-            header_structure: ensureIds(prev.header_structure)
+            headerStructure: ensureIds(prev.headerStructure)
         }));
         setIsHeaderModalVisible(true);
     };
@@ -514,7 +515,7 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
     const handleHeaderStructureUpdate = (newStructure: HeaderStructure[]) => {
         setTemplateData(prev => ({
             ...prev,
-            header_structure: newStructure
+            headerStructure: newStructure
         }));
     };
 
@@ -531,7 +532,7 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
             return null;
         };
 
-        const header = findHeader(templateData.header_structure);
+        const header = findHeader(templateData.headerStructure);
         if (header) {
             setEditingHeaderId(headerId);
             setIsHeaderModalVisible(true);
@@ -552,14 +553,14 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
 
         setTemplateData(prev => ({
             ...prev,
-            header_structure: removeHeader(prev.header_structure)
+            headerStructure: removeHeader(prev.headerStructure)
         }));
 
         message.success('Header group deleted successfully');
     };
 
     const handleEditColumn = (columnId: string) => {
-        const column = templateData.columns.find(col => col.field_id === columnId);
+        const column = templateData.columns.find(col => col.fieldId === columnId);
         if (column) {
             showColumnModal(column);
         }
@@ -574,7 +575,7 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
         <div>
             <ToolbarContainer>
                 <Space>
-                    {templateData.row_controls?.allow_add_remove && (
+                    {templateData.rowControls?.allowAddRemove && (
                         <Tooltip title="Add Row">
                             <Button 
                                 icon={<PlusOutlined />}
@@ -613,18 +614,18 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
                 </Space>
             </ToolbarContainer>
             
-            <TableContainer $stickyHeaders={templateData.column_layout?.sticky_headers}>
+            <TableContainer $stickyHeaders={templateData.columnLayout?.stickyHeaders}>
                 <StyledTable
-                    $tableBorder={templateData.style?.table_border}
-                    $stripedRows={templateData.style?.striped_rows}
-                    $alternateRowColor={templateData.style?.alternate_row_color}
-                    $headerColor={templateData.style?.header_color}
-                    $headerFontColor={templateData.style?.header_font_color}
+                    $tableBorder={templateData.style?.tableBorder}
+                    $stripedRows={templateData.style?.stripedRows}
+                    $alternateRowColor={templateData.style?.alternateRowColor}
+                    $headerColor={templateData.style?.headerColor}
+                    $headerFontColor={templateData.style?.headerFontColor}
                 >
                     <TableHeader 
                         headerStructure={processHeaderStructure.headers}
                         columns={orderedColumns}
-                        showActions={templateData.row_controls?.allow_add_remove}
+                        showActions={templateData.rowControls?.allowAddRemove}
                         onEditHeader={editMode ? handleEditHeader : undefined}
                         onDeleteHeader={editMode ? handleDeleteHeader : undefined}
                         onEditColumn={editMode ? handleEditColumn : undefined}
@@ -635,17 +636,17 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
                             <tr key={rowIndex}>
                                 {orderedColumns.map((column) => (
                                     <td 
-                                        key={`${rowIndex}-${column.field_id}`}
+                                        key={`${rowIndex}-${column.fieldId}`}
                                         style={{ 
                                             width: 'auto',
-                                            minWidth: column.field_type === 'boolean' ? '80px' : '120px',
-                                            maxWidth: column.field_type === 'text' ? '200px' : undefined
+                                            minWidth: column.fieldType === 'boolean' ? '80px' : '120px',
+                                            maxWidth: column.fieldType === 'text' ? '200px' : undefined
                                         }}
                                     >
-                                        {renderCell(column, row[column.field_id], rowIndex)}
+                                        {renderCell(column, row[column.fieldId], rowIndex)}
                                     </td>
                                 ))}
-                                {templateData.row_controls?.allow_add_remove && (
+                                {templateData.rowControls?.allowAddRemove && (
                                     <td style={{ 
                                         width: '80px', 
                                         textAlign: 'center',
@@ -668,14 +669,14 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
                         {paginatedData.length === 0 && (
                             <tr>
                                 <td 
-                                    colSpan={orderedColumns.length + (templateData.row_controls?.allow_add_remove ? 1 : 0)} 
+                                    colSpan={orderedColumns.length + (templateData.rowControls?.allowAddRemove ? 1 : 0)} 
                                     style={{ 
                                         textAlign: 'center', 
                                         padding: '20px',
                                         position: 'relative'  // Ensure proper stacking context
                                     }}
                                 >
-                                    No data available. {templateData.row_controls?.allow_add_remove && 'Click "Add Row" to add data.'}
+                                    No data available. {templateData.rowControls?.allowAddRemove && 'Click "Add Row" to add data.'}
                                 </td>
                             </tr>
                         )}
@@ -689,7 +690,7 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
                         current={currentPage}
                         onChange={setCurrentPage}
                         total={displayData.length}
-                        pageSize={templateData.pagination.rows_per_page}
+                        pageSize={templateData.pagination.rowsPerPage}
                         showSizeChanger
                         showQuickJumper
                         showTotal={(total) => `Total ${total} items`}
@@ -723,7 +724,7 @@ const UniversalTable = ({ editMode }: { editMode?: boolean }) => {
                         footer={null}
                     >
                         <HeaderGroupManager
-                            headerStructure={templateData.header_structure}
+                            headerStructure={templateData.headerStructure}
                             columns={templateData.columns}
                             onUpdate={(newStructure) => {
                                 handleHeaderStructureUpdate(newStructure);

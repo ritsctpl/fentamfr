@@ -79,7 +79,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({
     onDeleteColumn
 }) => {
     // First, map columns to their field_ids for easier lookup
-    const columnMap = new Map(columns.map(col => [col.field_id, col]));
+    const columnMap = new Map(columns.map(col => [col.fieldId, col]));
     
     // Get all leaf columns in the correct order
     const getOrderedColumns = () => {
@@ -109,7 +109,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({
         
         // Add any columns not in the header structure
         columns.forEach(col => {
-            if (!processedIds.has(col.field_id)) {
+            if (!processedIds.has(col.fieldId)) {
                 result.push(col);
             }
         });
@@ -121,7 +121,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({
     
     // Build a map of column IDs to their position in the final ordered list
     const columnPositions = new Map(
-        orderedColumns.map((col, index) => [col.field_id, index])
+        orderedColumns.map((col, index) => [col.fieldId, index])
     );
     
     // Helper to get the maximum depth of the header structure
@@ -296,8 +296,8 @@ const TableHeader: React.FC<TableHeaderProps> = ({
         
         // Add column names as the last row
         const columnHeaderRow = orderedColumns.map(column => (
-            <HeaderCell key={column.field_id} $isActions={column.field_id === 'actions'}>
-                {column.field_name}
+            <HeaderCell key={column.fieldId} $isActions={column.fieldId === 'actions'}>
+                {column.fieldName}
                 {column.unit && <small> ({column.unit})</small>}
                 {(onEditColumn || onDeleteColumn) && (
                     <HeaderActions>
@@ -305,7 +305,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({
                             <IconButton 
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onEditColumn(column.field_id);
+                                    onEditColumn(column.fieldId);
                                 }}
                                 title="Edit column"
                             >
@@ -319,7 +319,7 @@ const TableHeader: React.FC<TableHeaderProps> = ({
                             <IconButton 
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onDeleteColumn(column.field_id);
+                                    onDeleteColumn(column.fieldId);
                                 }}
                                 title="Delete column"
                             >

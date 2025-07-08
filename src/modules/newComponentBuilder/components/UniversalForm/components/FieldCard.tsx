@@ -31,13 +31,13 @@ const FieldCard: React.FC<FieldCardProps> = ({
     onChange,
 }) => {
     const [editValue, setEditValue] = useState<FieldValue>(() => {
-        if (field.default_value === undefined || field.default_value === null) {
+        if (field.defaultValue === undefined || field.defaultValue === null) {
             return '';
         }
-        if (typeof field.default_value === 'object') {
-            return JSON.stringify(field.default_value);
+        if (typeof field.defaultValue === 'object') {
+            return JSON.stringify(field.defaultValue);
         }
-        return field.default_value as FieldValue;
+        return field.defaultValue as FieldValue;
     });
 
     const handleValueChange = (value: FieldValue) => {
@@ -45,15 +45,15 @@ const FieldCard: React.FC<FieldCardProps> = ({
         if (onChange) {
             onChange({
                 ...field,
-                default_value: value,
+                defaultValue: value,
             });
         }
     };
 
     const getFieldTypeIcon = () => {
-        switch (field.field_type) {
+        switch (field.fieldType) {
             case 'text':
-                return field.display_mode === 'static' ? <OrderedListOutlined /> : <FormOutlined />;
+                return field.displayMode === 'static' ? <OrderedListOutlined /> : <FormOutlined />;
             case 'enum':
                 return <FormOutlined />;
             case 'boolean':
@@ -68,10 +68,10 @@ const FieldCard: React.FC<FieldCardProps> = ({
     };
 
     const getFieldTypeDisplay = () => {
-        switch (field.field_type) {
+        switch (field.fieldType) {
             case 'text':
-                if (field.display_mode === 'static') return 'Static Text';
-                if (field.display_mode === 'prefilled') return 'Template Text';
+                if (field.displayMode === 'static') return 'Static Text';
+                if (field.displayMode === 'prefilled') return 'Template Text';
                 return field.multiline ? 'Multiline Text' : 'Text';
             case 'enum':
                 return `Dropdown (${field.options?.length || 0} options)`;
@@ -93,19 +93,19 @@ const FieldCard: React.FC<FieldCardProps> = ({
             tags.push(<Tag key="required" color="red">Required</Tag>);
         }
 
-        if (field.read_only) {
+        if (field.readOnly) {
             tags.push(<Tag key="readonly" color="default" icon={<LockOutlined />}>Read Only</Tag>);
         }
 
-        if (field.role_control?.editable_by?.length) {
+        if (field.roleControl?.editableBy?.length) {
             tags.push(
-                <Tooltip key="roles" title={`Editable by: ${field.role_control.editable_by.join(', ')}`}>
+                <Tooltip key="roles" title={`Editable by: ${field.roleControl.editableBy.join(', ')}`}>
                     <Tag color="blue">Role Restricted</Tag>
                 </Tooltip>
             );
         }
 
-        if (field.data_source === 'api') {
+        if (field.dataSource === 'api') {
             tags.push(<Tag key="api" color="green" icon={<ApiOutlined />}>API Data</Tag>);
         }
 
@@ -113,9 +113,9 @@ const FieldCard: React.FC<FieldCardProps> = ({
     };
 
     const renderEditableContent = () => {
-        if (field.read_only) {
-            if (field.field_type === 'text') {
-                if (field.display_mode === 'static') {
+        if (field.readOnly) {
+            if (field.fieldType === 'text') {
+                if (field.displayMode === 'static') {
                     const value = Array.isArray(field.content) ? field.content.join('\n') : '';
                     return field.multiline ? (
                         <Input.TextArea
@@ -130,16 +130,16 @@ const FieldCard: React.FC<FieldCardProps> = ({
                         />
                     );
                 }
-                if (field.display_mode === 'prefilled') {
+                if (field.displayMode === 'prefilled') {
                     return field.multiline ? (
                         <Input.TextArea
-                            value={field.template_text || ''}
+                            value={field.templateText || ''}
                             disabled
                             autoSize={{ minRows: 2, maxRows: 6 }}
                         />
                     ) : (
                         <Input
-                            value={field.template_text || ''}
+                            value={field.templateText || ''}
                             disabled
                         />
                     );
@@ -148,14 +148,14 @@ const FieldCard: React.FC<FieldCardProps> = ({
             // fallback for other types
             return (
                 <div className="field-display-value">
-                    {String(field.default_value ?? '')}
+                    {String(field.defaultValue ?? '')}
                 </div>
             );
         }
 
-        switch (field.field_type) {
+        switch (field.fieldType) {
             case 'text':
-                if (field.display_mode === 'static') {
+                if (field.displayMode === 'static') {
                     // Editable: update content array (single or multiline)
                     const value = Array.isArray(field.content) ? field.content.join('\n') : '';
                     const handleStaticChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -179,22 +179,22 @@ const FieldCard: React.FC<FieldCardProps> = ({
                     );
                 }
                 // Prefilled/template mode: show template_text in input/textarea (read-only or editable as needed)
-                if (field.display_mode === 'prefilled') {
+                if (field.displayMode === 'prefilled') {
                     const handlePrefilledChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
                         const newValue = e.target.value;
                         if (onChange) {
-                            onChange({ ...field, template_text: newValue });
+                            onChange({ ...field, templateText: newValue });
                         }
                     };
                     return field.multiline ? (
                         <Input.TextArea
-                            value={field.template_text || ''}
+                            value={field.templateText || ''}
                             onChange={handlePrefilledChange}
                             autoSize={{ minRows: 2, maxRows: 6 }}
                         />
                     ) : (
                         <Input
-                            value={field.template_text || ''}
+                            value={field.templateText || ''}
                             onChange={handlePrefilledChange}
                         />
                     );
@@ -267,11 +267,11 @@ const FieldCard: React.FC<FieldCardProps> = ({
         return (
             <div className="debug-info">
                 <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
-                    ID: {field.field_id}
-                    {field.layout_column && `, Column: ${field.layout_column}`}
+                    ID: {field.fieldId}
+                    {field.layoutColumn && `, Column: ${field.layoutColumn}`}
                     {field.order !== undefined && `, Order: ${field.order}`}
                     {field.alignment && `, Align: ${field.alignment}`}
-                    {field.max_length && `, Max Length: ${field.max_length}`}
+                    {field.maxLength && `, Max Length: ${field.maxLength}`}
                 </Typography.Text>
             </div>
         );
@@ -280,10 +280,10 @@ const FieldCard: React.FC<FieldCardProps> = ({
     return (
         <Card
             size="small"
-            className={`field-card ${field.field_type} ${field.read_only ? 'read-only' : ''}`}
+            className={`field-card ${field.fieldType} ${field.readOnly ? 'read-only' : ''}`}
             style={{
                 marginBottom: 12,
-                gridColumn: field.layout_column ? `span ${field.layout_column}` : 'span 1',
+                gridColumn: field.layoutColumn ? `span ${field.layoutColumn}` : 'span 1',
             }}
             bodyStyle={{ padding: 12 }}
             bordered
@@ -296,10 +296,10 @@ const FieldCard: React.FC<FieldCardProps> = ({
                             strong
                             style={{
                                 textAlign: field.alignment || 'left',
-                                marginBottom: field.label_position === 'top' ? 8 : 0,
+                                marginBottom: field.labelPosition === 'top' ? 8 : 0,
                             }}
                         >
-                            {field.field_name}
+                            {field.fieldName}
                         </Typography.Text>
                     </Space>
                     <Space>

@@ -11,3 +11,7 @@
 .ant-tabs >.ant-tabs-nav .ant-tabs-nav-wrap {
     height: 40px !important;
 }
+
+.ant-input{
+    margin-top: 0px !important;
+}

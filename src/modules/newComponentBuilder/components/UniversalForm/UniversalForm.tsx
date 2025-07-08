@@ -32,12 +32,12 @@ const UniversalForm: React.FC<UniversalFormProps> = ({
   const handleDeleteField = (field: FormField) => {
     Modal.confirm({
       title: 'Delete Field',
-      content: `Are you sure you want to delete "${field.field_name}"?`,
+      content: `Are you sure you want to delete "${field.fieldName}"?`,
       okText: 'Yes',
       okType: 'danger',
       cancelText: 'No',
       onOk() {
-        setTemplateData(prev => prev.filter(f => f.field_id !== field.field_id));
+        setTemplateData(prev => prev.filter(f => f.fieldId !== field.fieldId));
       },
     });
   };
@@ -45,7 +45,7 @@ const UniversalForm: React.FC<UniversalFormProps> = ({
   const handleSaveField = (field: FormField) => {
     setTemplateData(prev => {
       if (editingField) {
-        return prev.map(f => f.field_id === field.field_id ? field : f);
+        return prev.map(f => f.fieldId === field.fieldId ? field : f);
       } else {
         return [...prev, field];
       }
@@ -54,13 +54,13 @@ const UniversalForm: React.FC<UniversalFormProps> = ({
   };
 
   const handleFieldChange = (updatedField: FormField) => {
-    setTemplateData(prev => prev.map(f => f.field_id === updatedField.field_id ? updatedField : f));
+    setTemplateData(prev => prev.map(f => f.fieldId === updatedField.fieldId ? updatedField : f));
   };
 
   const canEditField = (field: FormField): boolean => {
     if (!userRole) return true;
-    if (field.role_control?.editable_by) {
-      return field.role_control.editable_by.includes(userRole);
+    if (field.roleControl?.editableBy) {
+      return field.roleControl.editableBy.includes(userRole);
     }
     return true;
   };

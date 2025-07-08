@@ -179,7 +179,7 @@ export const ColumnConfigModal = ({
     form: FormInstance;
 }) => {
     const [activeTab, setActiveTab] = useState('basic');
-    const [fieldType, setFieldType] = useState<FieldType | undefined>(editingColumn?.field_type);
+    const [fieldType, setFieldType] = useState<FieldType | undefined>(editingColumn?.fieldType);
 
     // Update field type when it changes
     const handleFieldTypeChange = (value: FieldType) => {
@@ -197,7 +197,7 @@ export const ColumnConfigModal = ({
     // Initialize default value when editing column changes
     useEffect(() => {
         if (editingColumn) {
-            setFieldType(editingColumn.field_type);
+            setFieldType(editingColumn.fieldType);
         } else {
             setFieldType(undefined);
         }
@@ -215,14 +215,14 @@ export const ColumnConfigModal = ({
                 <Tabs.TabPane tab="Basic Settings" key="basic" style={{padding: 5}}>
                     <Form form={form} layout="vertical">
                         <Form.Item
-                            name="field_name"
+                            name="fieldName"
                             label="Column Name"
                             rules={[{ required: true }]}
                         >
                             <Input />
                         </Form.Item>
                         <Form.Item
-                            name="field_type"
+                            name="fieldType"
                             label="Field Type"
                             rules={[{ required: true }]}
                         >
@@ -242,7 +242,7 @@ export const ColumnConfigModal = ({
                         </Form.Item>
 
                         <Form.Item
-                            name="default_value"
+                            name="defaultValue"
                             label="Default Value"
                         >
                             <DefaultValueInput
@@ -254,7 +254,7 @@ export const ColumnConfigModal = ({
                         </Form.Item>
 
                         <Form.Item
-                            name="read_only"
+                            name="readOnly"
                             valuePropName="checked"
                             label={
                                 <Space>
@@ -297,9 +297,9 @@ export const ColumnConfigModal = ({
                                                     // After adding a new option, check and update default value
                                                     setTimeout(() => {
                                                         const options = form.getFieldValue('options') || [];
-                                                        const currentDefault = form.getFieldValue('default_value');
+                                                        const currentDefault = form.getFieldValue('defaultValue');
                                                         if (!options.some(opt => opt.value === currentDefault)) {
-                                                            form.setFieldValue('default_value', 
+                                                            form.setFieldValue('defaultValue', 
                                                                 options.length > 0 ? options[0].value : '');
                                                         }
                                                     }, 0);
@@ -327,9 +327,9 @@ export const ColumnConfigModal = ({
                                                             // After label change, update form values
                                                             setTimeout(() => {
                                                                 const options = form.getFieldValue('options') || [];
-                                                                const currentDefault = form.getFieldValue('default_value');
+                                                                const currentDefault = form.getFieldValue('defaultValue');
                                                                 if (!options.some(opt => opt.value === currentDefault)) {
-                                                                    form.setFieldValue('default_value', 
+                                                                    form.setFieldValue('defaultValue', 
                                                                         options.length > 0 ? options[0].value : '');
                                                                 }
                                                             }, 0);
@@ -347,9 +347,9 @@ export const ColumnConfigModal = ({
                                                             // After value change, update form values
                                                             setTimeout(() => {
                                                                 const options = form.getFieldValue('options') || [];
-                                                                const currentDefault = form.getFieldValue('default_value');
+                                                                const currentDefault = form.getFieldValue('defaultValue');
                                                                 if (!options.some(opt => opt.value === currentDefault)) {
-                                                                    form.setFieldValue('default_value', 
+                                                                    form.setFieldValue('defaultValue', 
                                                                         options.length > 0 ? options[0].value : '');
                                                                 }
                                                             }, 0);
@@ -361,9 +361,9 @@ export const ColumnConfigModal = ({
                                                     // After removing an option, check and update default value
                                                     setTimeout(() => {
                                                         const options = form.getFieldValue('options') || [];
-                                                        const currentDefault = form.getFieldValue('default_value');
+                                                        const currentDefault = form.getFieldValue('defaultValue');
                                                         if (!options.some(opt => opt.value === currentDefault)) {
-                                                            form.setFieldValue('default_value', 
+                                                            form.setFieldValue('defaultValue', 
                                                                 options.length > 0 ? options[0].value : '');
                                                         }
                                                     }, 0);
@@ -398,17 +398,17 @@ export const ColumnConfigModal = ({
                                                 onChange={(value) => {
                                                     // Insert column reference at cursor position or append
                                                     const currentFormula = form.getFieldValue('formula') || '';
-                                                    const column = templateData.columns.find(col => col.field_id === value);
+                                                    const column = templateData.columns.find(col => col.fieldId === value);
                                                     form.setFieldValue('formula', `${currentFormula}{${value}}`);
                                                 }}
                                                 showSearch
                                                 optionFilterProp="children"
                                             >
                                                 {templateData.columns
-                                                    .filter(col => col.field_id !== editingColumn?.field_id && col.field_type !== 'formula')
+                                                    .filter(col => col.fieldId !== editingColumn?.fieldId && col.fieldType !== 'formula')
                                                     .map(col => (
-                                                        <Select.Option key={col.field_id} value={col.field_id}>
-                                                            {col.field_name} ({col.field_type})
+                                                        <Select.Option key={col.fieldId} value={col.fieldId}>
+                                                            {col.fieldName} ({col.fieldType})
                                                         </Select.Option>
                                                     ))
                                                 }
@@ -489,11 +489,11 @@ export const ColumnConfigModal = ({
                                     <Input placeholder="/api/resource" />
                                 </Form.Item>
                                 <Form.Item
-                                    name="bind_field"
+                                    name="bindField"
                                     label="Bind Field"
                                     rules={[{ required: fieldType === 'lookup', message: 'Bind field is required for lookup fields' }]}
                                 >
-                                    <Input placeholder="field_to_display" />
+                                    <Input placeholder="fieldToDisplay" />
                                 </Form.Item>
                             </>
                         )}
@@ -521,14 +521,14 @@ export const ColumnConfigModal = ({
                         {fieldType === 'image' && (
                             <>
                                 <Form.Item
-                                    name="capture_camera"
+                                    name="captureCamera"
                                     valuePropName="checked"
                                     label="Allow Camera Capture"
                                 >
                                     <Switch />
                                 </Form.Item>
                                 <Form.Item
-                                    name="max_size_mb"
+                                    name="maxSizeMb"
                                     label="Max File Size (MB)"
                                 >
                                     <InputNumber min={0.1} defaultValue={5} step={0.1} style={{ width: '100%' }} />
@@ -539,7 +539,7 @@ export const ColumnConfigModal = ({
                         {fieldType === 'file' && (
                             <>
                                 <Form.Item
-                                    name="file_types"
+                                    name="fileTypes"
                                     label="Allowed File Types"
                                     tooltip="Enter file extensions without the dot, e.g. pdf, docx"
                                 >
@@ -554,7 +554,7 @@ export const ColumnConfigModal = ({
                                     </Select>
                                 </Form.Item>
                                 <Form.Item
-                                    name="max_size_mb"
+                                    name="maxSizeMb"
                                     label="Max File Size (MB)"
                                 >
                                     <InputNumber min={0.1} defaultValue={10} step={0.1} style={{ width: '100%' }} />
@@ -564,7 +564,7 @@ export const ColumnConfigModal = ({
 
                         {fieldType === 'signature' && (
                             <Form.Item
-                                name="signed_by_role"
+                                name="signedByRole"
                                 label="Roles Allowed to Sign"
                             >
                                 <Select mode="tags" style={{ width: '100%' }} placeholder="Enter roles">
@@ -578,7 +578,7 @@ export const ColumnConfigModal = ({
 
                         <Divider />
                         <Form.Item
-                            name="visibility_condition"
+                            name="visibilityCondition"
                             label="Visibility Condition"
                             tooltip="JavaScript expression that determines when this field is visible, e.g. status == 'fail'"
                         >

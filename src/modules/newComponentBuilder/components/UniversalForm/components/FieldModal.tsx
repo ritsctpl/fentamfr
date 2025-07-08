@@ -12,19 +12,19 @@ interface FieldModalProps {
 }
 
 const DEFAULT_FIELD: Partial<FormField> = {
-  field_type: 'text',
+  fieldType: 'text',
   required: false,
-  read_only: false,
-  label_position: 'left',
+  readOnly: false,
+  labelPosition: 'left',
   alignment: 'left',
-  data_source: 'user_input',
-  instruction_level: 'field',
-  layout_column: 1,
-  field_name: '',
-  display_mode: '',
+  dataSource: 'user_input',
+  instructionLevel: 'field',
+  layoutColumn: 1,
+  fieldName: '',
+  displayMode: '',
   multiline: false,
   content: [''],
-  template_text: '',
+  templateText: '',
 };
 
 const EDITOR_TABS: FieldEditorTab[] = [
@@ -53,7 +53,7 @@ const FieldModal: React.FC<FieldModalProps> = ({
         ...DEFAULT_FIELD,
         ...field,
         content: field.content || [''],
-        template_text: field.template_text || '',
+        templateText: field.templateText || '',
       } : DEFAULT_FIELD;
       form.setFieldsValue(initialValues);
       setFormState(initialValues);
@@ -84,18 +84,18 @@ const FieldModal: React.FC<FieldModalProps> = ({
         ...DEFAULT_FIELD,
         ...formState,
         ...values,
-        field_id: field?.field_id || `${values.field_name
-          ? values.field_name
+        fieldId: field?.fieldId || `${values.fieldName
+          ? values.fieldName
             .toLowerCase()
             .replace(/\s+/g, '_')
             .replace(/[^a-z0-9_]/g, '')
           : Date.now()}`,
       } as FormField;
       // Ensure correct storage for text fields
-      if (fieldData.field_type === 'text') {
-        if (fieldData.display_mode === 'static') {
-          fieldData.template_text = '';
-        } else if (fieldData.display_mode === 'prefilled') {
+      if (fieldData.fieldType === 'text') {
+        if (fieldData.displayMode === 'static') {
+          fieldData.templateText = '';
+        } else if (fieldData.displayMode === 'prefilled') {
           fieldData.content = undefined;
         }
       }
@@ -110,15 +110,15 @@ const FieldModal: React.FC<FieldModalProps> = ({
     const currentValues = form.getFieldsValue(true);
     const updates: Partial<FormField> = {
       ...currentValues,
-      field_type: type,
-      instruction_level: type === 'text' ? 'field' : undefined,
+      fieldType: type,
+      instructionLevel: type === 'text' ? 'field' : undefined,
       options: type === 'enum' ? [{ label: '', value: '' }] : undefined,
       required: type !== 'formula',
-      read_only: type === 'formula',
-      display_mode: type === 'text',
-      data_source: type === 'formula' ? 'formula' : type === 'lookup' ? 'api' : 'user_input',
+      readOnly: type === 'formula',
+      displayMode: type === 'text',
+      dataSource: type === 'formula' ? 'formula' : type === 'lookup' ? 'api' : 'user_input',
       content: type === 'text' ? [''] : undefined,
-      template_text: '',
+      templateText: '',
     };
     form.setFieldsValue(updates);
     setFormState(prev => ({ ...prev, ...updates }));
@@ -127,7 +127,7 @@ const FieldModal: React.FC<FieldModalProps> = ({
   // --- Modular Renderers ---
   const renderTextFields = () => (
     <>
-      <Form.Item name="display_mode" label="Display Mode">
+      <Form.Item name="displayMode" label="Display Mode">
         <Select>
           <Select.Option value="static">Static</Select.Option>
           <Select.Option value="prefilled">Prefilled</Select.Option>
@@ -136,14 +136,14 @@ const FieldModal: React.FC<FieldModalProps> = ({
       <Form.Item name="multiline" valuePropName="checked">
         <Switch checkedChildren="Multiline" unCheckedChildren="Single line" />
       </Form.Item>
-      <Form.Item shouldUpdate={(prev, curr) => prev.display_mode !== curr.display_mode || prev.multiline !== curr.multiline}>
+      <Form.Item shouldUpdate={(prev, curr) => prev.displayMode !== curr.displayMode || prev.multiline !== curr.multiline}>
         {({ getFieldValue }) => {
-          const displayMode = getFieldValue('display_mode');
+          const displayMode = getFieldValue('displayMode');
           const multiline = getFieldValue('multiline');
           if (displayMode === 'static') {
             return (
               <>
-                <Form.Item name="instruction_level" label="Instruction Level">
+                <Form.Item name="instructionLevel" label="Instruction Level">
                   <Select>
                     <Select.Option value="field">Field</Select.Option>
                     <Select.Option value="section">Section</Select.Option>
@@ -180,7 +180,7 @@ const FieldModal: React.FC<FieldModalProps> = ({
             );
           } else if (displayMode === 'prefilled') {
             return (
-              <Form.Item name="template_text" label="Template Text" rules={[{ required: true, message: 'Enter template text' }]}>
+              <Form.Item name="templateText" label="Template Text" rules={[{ required: true, message: 'Enter template text' }]}>
                 {multiline ? (
                   <Input.TextArea placeholder="Enter template text" autoSize={{ minRows: 2, maxRows: 6 }} />
                 ) : (
@@ -239,14 +239,14 @@ const FieldModal: React.FC<FieldModalProps> = ({
   const renderBasicFields = () => (
     <>
       <Form.Item
-        name="field_name"
+        name="fieldName"
         label="Field Name"
         rules={[{ required: true, message: 'Please enter field name' }]}
       >
         <Input placeholder="Enter field name" />
       </Form.Item>
       <Form.Item
-        name="field_type"
+        name="fieldType"
         label="Field Type"
         rules={[{ required: true }]}
       >
@@ -258,9 +258,9 @@ const FieldModal: React.FC<FieldModalProps> = ({
           <Select.Option value="formula">Formula</Select.Option>
         </Select>
       </Form.Item>
-      <Form.Item noStyle shouldUpdate={(prev, curr) => prev.field_type !== curr.field_type}>
+      <Form.Item noStyle shouldUpdate={(prev, curr) => prev.fieldType !== curr.fieldType}>
         {({ getFieldValue }) => {
-          const fieldType = getFieldValue('field_type');
+          const fieldType = getFieldValue('fieldType');
           if (fieldType === 'text') return renderTextFields();
           if (fieldType === 'enum') return renderEnumFields();
           if (fieldType === 'lookup') return (
@@ -273,7 +273,7 @@ const FieldModal: React.FC<FieldModalProps> = ({
               <Form.Item name="unit" label="Unit"> <Input placeholder="e.g., %, kg, etc." /> </Form.Item>
               <Badge.Ribbon text="Available fields" placement="start">
                 <Space wrap>
-                  {availableFields.map(f => (<Badge key={f.field_id} color="blue" text={`{${f.field_id}}`} />))}
+                  {availableFields.map(f => (<Badge key={f.fieldId} color="blue" text={`{${f.fieldId}}`} />))}
                 </Space>
               </Badge.Ribbon>
             </>
@@ -286,7 +286,7 @@ const FieldModal: React.FC<FieldModalProps> = ({
 
   const renderLayoutFields = () => (
     <>
-      <Form.Item name="layout_column" label="Column">
+      <Form.Item name="layoutColumn" label="Column">
         <Select>
           <Select.Option value={1}>Column 1</Select.Option>
           <Select.Option value={2}>Column 2</Select.Option>
@@ -297,7 +297,7 @@ const FieldModal: React.FC<FieldModalProps> = ({
         <InputNumber min={0} />
       </Form.Item>
 
-      <Form.Item name="label_position" label="Label Position">
+      <Form.Item name="labelPosition" label="Label Position">
         <Select>
           <Select.Option value="left">Left</Select.Option>
           <Select.Option value="top">Top</Select.Option>
@@ -320,12 +320,12 @@ const FieldModal: React.FC<FieldModalProps> = ({
         <Switch checkedChildren="Required" unCheckedChildren="Optional" />
       </Form.Item>
 
-      <Form.Item name="read_only" valuePropName="checked">
+      <Form.Item name="readOnly" valuePropName="checked">
         <Switch checkedChildren="Read Only" unCheckedChildren="Editable" />
       </Form.Item>
 
       <Form.Item
-        name={['role_control', 'editable_by']}
+        name={['roleControl', 'editableBy']}
         label="Editable By Roles"
       >
         <Select
@@ -345,7 +345,7 @@ const FieldModal: React.FC<FieldModalProps> = ({
 
   const renderDataSourceFields = () => (
     <>
-      <Form.Item name="data_source" label="Data Source">
+      <Form.Item name="dataSource" label="Data Source">
         <Select>
           <Select.Option value="user_input">User Input</Select.Option>
           <Select.Option value="api">API</Select.Option>
@@ -358,20 +358,20 @@ const FieldModal: React.FC<FieldModalProps> = ({
         shouldUpdate={(prev, curr) => prev.data_source !== curr.data_source}
       >
         {({ getFieldValue }) => {
-          const dataSource = getFieldValue('data_source');
+          const dataSource = getFieldValue('dataSource');
           return dataSource === 'api' ? (
-            <Form.Item name="api_endpoint" label="API Endpoint">
+            <Form.Item name="apiEndpoint" label="API Endpoint">
               <Input placeholder="Enter API endpoint" />
             </Form.Item>
           ) : null;
         }}
       </Form.Item>
 
-      <Form.Item name="max_length" label="Maximum Length">
+      <Form.Item name="maxLength" label="Maximum Length">
         <InputNumber min={0} />
       </Form.Item>
 
-      <Form.Item name="default_value" label="Default Value">
+      <Form.Item name="defaultValue" label="Default Value">
         <Input placeholder="Enter default value" />
       </Form.Item>
     </>

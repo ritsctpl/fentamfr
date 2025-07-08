@@ -162,7 +162,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
     }
 
     // Number validations
-    if (column.field_type === 'number' && val !== undefined && val !== null && val !== '') {
+    if (column.fieldType === 'number' && val !== undefined && val !== null && val !== '') {
       const numVal = Number(val);
       const { min, max } = column.validation || {};
 
@@ -182,11 +182,11 @@ export const EditableCell: React.FC<EditableCellProps> = ({
     }
 
     // Text length validation
-    if ((column.field_type === 'text' || column.field_type === 'lookup') &&
+    if ((column.fieldType === 'text' || column.fieldType === 'lookup') &&
       typeof val === 'string' &&
-      column.max_length !== undefined &&
-      val.length > column.max_length) {
-      setError(`Text must be at most ${column.max_length} characters`);
+      column.maxLength !== undefined &&
+      val.length > column.maxLength) {
+      setError(`Text must be at most ${column.maxLength} characters`);
       return false;
     }
 
@@ -194,7 +194,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
   };
 
   const handleStartEdit = () => {
-    if (!column.read_only) {
+    if (!column.readOnly) {
       setEditing(true);
       validateValue(localValue);
     }
@@ -205,8 +205,8 @@ export const EditableCell: React.FC<EditableCellProps> = ({
     validateValue(val);
 
     // For immediate validation fields like number, update immediately if valid
-    if (column.field_type === 'number' && validateValue(val)) {
-      onUpdate(rowIndex, column.field_id, val);
+    if (column.fieldType === 'number' && validateValue(val)) {
+      onUpdate(rowIndex, column.fieldId, val);
     }
   };
 
@@ -214,7 +214,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
     if (validateValue(localValue)) {
       setEditing(false);
       if (localValue !== value) {
-        onUpdate(rowIndex, column.field_id, localValue);
+        onUpdate(rowIndex, column.fieldId, localValue);
       }
     }
   };
@@ -242,7 +242,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
   };
 
   // For read-only cells, display the value with proper formatting
-  if (column.read_only) {
+  if (column.readOnly) {
     if (value === undefined || value === null || value === '') {
       return (
         <Tooltip title="This field is read-only">
@@ -253,12 +253,12 @@ export const EditableCell: React.FC<EditableCellProps> = ({
       );
     }
 
-    if (column.field_type === 'boolean') {
+    if (column.fieldType === 'boolean') {
       return <CellSwitch checked={value} disabled />;
     }
 
     // Show number with proper formatting
-    if (column.field_type === 'number') {
+    if (column.fieldType === 'number') {
       const formattedValue = typeof value === 'number' && column.precision !== undefined
         ? value.toFixed(column.precision)
         : value;
@@ -287,14 +287,14 @@ export const EditableCell: React.FC<EditableCellProps> = ({
 
   // If value is empty/null/undefined, show placeholder
   if (!editing && (value === undefined || value === null || value === '')) {
-    if (!['boolean', 'image', 'file', 'signature'].includes(column.field_type)) {
+    if (!['boolean', 'image', 'file', 'signature'].includes(column.fieldType)) {
       return <EmptyCell onClick={handleStartEdit}>Enter to edit</EmptyCell>;
     }
   }
 
   // If not editing and we have a value, show formatted display value for certain types
   if (!editing && value !== undefined && value !== null && value !== '') {
-    if (column.field_type === 'number' && column.unit) {
+    if (column.fieldType === 'number' && column.unit) {
       const formattedValue = typeof value === 'number' && column.precision !== undefined
         ? value.toFixed(column.precision)
         : value;
@@ -308,7 +308,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
     }
 
     // For enum/select fields, show the label instead of the value
-    if ((column.field_type === 'enum' || column.field_type === 'select') && column.options) {
+    if ((column.fieldType === 'enum' || column.fieldType === 'select') && column.options) {
       const option = column.options.find(opt => opt.value === value);
       if (option) {
         return <div onClick={handleStartEdit}>{option.label}</div>;
@@ -317,7 +317,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
   }
 
   const renderEditableCell = () => {
-    switch (column.field_type) {
+    switch (column.fieldType) {
         case 'number':
         const validateNumberValue = (value: number | string | null) => {
           if (value === null || value === undefined || value === '') {
@@ -384,7 +384,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
             checked={localValue}
             onChange={(checked) => {
               handleChange(checked);
-              onUpdate(rowIndex, column.field_id, checked);
+              onUpdate(rowIndex, column.fieldId, checked);
             }}
                 />
             );
@@ -397,7 +397,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
             value={localValue}
             onChange={(val) => {
               handleChange(val);
-              onUpdate(rowIndex, column.field_id, val);
+              onUpdate(rowIndex, column.fieldId, val);
             }}
             onBlur={handleFinishEdit}
             options={column.options?.map(opt => ({ label: opt.label, value: opt.value }))}
@@ -412,7 +412,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
             onChange={(date) => {
               handleChange(date ? date.format('YYYY-MM-DD') : null);
               if (date) {
-                onUpdate(rowIndex, column.field_id, date.format('YYYY-MM-DD'));
+                onUpdate(rowIndex, column.fieldId, date.format('YYYY-MM-DD'));
               }
             }}
                     style={{ width: '100%' }}
@@ -453,28 +453,28 @@ export const EditableCell: React.FC<EditableCellProps> = ({
               type="text"
               size="small"
               icon={<DeleteOutlined />}
-              onClick={() => onUpdate(rowIndex, column.field_id, null)}
+              onClick={() => onUpdate(rowIndex, column.fieldId, null)}
             />
           </FileCell>
         ) : (
           <FileCell>
                 <Upload
-                    accept={column.file_types?.join(',')}
+                    accept={column.fileTypes?.join(',')}
                     maxCount={1}
               showUploadList={false}
                     beforeUpload={() => false}
                     onChange={(info) => {
                         if (info.file) {
-                  onUpdate(rowIndex, column.field_id, info.file);
+                  onUpdate(rowIndex, column.fieldId, info.file);
                 }
               }}
             >
               <Button
                 type="text"
                 size="small"
-                icon={column.field_type === 'image' ? <CameraOutlined /> : <UploadOutlined />}
+                icon={column.fieldType === 'image' ? <CameraOutlined /> : <UploadOutlined />}
               >
-                {column.field_type === 'image' ? 'Image' : 'File'}
+                {column.fieldType === 'image' ? 'Image' : 'File'}
                     </Button>
                 </Upload>
           </FileCell>
@@ -487,13 +487,13 @@ export const EditableCell: React.FC<EditableCellProps> = ({
               type="text"
               size="small"
               icon={<DeleteOutlined />}
-              onClick={() => onUpdate(rowIndex, column.field_id, null)}
+              onClick={() => onUpdate(rowIndex, column.fieldId, null)}
             />
           </FileCell>
         ) : (
           <SignatureBox onClick={() => {
             // In a real app, this would open a signature pad
-            onUpdate(rowIndex, column.field_id, "Signature captured");
+            onUpdate(rowIndex, column.fieldId, "Signature captured");
           }}>
             <SignatureOutlined style={{ fontSize: '24px', color: '#1890ff' }} />
             <div>Sign here</div>
@@ -513,7 +513,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
                   setEditing(false);
                 }
               }}
-              maxLength={column.max_length}
+              maxLength={column.maxLength}
               rows={column.rows || 3}
               autoSize={{ minRows: column.rows || 3 }}
             />
@@ -528,7 +528,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
             onChange={(e) => handleChange(e.target.value)}
             onBlur={handleFinishEdit}
             onKeyDown={handleKeyDown}
-                    maxLength={column.max_length}
+                    maxLength={column.maxLength}
             bordered={editing}
                 />
             );
@@ -536,7 +536,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
 };
 
   return (
-    <div onClick={handleStartEdit} style={{ cursor: column.read_only ? 'not-allowed' : 'text' }}>
+    <div onClick={handleStartEdit} style={{ cursor: column.readOnly ? 'not-allowed' : 'text' }}>
       {renderEditableCell()}
       {error && <ErrorMessage>{error}</ErrorMessage>}
     </div>
