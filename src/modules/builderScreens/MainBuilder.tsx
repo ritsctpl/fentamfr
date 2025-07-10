@@ -10,6 +10,7 @@ import TemplateBuilderMain from '@modules/templateCreater/TemplateBuilderMain';
 import CommonAppBar from '@components/CommonAppBar';
 import ComponentBuilderMaintenance from '@modules/componentBuilder/components/ComponentBuilderMain';
 import ComponentBuilder from '@modules/newComponentBuilder/components/ComponentBuilder';
+import TemplateScreen from '@modules/newComponentBuilder/components/TemplateScreen';
 
 export default function MainBuilder() {
     const [call, setCall] = useState(0);
@@ -94,6 +95,19 @@ export default function MainBuilder() {
                             children: (
                                 <div style={{ height: '100%', width: '100%' }}>
                                     <ComponentBuilder />
+                                </div>
+                            )
+                        },
+                        {
+                            key: '6',
+                            label: 'Template Screen',
+                            style: {
+                                width: '100%',
+                                height: '100%'
+                            },
+                            children: (
+                                <div style={{ height: '100%', width: '100%' }}>
+                                    <TemplateScreen />
                                 </div>
                             )
                         }

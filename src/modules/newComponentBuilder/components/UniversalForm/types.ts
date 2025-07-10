@@ -99,9 +99,25 @@ export interface SettingsPanelProps {
   onClose: () => void;
 }
 
+export interface ResolvedValues {
+  [key: string]: string;
+}
+
+export interface LineClearanceInstruction {
+  template_text: string;
+  resolved_values: ResolvedValues;
+}
+
+export interface UserData {
+  [key: string]: any;
+}
+
 export interface UniversalFormProps {
-  setFields?
+  setFields?: (fields: FormField[]) => void;
+  setUserData?: (userData: UserData) => void;
   editMode?: boolean;
+  templateStructure?: FormField[];
+  userData?: UserData;
   userRole?: string;
   onSave?: (template: { settings: TemplateSettings; fields: FormField[] }) => void;
 } 

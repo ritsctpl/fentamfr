@@ -1,5 +1,5 @@
 // components/FieldCard.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Space, Typography, Card, Tag, Tooltip, Input, Switch, Select, InputNumber } from 'antd';
 import {
     EditOutlined,
@@ -30,23 +30,105 @@ const FieldCard: React.FC<FieldCardProps> = ({
     showDebug,
     onChange,
 }) => {
+    // Initialize editValue based on field type and display mode
     const [editValue, setEditValue] = useState<FieldValue>(() => {
+        if (field.fieldType === 'text') {
+            if (field.displayMode === 'static' && field.content) {
+                return Array.isArray(field.content) ? field.content.join('\n') : '';
+            }
+            if (field.displayMode === 'prefilled') {
+                return field.templateText || '';
+            }
+            if (field.multiline && field.defaultValue) {
+                return Array.isArray(field.defaultValue) 
+                    ? field.defaultValue.join('\n')
+                    : String(field.defaultValue);
+            }
+        }
+        
         if (field.defaultValue === undefined || field.defaultValue === null) {
             return '';
         }
         if (typeof field.defaultValue === 'object') {
+            if (Array.isArray(field.defaultValue)) {
+                return field.defaultValue.join('\n');
+            }
             return JSON.stringify(field.defaultValue);
         }
         return field.defaultValue as FieldValue;
     });
 
+    // Update editValue when field changes
+    useEffect(() => {
+        if (field.fieldType === 'text') {
+            if (field.displayMode === 'static' && field.content) {
+                setEditValue(Array.isArray(field.content) ? field.content.join('\n') : '');
+            } else if (field.displayMode === 'prefilled') {
+                setEditValue(field.templateText || '');
+            } else if (field.multiline && field.defaultValue) {
+                setEditValue(Array.isArray(field.defaultValue) 
+                    ? field.defaultValue.join('\n')
+                    : String(field.defaultValue));
+            }
+        } else if (field.defaultValue !== undefined && field.defaultValue !== null) {
+            if (typeof field.defaultValue === 'object') {
+                if (Array.isArray(field.defaultValue)) {
+                    setEditValue(field.defaultValue.join('\n'));
+                } else {
+                    setEditValue(JSON.stringify(field.defaultValue));
+                }
+            } else {
+                setEditValue(field.defaultValue as FieldValue);
+            }
+        } else {
+            setEditValue('');
+        }
+    }, [field]);
+
     const handleValueChange = (value: FieldValue) => {
         setEditValue(value);
         if (onChange) {
-            onChange({
-                ...field,
-                defaultValue: value,
-            });
+            if (field.fieldType === 'text') {
+                if (field.displayMode === 'static') {
+                    // For static text, always store as array
+                    const contentArray = String(value)
+                        .split('\n')
+                        .filter(line => line.trim() !== '');
+                    
+                    onChange({
+                        ...field,
+                        content: contentArray,
+                    });
+                } else if (field.displayMode === 'prefilled') {
+                    // For prefilled text
+                    onChange({
+                        ...field,
+                        templateText: String(value),
+                    });
+                } else if (field.multiline) {
+                    // For regular multiline text fields
+                    const lines = String(value)
+                        .split('\n')
+                        .filter(line => line.trim() !== '');
+                    
+                    onChange({
+                        ...field,
+                        defaultValue: lines,
+                    });
+                } else {
+                    // For single line text fields
+                    onChange({
+                        ...field,
+                        defaultValue: value,
+                    });
+                }
+            } else {
+                // For non-text fields
+                onChange({
+                    ...field,
+                    defaultValue: value,
+                });
+            }
         }
     };
 
@@ -122,11 +204,13 @@ const FieldCard: React.FC<FieldCardProps> = ({
                             value={value}
                             disabled
                             autoSize={{ minRows: 2, maxRows: 6 }}
+                            className="static-text-area"
                         />
                     ) : (
                         <Input
                             value={value}
                             disabled
+                            className="static-text-input"
                         />
                     );
                 }
@@ -136,16 +220,17 @@ const FieldCard: React.FC<FieldCardProps> = ({
                             value={field.templateText || ''}
                             disabled
                             autoSize={{ minRows: 2, maxRows: 6 }}
+                            className="prefilled-text-area"
                         />
                     ) : (
                         <Input
                             value={field.templateText || ''}
                             disabled
+                            className="prefilled-text-input"
                         />
                     );
                 }
             }
-            // fallback for other types
             return (
                 <div className="field-display-value">
                     {String(field.defaultValue ?? '')}
@@ -156,54 +241,48 @@ const FieldCard: React.FC<FieldCardProps> = ({
         switch (field.fieldType) {
             case 'text':
                 if (field.displayMode === 'static') {
-                    // Editable: update content array (single or multiline)
-                    const value = Array.isArray(field.content) ? field.content.join('\n') : '';
-                    const handleStaticChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-                        const newValue = e.target.value;
-                        const newContent = field.multiline ? newValue.split('\n') : [newValue];
-                        if (onChange) {
-                            onChange({ ...field, content: newContent });
-                        }
-                    };
                     return field.multiline ? (
                         <Input.TextArea
-                            value={value}
-                            onChange={handleStaticChange}
+                            value={String(editValue)}
+                            onChange={(e) => handleValueChange(e.target.value)}
                             autoSize={{ minRows: 2, maxRows: 6 }}
+                            placeholder={`Enter ${field.fieldName.toLowerCase()}`}
+                            className="static-text-area"
                         />
                     ) : (
                         <Input
-                            value={value}
-                            onChange={handleStaticChange}
+                            value={String(editValue)}
+                            onChange={(e) => handleValueChange(e.target.value)}
+                            placeholder={`Enter ${field.fieldName.toLowerCase()}`}
+                            className="static-text-input"
                         />
                     );
                 }
-                // Prefilled/template mode: show template_text in input/textarea (read-only or editable as needed)
                 if (field.displayMode === 'prefilled') {
-                    const handlePrefilledChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-                        const newValue = e.target.value;
-                        if (onChange) {
-                            onChange({ ...field, templateText: newValue });
-                        }
-                    };
                     return field.multiline ? (
                         <Input.TextArea
-                            value={field.templateText || ''}
-                            onChange={handlePrefilledChange}
+                            value={String(editValue)}
+                            onChange={(e) => handleValueChange(e.target.value)}
                             autoSize={{ minRows: 2, maxRows: 6 }}
+                            placeholder="Enter template text"
+                            className="prefilled-text-area"
                         />
                     ) : (
                         <Input
-                            value={field.templateText || ''}
-                            onChange={handlePrefilledChange}
+                            value={String(editValue)}
+                            onChange={(e) => handleValueChange(e.target.value)}
+                            placeholder="Enter template text"
+                            className="prefilled-text-input"
                         />
                     );
                 }
-                // fallback
+                // Default text input
                 return (
                     <Input
                         value={String(editValue)}
                         onChange={(e) => handleValueChange(e.target.value)}
+                        placeholder={`Enter ${field.fieldName.toLowerCase()}`}
+                        className="default-text-input"
                     />
                 );
 

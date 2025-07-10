@@ -2,7 +2,8 @@ import styled from 'styled-components';
 
 export const TableContainer = styled.div<{ $stickyHeaders?: boolean }>`
   width: 100%;
-  height: calc(100vh - 400px);
+  height: 100%;
+  max-height: calc(100vh - 400px);
   overflow-x: auto;
   position: relative;
   border: 1px solid #e8e8e8;

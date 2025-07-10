@@ -14,7 +14,7 @@ import { HeaderStructure, TemplateData, Column, UserData } from './types';
 import TableHeader from './TableHeader';
 import HeaderGroupManager from './HeaderGroupManager';
 
-const UniversalTable = ({ editMode, setTableConfig }: { editMode?: boolean, setTableConfig?: (config: any) => void }) => {
+const UniversalTable = ({ editMode, setTableConfig, templateStructure, userDatas, setUserDatas }: { editMode?: boolean, setTableConfig?: (config: any) => void, templateStructure?: any, userDatas?: any, setUserDatas?: (data: any) => void }) => {
     const [templateData, setTemplateData] = useState<TemplateData>({
         columns: [],
         headerStructure: [],
@@ -58,11 +58,21 @@ const UniversalTable = ({ editMode, setTableConfig }: { editMode?: boolean, setT
 
     // Load sample data
     useEffect(() => {
-        // Initialize user data with preloaded rows if not in edit mode
-        if (!editMode && templateData.preloadRows && templateData.preloadRows.length > 0) {
-            setUserData(templateData.preloadRows);
+        if (templateStructure) {
+            setTemplateData(templateStructure);
+    
+            // When NOT in edit mode, load from preloadRows or fallback to userDatas
+            if (!editMode) {
+                if (userDatas?.length > 0) {
+                    setUserData(userDatas);
+                } else if (templateStructure.preloadRows?.length > 0) {
+                    setUserData(templateStructure.preloadRows);
+                }
+            }
         }
-    }, [editMode]);
+    }, [templateStructure, editMode]);
+    
+    
 
     // This effect handles the switching between edit mode and view mode
     useEffect(() => {
@@ -86,6 +96,9 @@ const UniversalTable = ({ editMode, setTableConfig }: { editMode?: boolean, setT
     useEffect(() => {
         if (setTableConfig) {
             setTableConfig(templateData);
+        }
+        if (setUserDatas) {
+            setUserDatas(userData);
         }
     }, [templateData, userData]);
 
