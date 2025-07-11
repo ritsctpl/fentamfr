@@ -121,6 +121,70 @@ const getInitialTableData = (tableConfig: any): any[] => {
     return [];
 };
 
+// Helper to group components by alignment
+const groupComponentsByAlignment = (components: any[]) => {
+    const alignments = [
+        'top', 'top-left', 'top-right',
+        'left', 'right',
+        'bottom', 'bottom-left', 'bottom-right'
+    ];
+    const grouped: Record<string, any[]> = {};
+    alignments.forEach(alignment => grouped[alignment] = []);
+    components.forEach(comp => {
+        const alignment = comp.componentAlignment || 'top';
+        if (!grouped[alignment]) grouped[alignment] = [];
+        grouped[alignment].push(comp);
+    });
+    return grouped;
+};
+
+// Helper to get which alignments are present
+const getPresentAlignments = (grouped: Record<string, any[]>) => {
+    const present: Record<string, boolean> = {};
+    Object.keys(grouped).forEach(key => {
+        if (grouped[key] && grouped[key].length > 0) present[key] = true;
+    });
+    return present;
+};
+
+// Dynamic area style based on present alignments
+const getAreaStyle = (area: string, present: Record<string, boolean>): React.CSSProperties => {
+    // Left/Right
+    if (area === 'left' && !present.right) return { gridArea: 'left', gridColumn: '1 / -1' };
+    if (area === 'right' && !present.left) return { gridArea: 'right', gridColumn: '1 / -1' };
+    if (area === 'left' && present.right) return { gridArea: 'left', gridColumn: '1 / 3' };
+    if (area === 'right' && present.left) return { gridArea: 'right', gridColumn: '3 / 7' };
+    // Top-Left/Top-Right
+    if (area === 'top-left' && !present['top-right']) return { gridArea: 'top-left', gridColumn: '1 / 7' };
+    if (area === 'top-right' && !present['top-left']) return { gridArea: 'top-right', gridColumn: '7 / -1' };
+    if (area === 'top-left' && present['top-right']) return { gridArea: 'top-left', gridColumn: '1 / 7' };
+    if (area === 'top-right' && present['top-left']) return { gridArea: 'top-right', gridColumn: '7 / -1' };
+    // Bottom-Left/Bottom-Right
+    if (area === 'bottom-left' && !present['bottom-right']) return { gridArea: 'bottom-left', gridColumn: '1 / 7' };
+    if (area === 'bottom-right' && !present['bottom-left']) return { gridArea: 'bottom-right', gridColumn: '7 / -1' };
+    if (area === 'bottom-left' && present['bottom-right']) return { gridArea: 'bottom-left', gridColumn: '1 / 7' };
+    if (area === 'bottom-right' && present['bottom-left']) return { gridArea: 'bottom-right', gridColumn: '7 / -1' };
+    // Top/Bottom always full width
+    if (area === 'top') return { gridArea: 'top', gridColumn: '1 / -1' };
+    if (area === 'bottom') return { gridArea: 'bottom', gridColumn: '1 / -1' };
+    // Default
+    return { gridArea: area };
+};
+
+// CSS for the grid layout
+const formGridStyle: React.CSSProperties = {
+    display: 'grid',
+    gridTemplateAreas: `
+        'top top top'
+        'top-left center top-right'
+        'left center right'
+        'bottom-left bottom bottom-right'
+    `,
+    gridTemplateColumns: '1fr 2fr 1fr',
+    gridTemplateRows: 'auto auto auto auto',
+    gap: '16px',
+};
+
 const TemplateScreen: React.FC = () => {
     // Memoize the initial values calculation
     const initialUserValues = useMemo(() => {
@@ -224,14 +288,52 @@ const TemplateScreen: React.FC = () => {
         );
     }, [userValues, handleComponentDataChange]);
 
+    // Render a form with alignment-aware layout
+    const renderFormWithAlignment = (form: any, key: string) => {
+        const components = form.definition?.components || [];
+        const grouped = groupComponentsByAlignment(components);
+        const present = getPresentAlignments(grouped);
+        return (
+            <div key={key} style={{ marginBottom: 32 }}>
+                <div style={formGridStyle}>
+                    <div style={getAreaStyle('top', present)}>
+                        {grouped['top'].map((comp: any, idx: number) => renderComponent(comp, `${key}-top-${idx}`))}
+                    </div>
+                    <div style={getAreaStyle('top-left', present)}>
+                        {grouped['top-left'].map((comp: any, idx: number) => renderComponent(comp, `${key}-top-left-${idx}`))}
+                    </div>
+                    <div style={getAreaStyle('top-right', present)}>
+                        {grouped['top-right'].map((comp: any, idx: number) => renderComponent(comp, `${key}-top-right-${idx}`))}
+                    </div>
+                    <div style={getAreaStyle('left', present)}>
+                        {grouped['left'].map((comp: any, idx: number) => renderComponent(comp, `${key}-left-${idx}`))}
+                    </div>
+                    <div style={{ gridArea: 'center' }}>
+                        {/* Center is for components with no alignment or future use */}
+                    </div>
+                    <div style={getAreaStyle('right', present)}>
+                        {grouped['right'].map((comp: any, idx: number) => renderComponent(comp, `${key}-right-${idx}`))}
+                    </div>
+                    <div style={getAreaStyle('bottom-left', present)}>
+                        {grouped['bottom-left'].map((comp: any, idx: number) => renderComponent(comp, `${key}-bottom-left-${idx}`))}
+                    </div>
+                    <div style={getAreaStyle('bottom', present)}>
+                        {grouped['bottom'].map((comp: any, idx: number) => renderComponent(comp, `${key}-bottom-${idx}`))}
+                    </div>
+                    <div style={getAreaStyle('bottom-right', present)}>
+                        {grouped['bottom-right'].map((comp: any, idx: number) => renderComponent(comp, `${key}-bottom-right-${idx}`))}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     // Memoize the forms and components renderer
     const renderFormsAndComponents = useCallback((list: any[] = [], prefix: string) =>
         list.map((item: any, idx: number) => {
-            // If it's a form, render its components
+            // If it's a form, render with alignment
             if (item.definition?.components) {
-                return item.definition.components.map((comp: any, cidx: number) =>
-                    renderComponent(comp, `${prefix}-form-${idx}-comp-${cidx}`)
-                );
+                return renderFormWithAlignment(item, `${prefix}-form-${idx}`);
             }
             // If it's a direct component
             return renderComponent(item, `${prefix}-comp-${idx}`);

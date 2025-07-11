@@ -70,7 +70,7 @@ const UniversalTable = ({ editMode, setTableConfig, templateStructure, userDatas
                 }
             }
         }
-    }, [templateStructure, editMode]);
+    }, [editMode]);
     
     
 
@@ -97,10 +97,13 @@ const UniversalTable = ({ editMode, setTableConfig, templateStructure, userDatas
         if (setTableConfig) {
             setTableConfig(templateData);
         }
-        if (setUserDatas) {
-            setUserDatas(userData);
+    }, [templateData]);
+
+    useEffect(() => {
+        if (userDatas) {
+            setUserData(userDatas);
         }
-    }, [templateData, userData]);
+    }, [userDatas]);
 
     const evaluateFormula = (formula: string, rowData: UserData): number | string => {
         try {
@@ -490,12 +493,9 @@ const UniversalTable = ({ editMode, setTableConfig, templateStructure, userDatas
 
     // Get the ordered list of columns to display in the table body
     const orderedColumns = useMemo(() => {
-        const { leafColumns, columnsNotInStructure } = processHeaderStructure;
-        const allOrderedColumnIds = [...leafColumns, ...columnsNotInStructure];
-        return allOrderedColumnIds
-            .map(id => templateData.columns.find(col => col.fieldId === id))
-            .filter(Boolean) as Column[];
-    }, [processHeaderStructure, templateData.columns]);
+        return templateData.columns; // Keep the exact order from user creation
+    }, [templateData.columns]);
+    
 
     const renderCell = (column: Column, value: any, rowIndex: number) => {
         return (
